@@ -68,23 +68,25 @@ class GrailTest {
   clickSave = (e) => {
     let page_state = this.getPageState();
     page_state['active'] = true;
+    // TODO post to backend
     debugger;
   }
 
   clickCheck = (e) => {
     let page_state = this.getPageState();
+    // TODO post to Backend
     debugger;
   }
 
   injectControls = () => {
     var document = this.getDocument();
     var wrapper = document.createElement('div');
-    // TODO I think in the future we might want to use shadowRoot but the api isn't standardized yet
+    // I think in the future we might want to use createShadowRoot but the api isn't standardized yet
+    // TODO Style controls
     var htmlTemplate = `
       <style>
         .grail-test-controller {
           position: relative;
-
         }
         .grail-test-controls {
         }
@@ -101,6 +103,7 @@ class GrailTest {
       </div>
     `;
     wrapper.innerHTML = htmlTemplate;
+    // TODO Check if the controls are there first?
     document.body.insertBefore(wrapper, document.body.firstChild);
     document.querySelector('.grail-test-save').addEventListener('click', this.clickSave);
     document.querySelector('.grail-test-check').addEventListener('click', this.clickCheck);
