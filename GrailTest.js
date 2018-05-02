@@ -42,14 +42,13 @@ class GrailTest {
     let all = this.getAllElems();
     var elems = [];
     for(let i = 0; i < all.length; i++) {
-      let style = {id: all[i].id, html: all[i].outerHTML.replace(all[i].innerHTML, ''), properties:[]};
+      let style = {id: all[i].id, html: all[i].outerHTML.replace(all[i].innerHTML, ''), properties:{}};
       let styles = this.window.getComputedStyle(all[i]);
       for(let j = 0; j < styles.length; j++) {
-        let property = {};
-        property[styles[j]] = styles.getPropertyValue(styles[j]);
+        let value = styles.getPropertyValue(styles[j]);
         // To reduce size of styles
-        if(EMPTY_CHROME_STYLES[styles[j]] !== property[styles[j]]) {
-          style['properties'].push(property);
+        if(EMPTY_CHROME_STYLES[styles[j]] !== value) {
+          style['properties'][styles[j]] = value;
         }
       }
       elems.push(style);
