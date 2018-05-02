@@ -80,7 +80,13 @@ class GrailTest {
 
   injectControls = () => {
     var document = this.getDocument();
+
+    // For webpack hot reloads
+    if (document.querySelector('.grail-test-wrapper')) { // Already injected controls
+      return;
+    }
     var wrapper = document.createElement('div');
+    wrapper.className = "grail-test-wrapper";
     // I think in the future we might want to use createShadowRoot but the api isn't standardized yet
     // TODO Style controls
     var htmlTemplate = `
@@ -103,7 +109,6 @@ class GrailTest {
       </div>
     `;
     wrapper.innerHTML = htmlTemplate;
-    // TODO Check if the controls are there first?
     document.body.insertBefore(wrapper, document.body.firstChild);
     document.querySelector('.grail-test-save').addEventListener('click', this.clickSave);
     document.querySelector('.grail-test-check').addEventListener('click', this.clickCheck);
