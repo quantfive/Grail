@@ -58,13 +58,6 @@ class GrailTest {
     return elems;
   }
 
-  runTests = () => {
-    console.log("running tests");
-    let that = this;
-    let page_state = this.getPageState();
-    debugger;
-  }
-
   clickSave = (e) => {
     let page_state = this.getPageState();
     page_state['active'] = true;
