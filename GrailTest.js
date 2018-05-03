@@ -91,12 +91,40 @@ class GrailTest {
     // TODO Style controls
     var htmlTemplate = `
       <style>
+        .grail-test-wrapper {
+        }
+        .grail-test-controller:hover {
+          opacity: 0.7;
+        }
+        .grail-test-controller button {
+          cursor: pointer;
+          color: black;
+          background: white;
+          font-weight: bold;
+          border-radius: 5px;
+          font-size: 14px;
+          line-height: 14px;
+          border: 1px solid white;
+        }
         .grail-test-controller {
-          position: relative;
+          position: absolute;
+          top: 0;
+          left: 0;
+
+          background: black;
+          color: white;
+
+          border-radius: 5px;
+          padding: 5px;
+
+          cursor: default;
+          z-index: 9999999;
+          opacity: 0.1;
         }
         .grail-test-controls {
         }
         .grail-test-check {
+          margin-left: 5px;
         }
         .grail-test-save {
         }
