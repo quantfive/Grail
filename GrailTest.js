@@ -88,7 +88,6 @@ class GrailTest {
     var wrapper = document.createElement('div');
     wrapper.className = "grail-test-wrapper";
     // I think in the future we might want to use createShadowRoot but the api isn't standardized yet
-    // TODO Style controls
     var htmlTemplate = `
       <style>
         .grail-test-wrapper {
@@ -164,4 +163,4 @@ doc_ready(function(){
     setTimeout(test.injectControls, LOAD_TIME);
 });
 
-export default new GrailTest();
+export default GrailTest;
