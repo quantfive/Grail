@@ -12,23 +12,23 @@ const LOAD_TIME = 1000;
 
 class GrailTest {
 
-  getWindow = () => {
+  getWindow() {
     return window;
   }
 
-  getPageName = () => {
+  getPageName() {
     return this.getWindow().location.href;
   }
 
-  getDocument = () => {
+  getDocument() {
     return this.getWindow().document;
   }
 
-  getDocumentHtml = () => {
+  getDocumentHtml() {
     return this.getDocument().documentElement;
   }
 
-  getPageState = () => {
+  getPageState() {
     return {
       page_name: this.getPageName(),
       html_elements_attributes: this.getAllStyles(),
@@ -36,7 +36,7 @@ class GrailTest {
   }
 
   // Filters: has id, not script
-  getAllElems = () => {
+  getAllElems () {
     let all = this.getDocumentHtml().getElementsByTagName("*");
     var elems = [];
     for(let i = 0; i < all.length; i++) {
@@ -47,7 +47,7 @@ class GrailTest {
     return elems;
   }
 
-  getAllStyles = () => {
+  getAllStyles() {
     let all = this.getAllElems();
     var elems = [];
     for(let i = 0; i < all.length; i++) {
@@ -77,7 +77,7 @@ class GrailTest {
     return elems;
   }
 
-  clickSave = (e) => {
+  clickSave (e) {
     e.stopPropagation();
     e.preventDefault();
     let page_state = this.getPageState();
@@ -93,12 +93,12 @@ class GrailTest {
     });
   }
 
-  clickCheck = (e) => {
+  clickCheck (e) {
     e.stopPropagation();
     e.preventDefault();
     let page_state = this.getPageState();
     page_state['page_width'] = this.getWindow().innerWidth;
-    
+
     let config = API.POST_CONFIG({page_state: page_state});
     return fetch(API.DIFF_PAGE_STATE, config)
     .then(Helpers.checkStatus)
@@ -109,7 +109,7 @@ class GrailTest {
     });
   }
 
-  injectControls = () => {
+  injectControls () {
     var document = this.getDocument();
 
     // For webpack hot reloads

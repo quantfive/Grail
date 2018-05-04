@@ -58,14 +58,14 @@ const timedRequest = (ms, promise) =>
     );
   });
 
-const requestRedirect = (url, options) =>
+const requestRedirect = (url, options) => {
+  let opts = options;
+  opts.redirect = 'follow';
   timedRequest(
     REQUEST_TIMEOUT_MS,
-    fetch(url, {
-      ...options,
-      redirect: 'follow',
-    }).then(checkStatus)
+    fetch(url, opts).then(checkStatus)
   );
+}
 
 const request = (url, options) =>
   timedRequest(
