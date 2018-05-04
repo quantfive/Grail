@@ -31,6 +31,7 @@ class GrailTest {
   getPageState() {
     return {
       page_name: this.getPageName(),
+      page_width: this.getWindow().innerWidth,
       html_elements_attributes: this.getAllStyles(),
     };
   }
@@ -82,7 +83,6 @@ class GrailTest {
     e.preventDefault();
     let page_state = this.getPageState();
     page_state['active'] = true;
-    page_state['page_width'] = this.getWindow().innerWidth;
 
     return fetch(API.SAVE_PAGE_STATE, API.POST_CONFIG({page_state: page_state}))
     .then(Helpers.checkStatus)
@@ -97,7 +97,6 @@ class GrailTest {
     e.stopPropagation();
     e.preventDefault();
     let page_state = this.getPageState();
-    page_state['page_width'] = this.getWindow().innerWidth;
 
     let config = API.POST_CONFIG({page_state: page_state});
     return fetch(API.DIFF_PAGE_STATE, config)
