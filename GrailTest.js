@@ -81,6 +81,7 @@ class GrailTest {
   clickSave (e) {
     e.stopPropagation();
     e.preventDefault();
+    window.scrollTo(0,0);
     let page_state = this.getPageState();
     page_state['active'] = true;
 
@@ -96,6 +97,7 @@ class GrailTest {
   clickCheck (e) {
     e.stopPropagation();
     e.preventDefault();
+    window.scrollTo(0,0);
     let page_state = this.getPageState();
 
     let config = API.POST_CONFIG({page_state: page_state});
