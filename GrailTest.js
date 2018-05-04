@@ -70,7 +70,7 @@ class GrailTest {
       }
       // Text of Element
       if (all[i].childNodes.length > 0) {
-        styles['css_attributes']['text'] = all[i].childNodes[0].nodeValue;
+        style['css_attributes']['text'] = all[i].childNodes[0].nodeValue;
       }
       elems.push(style);
     }
@@ -97,6 +97,7 @@ class GrailTest {
     e.stopPropagation();
     e.preventDefault();
     let page_state = this.getPageState();
+    page_state['page_width'] = this.getWindow().innerWidth;
     
     let config = API.POST_CONFIG({page_state: page_state});
     return fetch(API.DIFF_PAGE_STATE, config)
