@@ -52,13 +52,25 @@ class GrailTest {
     var elems = [];
     for(let i = 0; i < all.length; i++) {
       let style = {element_id: all[i].id, html: all[i].outerHTML.replace(all[i].innerHTML, ''), css_attributes:{}};
+      // Computed CSS Properties
       let styles = this.getWindow().getComputedStyle(all[i]);
       for(let j = 0; j < styles.length; j++) {
         let value = styles.getPropertyValue(styles[j]);
-        // To reduce size of styles
+        // Don't include default styles to reduce size of styles
         if(EMPTY_CHROME_STYLES[styles[j]] !== value) {
           style['css_attributes'][styles[j]] = value;
         }
+      }
+      // Computed Postion of Element
+      let boundingRect = all[i].getBoundingClientRect();
+      for (let attrname in boundingRect) {
+        if (!isNaN(boundingRect[attrname])) {
+          style['css_attributes']['bounding_' + attrname] = boundingRect[attrname];
+        }
+      }
+      // Text of Element
+      if (all[i].childNodes.length > 0) {
+        styles['css_attributes']['text'] = all[i].childNodes[0].nodeValue;
       }
       elems.push(style);
     }
