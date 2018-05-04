@@ -168,8 +168,9 @@ class GrailTest {
     `;
     wrapper.innerHTML = htmlTemplate;
     document.body.insertBefore(wrapper, document.body.firstChild);
-    document.querySelector('.grail-test-save').addEventListener('click', this.clickSave);
-    document.querySelector('.grail-test-check').addEventListener('click', this.clickCheck);
+    var that = this;
+    document.querySelector('.grail-test-save').addEventListener('click', this.clickSave.bind(that));
+    document.querySelector('.grail-test-check').addEventListener('click', this.clickCheck.bind(that));
   }
 }
 
@@ -191,7 +192,7 @@ function doc_ready(callback) {
 doc_ready(function(){
     let test = new GrailTest();
     //setTimeout(test.runTests, LOAD_TIME);
-    setTimeout(test.injectControls, LOAD_TIME);
+    setTimeout(test.injectControls.bind(test), LOAD_TIME);
 });
 
 export default GrailTest;
