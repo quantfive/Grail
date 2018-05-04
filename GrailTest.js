@@ -59,6 +59,8 @@ class GrailTest {
   }
 
   clickSave = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
     let page_state = this.getPageState();
     page_state['active'] = true;
     // TODO post to backend
@@ -66,6 +68,8 @@ class GrailTest {
   }
 
   clickCheck = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
     let page_state = this.getPageState();
     // TODO post to Backend
     debugger;
