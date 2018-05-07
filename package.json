@@ -1,0 +1,26 @@
+{
+  "name": "grail-frontend-test-package",
+  "description": "",
+  "version": "1.0.0",
+  "main": "GrailTest.js",
+  "dependencies": {
+    "webpack": "^4.7.0"
+  },
+  "devDependencies": {
+    "webpack-cli": "^2.1.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --config webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lightninglu10/grail-frontend-test-package.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lightninglu10/grail-frontend-test-package/issues"
+  },
+  "homepage": "https://github.com/lightninglu10/grail-frontend-test-package#readme"
+}

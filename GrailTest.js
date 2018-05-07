@@ -3,11 +3,27 @@
  * @piccoloman
  */
 import ReactDOM from 'react-dom';
-import App from './grail/containers/app/App';
+import App from './grail/src/containers/app/App';
 
 const LOAD_TIME = 1000;
 
 class GrailTest {
+  getWindow() {
+    return window;
+  }
+
+  getPageName() {
+    return this.getWindow().location.href;
+  }
+
+  getDocument() {
+    return this.getWindow().document;
+  }
+
+  getDocumentHtml() {
+    return this.getDocument().documentElement;
+  }
+
   injectControls () {
     var document = this.getDocument();
 
@@ -19,10 +35,10 @@ class GrailTest {
     var wrapper = document.createElement('div');
     wrapper.className = "grail-test-wrapper";
     // I think in the future we might want to use createShadowRoot but the api isn't standardized yet
-    var htmlTemplate = `
-    <iframe src="./grail/build/index.html"></iframe>
-    `;
-    wrapper.innerHTML = htmlTemplate;
+    // var htmlTemplate = `
+    // <iframe src="./grail/build/index.html"></iframe>
+    // `;
+    // wrapper.innerHTML = htmlTemplate;
     document.body.insertBefore(wrapper, document.body.firstChild);
     ReactDOM.render(<App />, document.getElementsByClassName('grail-test-wrapper')[0]);
   }

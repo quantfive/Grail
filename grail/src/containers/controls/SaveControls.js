@@ -124,9 +124,9 @@ class SaveControls extends Component {
 
 let styles = StyleSheet.create({
   grailTestController: {
-    // position: 'fixed',
-    // bottom: 30,
-    // right: 30,
+    position: 'fixed',
+    bottom: 30,
+    right: 30,
     padding: 15,
     background: '#000',
     color: '#fff',
