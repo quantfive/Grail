@@ -7,6 +7,11 @@
 # Installation
 ```
 yarn add https://github.com/lightninglu10/grail-frontend-test-package.git#grail-component
+```
+
+or 
+
+```
 npm install https://github.com/lightninglu10/grail-frontend-test-package.git#grail-component
 ```
 
