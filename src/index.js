@@ -2,8 +2,9 @@
  * Main Library for Grail frontend testing
  * @piccoloman
  */
+import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './grail/src/containers/app/App';
+import App from './containers/app/App';
 
 const LOAD_TIME = 1000;
 
@@ -22,6 +23,27 @@ class GrailTest {
 
   getDocumentHtml() {
     return this.getDocument().documentElement;
+  }
+
+  doc_ready(callback) {
+    if(typeof document !== 'undefined') { // Don't Run on Server Side Rendered React
+      if (document.readyState !== 'loading') {
+        callback();
+      } else if (document.addEventListener) {
+        document.addEventListener('DOMContentLoaded', callback);
+      } else { // IE <= 8
+        console.log("ie 8 and below is discouraged");
+        document.attachEvent('onreadystatechange', function(){
+          if (document.readyState === 'complete') callback();
+        });
+      }
+    }
+  }
+
+  run = () => {
+    let test = new GrailTest();
+    //setTimeout(test.runTests, LOAD_TIME);
+    setTimeout(test.injectControls.bind(test), LOAD_TIME);
   }
 
   injectControls () {
@@ -43,26 +65,5 @@ class GrailTest {
     ReactDOM.render(<App />, document.getElementsByClassName('grail-test-wrapper')[0]);
   }
 }
-
-function doc_ready(callback) {
-  if(typeof document !== 'undefined') { // Don't Run on Server Side Rendered React
-    if (document.readyState !== 'loading') {
-      callback();
-    } else if (document.addEventListener) {
-      document.addEventListener('DOMContentLoaded', callback);
-    } else { // IE <= 8
-      console.log("ie 8 and below is discouraged");
-      document.attachEvent('onreadystatechange', function(){
-        if (document.readyState === 'complete') callback();
-      });
-    }
-  }
-}
-
-doc_ready(function(){
-    let test = new GrailTest();
-    //setTimeout(test.runTests, LOAD_TIME);
-    setTimeout(test.injectControls.bind(test), LOAD_TIME);
-});
 
 export default GrailTest;
