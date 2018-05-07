@@ -4,7 +4,21 @@
 [![npm package][npm-badge]][npm]
 [![Coveralls][coveralls-badge]][coveralls]
 
-Describe grail-component here.
+# Installation
+```
+yarn add https://github.com/lightninglu10/grail-frontend-test-package.git#grail-component
+npm install https://github.com/lightninglu10/grail-frontend-test-package.git#grail-component
+```
+
+# Usage
+```
+import Grail from 'grail-component';
+
+this.grailComponent = new Grail();
+this.grailComponent.run();
+```
+
+First import Grail from `'grail-component'`, then instantiate the Grail class. Once the Grail class is instantiated, call .run() on it for it to run and display the controls in the bottom right.
 
 [build-badge]: https://img.shields.io/travis/user/repo/master.png?style=flat-square
 [build]: https://travis-ci.org/user/repo
