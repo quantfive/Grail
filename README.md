@@ -16,7 +16,7 @@ npm install https://github.com/lightninglu10/grail-frontend-test-package.git#gra
 ```
 
 # Usage
-```
+```javascript
 import Grail from 'grail-component';
 
 this.grailComponent = new Grail();
