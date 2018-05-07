@@ -19,8 +19,8 @@ npm install https://github.com/lightninglu10/grail-frontend-test-package.git#gra
 ```javascript
 import Grail from 'grail-component';
 
-this.grailComponent = new Grail();
-this.grailComponent.run();
+let grailComponent = new Grail();
+grailComponent.run();
 ```
 
 First import Grail from `'grail-component'`, then instantiate the Grail class. Once the Grail class is instantiated, call .run() on it for it to run and display the controls in the bottom right.
