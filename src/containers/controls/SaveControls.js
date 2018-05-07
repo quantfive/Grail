@@ -115,8 +115,8 @@ class SaveControls extends Component {
   render() {
     return (
       <div className={css(styles.grailTestController)}>
-        <button className={css(styles.grailTestButton)}>save</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)}>check</button>
+        <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
       </div>
     );
   }
