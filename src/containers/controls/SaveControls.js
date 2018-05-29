@@ -92,7 +92,6 @@ class SaveControls extends Component {
     .then(Helpers.parseJSON)
     .then(json => {
       console.log(json);
-      debugger
     });
   }
 
@@ -108,7 +107,6 @@ class SaveControls extends Component {
     .then(Helpers.parseJSON)
     .then(json => {
       console.log(json);
-      debugger
     });
   }
 

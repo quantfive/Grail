@@ -28,10 +28,10 @@ function setupRequestHeaders(noContentType) {
 
 const API = {
   // Save Page State
-  SAVE_PAGE_STATE: BASE_URL + 'page_states',
+  SAVE_PAGE_STATE: BASE_URL + 'page_states/',
 
   // Diff Page State
-  DIFF_PAGE_STATE: BASE_URL + 'diff_page_states',
+  DIFF_PAGE_STATE: BASE_URL + 'diff_page_states/',
 
   // HTTP Configurations
   GET_CONFIG: (token=null) => {
