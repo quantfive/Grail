@@ -80,14 +80,64 @@ class SaveControls extends Component {
     return elems;
   }
 
+  getAllElements() {
+    var body = this.getDocumentHtml().getElementsByTagName("body");
+    let elements = this.getHTMLElements(body);
+    return {'body': elements};
+  }
+
+  getCSSElements(element) {
+
+  }
+
+  getHTMLElements(collection) {
+    if (collection.length == 0) {
+      return null;
+    }
+    let index = 0;
+    let elements = {};
+    for (let child of collection) {
+      let innerHtml = child.innerHTML;
+      let outerHtml = child.outerHTML;
+      let element = outerHtml.replace(innerHtml, '');
+
+      if (!child.hasChildNodes()) {
+        let dict = {}
+        dict['html'] = element;
+        dict['css_attributes'] = '';
+        dict['children'] = null;
+        elements[index] = dict;
+      } else {
+        let dict = {}
+        dict['html'] = element;
+        dict['css_attributes'] = '';
+        dict['children'] = this.getHTMLElements(child.children);
+        elements[index] = dict;
+      }
+      index = index + 1;
+    }
+    return elements;
+  }
+
   clickSave = (e) => {
+    // temp
+    var type = 1; // 0 for original, 1 for new
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
-    let page_state = this.getPageState();
+
+    let page_state = '';
+    let api = '';
+    if (type == 0) {
+      page_state = this.getPageState(); 
+      api = API.SAVE_PAGE_STATE;
+    } else {
+      api = API.SAVE_PAGE_STATE2;
+      page_state = this.getAllElements();
+    }
     page_state['active'] = true;
 
-    return fetch(API.SAVE_PAGE_STATE, API.POST_CONFIG({page_state: page_state}))
+    return fetch(api, API.POST_CONFIG({page_state: page_state}))
     .then(Helpers.checkStatus)
     .then(Helpers.parseJSON)
     .then(json => {
