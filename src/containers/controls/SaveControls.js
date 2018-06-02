@@ -6,6 +6,7 @@ import React, { Component } from 'react';
 
 // NPM Modules
 import { css, StyleSheet } from 'aphrodite';
+// import Niffy from 'niffy';
 
 // Config
 import API from '../../config/api';
@@ -104,13 +105,17 @@ class SaveControls extends Component {
       if (!child.hasChildNodes()) {
         let dict = {}
         dict['html'] = element;
-        dict['css_attributes'] = '';
+        dict['element_id'] = child.id ? child.id : index;
+        // dict['bounding'] = child.getBoundingClientRect();
+        dict['css_attributes'] = child.getBoundingClientRect();
         dict['children'] = null;
         elements[index] = dict;
       } else {
         let dict = {}
         dict['html'] = element;
-        dict['css_attributes'] = '';
+        dict['element_id'] = child.id ? child.id : index;
+        // dict['bounding'] = child.getBoundingClientRect();
+        dict['css_attributes'] = child.getBoundingClientRect();
         dict['children'] = this.getHTMLElements(child.children);
         elements[index] = dict;
       }
@@ -121,21 +126,27 @@ class SaveControls extends Component {
 
   clickSave = (e) => {
     // temp
-    var type = 1; // 0 for original, 1 for new
+    var type = 1; // 0 for original, 1 for new, 2 for niffy
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
 
     let page_state = '';
     let api = '';
-    if (type == 0) {
+    if (type === 0) {
       page_state = this.getPageState(); 
+      page_state['active'] = true;
       api = API.SAVE_PAGE_STATE;
-    } else {
+    } else if (type === 1) {
       api = API.SAVE_PAGE_STATE2;
       page_state = this.getAllElements();
+      page_state['active'] = true;
+    } else if (type === 2) {
+      api = API.SAVE_PAGE_STATE3;
+      page_state = this.getDocumentHtml().outerHTML;
+    } else {
+      alert("error");
     }
-    page_state['active'] = true;
 
     return fetch(api, API.POST_CONFIG({page_state: page_state}))
     .then(Helpers.checkStatus)
@@ -149,14 +160,44 @@ class SaveControls extends Component {
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
-    let page_state = this.getPageState();
+    
+    let type = 1;
+    let page_state = null;
+    let api = '';
+
+    if (type === 0) {
+      page_state = this.getPageState();
+      api = API.DIFF_PAGE_STATE;
+
+    } else if (type === 1) {
+      page_state = this.getAllElements();
+      page_state['active'] = true;
+      api = API.DIFF_PAGE_STATE2;
+    } else {
+      alert("error");
+    }
 
     let config = API.POST_CONFIG({page_state: page_state});
-    return fetch(API.DIFF_PAGE_STATE, config)
+    return fetch(api, config)
     .then(Helpers.checkStatus)
     .then(Helpers.parseJSON)
     .then(json => {
       console.log(json);
+    });
+  }
+
+  clickOpenOld = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    window.scrollTo(0,0);
+
+    let new_html = this.getDocumentHtml().outerHTML;
+    let res = fetch(API.NIFFY, API.POST_CONFIG({page_state: new_html}))
+    .then(Helpers.checkStatus)
+    .then(Helpers.parseJSON)
+    .then(json => {
+      console.log(json);
+      // let niffy = new Niffy();
     });
   }
 
@@ -200,6 +241,9 @@ let styles = StyleSheet.create({
     border: '1px solid white',
   },
   grailTestCheck: {
+    marginLeft: 10,
+  },
+  grailTestCheck2: {
     marginLeft: 10,
   },
 })

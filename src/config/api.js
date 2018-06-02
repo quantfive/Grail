@@ -33,8 +33,17 @@ const API = {
   //Save Page State 2
   SAVE_PAGE_STATE2: BASE_URL + 'page_states2/',
 
+  //Save Page State 3
+  SAVE_PAGE_STATE3: BASE_URL + 'page_states3/',
+
   // Diff Page State
   DIFF_PAGE_STATE: BASE_URL + 'diff_page_states/',
+
+  // Diff Page State 2
+  DIFF_PAGE_STATE2: BASE_URL + 'diff_page_states2/',
+
+  // Niffy
+  NIFFY: BASE_URL + 'niffy/',
 
   // HTTP Configurations
   GET_CONFIG: (token=null) => {
