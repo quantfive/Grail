@@ -83,7 +83,7 @@ class SaveControls extends Component {
 
   getAllElements() {
     var body = this.getDocumentHtml().getElementsByTagName("body");
-    let elements = this.getHTMLElements(body);
+    let elements = this.getHTMLElements(body, 0);
     return {'body': elements};
   }
 
@@ -91,7 +91,7 @@ class SaveControls extends Component {
 
   }
 
-  getHTMLElements(collection) {
+  getHTMLElements(collection, tempId) {
     if (collection.length == 0) {
       return null;
     }
@@ -105,19 +105,21 @@ class SaveControls extends Component {
       if (!child.hasChildNodes()) {
         let dict = {}
         dict['html'] = element;
-        dict['element_id'] = child.id ? child.id : index;
+        dict['element_id'] = child.id ? child.id : tempId;
         // dict['bounding'] = child.getBoundingClientRect();
         dict['css_attributes'] = child.getBoundingClientRect();
         dict['children'] = null;
         elements[index] = dict;
+        tempId = tempId + 1;
       } else {
         let dict = {}
         dict['html'] = element;
-        dict['element_id'] = child.id ? child.id : index;
+        dict['element_id'] = child.id ? child.id : tempId;
         // dict['bounding'] = child.getBoundingClientRect();
         dict['css_attributes'] = child.getBoundingClientRect();
-        dict['children'] = this.getHTMLElements(child.children);
+        dict['children'] = this.getHTMLElements(child.children, tempId + 1);
         elements[index] = dict;
+        tempId = tempId + 1;
       }
       index = index + 1;
     }
