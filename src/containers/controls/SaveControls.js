@@ -87,10 +87,6 @@ class SaveControls extends Component {
     return {'body': elements};
   }
 
-  getCSSElements(element) {
-
-  }
-
   getHTMLElements(collection, tempId) {
     if (collection.length == 0) {
       return null;
@@ -126,9 +122,46 @@ class SaveControls extends Component {
     return elements;
   }
 
+  getAll() {
+    let html = this.getDocumentHtml().outerHTML;
+
+    let body = this.getDocumentHtml().getElementsByTagName('body');
+    let res = {}
+    let css = this.getCSS(body, 0, res);
+    return { html: html, css:css };
+  }
+
+  getCSS(collection, tempId, result) {
+    if (collection.length === 0) {
+      return null;
+    }
+
+    for (let child of collection) {
+      let css = {}
+      let id = child.id ? child.id : tempId
+      let rect  = this.filter(child.getBoundingClientRect());
+      if (!child.hasChildNodes()) {
+        result[id] = rect;
+        tempId = tempId + 1;
+      } else {
+        result[id] = rect;
+        result = {...result, ...this.getCSS(child.children, tempId + 1, result)};
+        tempId = tempId + 1;
+      }
+    }
+    return result
+  }
+
+  filter(rect) {
+    let dict = {};
+    dict['x'] = rect.x;
+    dict['y'] = rect.y;
+    return dict;
+  }
+
   clickSave = (e) => {
     // temp
-    var type = 1; // 0 for original, 1 for new, 2 for niffy
+    var type = 2; // 0 for original, 1 for new, 2 for soup
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
@@ -145,7 +178,7 @@ class SaveControls extends Component {
       page_state['active'] = true;
     } else if (type === 2) {
       api = API.SAVE_PAGE_STATE3;
-      page_state = this.getDocumentHtml().outerHTML;
+      page_state = this.getAll();
     } else {
       alert("error");
     }
@@ -163,7 +196,7 @@ class SaveControls extends Component {
     e.preventDefault();
     window.scrollTo(0,0);
     
-    let type = 1;
+    let type = 2;
     let page_state = null;
     let api = '';
 
@@ -175,6 +208,9 @@ class SaveControls extends Component {
       page_state = this.getAllElements();
       page_state['active'] = true;
       api = API.DIFF_PAGE_STATE2;
+    } else if (type === 2) {
+      page_state = this.getAll();
+      api = API.DIFF_PAGE_STATE3;
     } else {
       alert("error");
     }

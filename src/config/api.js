@@ -42,6 +42,9 @@ const API = {
   // Diff Page State 2
   DIFF_PAGE_STATE2: BASE_URL + 'diff_page_states2/',
 
+  // Diff Page State 3
+  DIFF_PAGE_STATE3: BASE_URL + 'diff_page_states3/',
+
   // Niffy
   NIFFY: BASE_URL + 'niffy/',
 

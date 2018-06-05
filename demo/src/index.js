@@ -10,8 +10,15 @@ class Demo extends Component {
     this.grailTest.run();
   }
   render() {
-    return <div id='component'>
-      <h1 id='header'>grail-component Demo</h1>
+    return <div id='main'>
+        <div id='top'>
+            <p id='a'> Grail </p>
+            <p id='b'> Component </p>
+        </div>
+        <div id='bottom'>
+            <p id='c'> Demo </p>
+            <p id='d'> Test </p>
+        </div>
     </div>
   }
 }
