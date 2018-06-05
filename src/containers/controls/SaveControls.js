@@ -58,7 +58,7 @@ class SaveControls extends Component {
       let style = {element_id: all[i].id, html: all[i].outerHTML.replace(all[i].innerHTML, ''), css_attributes:{}};
       // Computed CSS Properties
       let styles = this.getWindow().getComputedStyle(all[i]);
-      for(let j = 0; j < styles.length; j++) {
+      for (let j = 0; j < styles.length; j++) {
         let value = styles.getPropertyValue(styles[j]);
         // Don't include default styles to reduce size of styles
         if(EMPTY_CHROME_STYLES[styles[j]] !== value) {
@@ -139,7 +139,18 @@ class SaveControls extends Component {
     for (let child of collection) {
       let css = {}
       let id = child.id ? child.id : tempId
-      let rect  = this.filter(child.getBoundingClientRect());
+      let rect = this.filter(child.getBoundingClientRect());
+
+      // Computed CSS Properties
+      let styles = this.getWindow().getComputedStyle(child);
+      for(let j = 0; j < styles.length; j++) {
+        let value = styles.getPropertyValue(styles[j]);
+        // Don't include default styles to reduce size of styles
+        if(EMPTY_CHROME_STYLES[styles[j]] !== value) {
+          rect[styles[j]] = value;
+        }
+      }
+
       if (!child.hasChildNodes()) {
         result[id] = rect;
         tempId = tempId + 1;
