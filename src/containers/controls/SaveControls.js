@@ -13,7 +13,17 @@ import API from '../../config/api';
 import Helpers from '../../config/helpers';
 import EMPTY_CHROME_STYLES from '../../config/empty_chrome_styles';
 
+const SKIPTAGS = {
+  script: true,
+  head: true,
+  meta: true,
+  style: true,
+  title: true,
+}
 class SaveControls extends Component {
+  constructor() {
+    super();
+  }
 
   getWindow() {
     return window;
@@ -40,19 +50,25 @@ class SaveControls extends Component {
   }
 
   // Filters: has id, not script
-  getAllElems () {
+  getAllElems (filterById) {
     let all = this.getDocumentHtml().getElementsByTagName("*");
     var elems = [];
     for(let i = 0; i < all.length; i++) {
-      if(all[i].id !== '' && all[i].tagName.toLowerCase() !== 'script') {
-        elems.push(all[i]);
+      if(!SKIPTAGS[all[i].tagName.toLowerCase()]) {
+        if (filterById) {
+          if (all[i].id !== '') {
+            elems.push(all[i]);
+          }
+        } else {
+          elems.push(all[i]);
+        }
       }
     }
     return elems;
   }
 
   getAllStyles() {
-    let all = this.getAllElems();
+    let all = this.getAllElems(true);
     var elems = [];
     for(let i = 0; i < all.length; i++) {
       let style = {element_id: all[i].id, html: all[i].outerHTML.replace(all[i].innerHTML, ''), css_attributes:{}};
@@ -92,40 +108,26 @@ class SaveControls extends Component {
     if (collection.length == 0) {
       return null;
     }
-    let index = 0;
+    // let index = 0;
     let elements = {};
     for (let child of collection) {
-      let innerHtml = child.innerHTML;
-      let outerHtml = child.outerHTML;
-      let element = outerHtml.replace(innerHtml, '');
-
+      if (!child.id) {
+        child.setAttribute('order', tempId);
+      }
       if (!child.hasChildNodes()) {
-        let dict = {}
-        dict['html'] = element;
-        dict['element_id'] = child.id ? child.id : tempId;
-        // dict['bounding'] = child.getBoundingClientRect();
-        dict['css_attributes'] = child.getBoundingClientRect();
-        dict['children'] = null;
-        elements[index] = dict;
         tempId = tempId + 1;
       } else {
-        let dict = {}
-        dict['html'] = element;
-        dict['element_id'] = child.id ? child.id : tempId;
-        // dict['bounding'] = child.getBoundingClientRect();
-        dict['css_attributes'] = child.getBoundingClientRect();
-        dict['children'] = this.getHTMLElements(child.children, tempId + 1);
-        elements[index] = dict;
+        this.getHTMLElements(child.children, tempId + 1);
         tempId = tempId + 1;
       }
-      index = index + 1;
     }
     return elements;
   }
 
   getAll() {
-    let html = this.getDocumentHtml().outerHTML;
+    let all = this.getAllElements();
     let body = this.getDocumentHtml().getElementsByTagName('body');
+    let html = body[0].outerHTML;
     let res = {}
     let css = this.getCSS(body, 0, res);
     return { html: html, css:css };
@@ -138,7 +140,7 @@ class SaveControls extends Component {
 
     for (let child of collection) {
       let css = {}
-      let id = child.id ? child.id : tempId
+      let id = child.id ? child.id : child.getAttribute('order')
       let rect = this.filter(child.getBoundingClientRect());
 
       // Computed CSS Properties
