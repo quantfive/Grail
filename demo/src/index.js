@@ -23,4 +23,4 @@ class Demo extends Component {
   }
 }
 
-render(<Demo/>, document.querySelector('#demo'))
+render(<Demo id='demo'/>, document.querySelector('#demo'))

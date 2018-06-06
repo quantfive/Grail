@@ -6,8 +6,8 @@ import SaveControls from '../controls/SaveControls';
 class App extends Component {
   render() {
     return (
-      <div className="App" style={{background: 'transparent'}}>
-        <SaveControls />
+      <div className="App" id ='app'style={{background: 'transparent'}}>
+        <SaveControls id='controls'/>
       </div>
     );
   }

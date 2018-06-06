@@ -56,13 +56,14 @@ class GrailTest {
 
     var wrapper = document.createElement('div');
     wrapper.className = "grail-test-wrapper";
+    wrapper.id = 'wrapper';
     // I think in the future we might want to use createShadowRoot but the api isn't standardized yet
     // var htmlTemplate = `
     // <iframe src="./grail/build/index.html"></iframe>
     // `;
     // wrapper.innerHTML = htmlTemplate;
     document.body.insertBefore(wrapper, document.body.firstChild);
-    ReactDOM.render(<App />, document.getElementsByClassName('grail-test-wrapper')[0]);
+    ReactDOM.render(<App id='app'/>, document.getElementsByClassName('grail-test-wrapper')[0]);
   }
 }
 
