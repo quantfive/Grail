@@ -124,7 +124,6 @@ class SaveControls extends Component {
 
   getAll() {
     let html = this.getDocumentHtml().outerHTML;
-
     let body = this.getDocumentHtml().getElementsByTagName('body');
     let res = {}
     let css = this.getCSS(body, 0, res);
@@ -252,7 +251,7 @@ class SaveControls extends Component {
 
   render() {
     return (
-      <div className={css(styles.grailTestController)}>
+      <div id="xyz-grail-controls-zyx" className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
       </div>
@@ -287,6 +286,7 @@ let styles = StyleSheet.create({
     fontWeight: 'bold',
     borderRadius: 5,
     fontSize: 14,
+    outline: 'none',
     border: '1px solid white',
   },
   grailTestCheck: {
