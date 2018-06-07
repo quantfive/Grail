@@ -1,6 +1,6 @@
 {
   "name": "grail-component",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "grail-component React component",
   "main": "lib/index.js",
   "module": "es/index.js",
