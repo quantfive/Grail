@@ -18,7 +18,7 @@ const SKIPTAGS = {
   head: true,
   meta: true,
   style: true,
-  title: true,
+  title: true,  
 }
 class SaveControls extends Component {
   constructor() {
@@ -99,7 +99,6 @@ class SaveControls extends Component {
 
   getAllElements() {
     var body = this.getDocumentHtml().getElementsByTagName("body");
-    body = body.replace("<div class='grail-test-wrapper' id='wrapper'><div class='App' id='app' style='background: transparent;'><div id='controller' class='grailTestController_17p9cqp'><button id='b1' class='grailTestButton_p5ifba'>save</button><button id='b2' class='grailTestButton_p5ifba-o_O-grailTestCheck_o9hb19'>check</button></div></div></div>", '')
     let elements = this.getHTMLElements(body, 0);
     return {'body': elements};
   }
