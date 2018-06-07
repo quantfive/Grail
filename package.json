@@ -19,12 +19,7 @@
     "test:watch": "nwb test-react --server"
   },
   "dependencies": {
-    "aphrodite": "^2.2.0",
-    "child_process": "^1.0.2",
-    "file-system": "^2.2.2",
-    "fs": "^0.0.1-security",
-    "niffy": "^0.2.0",
-    "nightmare": "^3.0.1"
+    "aphrodite": "^2.2.0"
   },
   "peerDependencies": {
     "react": "16.x"
