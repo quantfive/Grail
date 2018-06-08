@@ -6,12 +6,18 @@ import React, { Component } from 'react';
 
 // NPM Modules
 import { css, StyleSheet } from 'aphrodite';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 // import Niffy from 'niffy';
 
 // Config
 import API from '../../config/api';
 import Helpers from '../../config/helpers';
 import EMPTY_CHROME_STYLES from '../../config/empty_chrome_styles';
+
+// Redux
+import { GrailActions } from '../../redux/grail';
+import { ModalActions } from '../../redux/modals';
 
 const SKIPTAGS = {
   script: true,
@@ -204,6 +210,8 @@ class SaveControls extends Component {
   }
 
   clickCheck = (e) => {
+    let { modalActions, grailActions } = this.props;
+
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
@@ -227,13 +235,8 @@ class SaveControls extends Component {
       alert("error");
     }
 
-    let config = API.POST_CONFIG({page_state: page_state});
-    return fetch(api, config)
-    .then(Helpers.checkStatus)
-    .then(Helpers.parseJSON)
-    .then(json => {
-      console.log(json);
-    });
+    grailActions.checkPage(api, page_state);
+    modalActions.openCheckModal(true);
   }
 
   clickOpenOld = (e) => {
@@ -299,4 +302,13 @@ let styles = StyleSheet.create({
   },
 })
 
-export default SaveControls;
+const mapStateToProps = state => ({
+  grail: state.grail,
+})
+
+const mapDispatchToProps = (dispatch) => ({
+  grailActions: bindActionCreators(GrailActions, dispatch),
+  modalActions: bindActionCreators(ModalActions, dispatch)
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SaveControls)

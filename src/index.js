@@ -5,6 +5,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './containers/app/App';
+import { Provider } from 'react-redux';
+import { configure, history } from './config/configure-store';
+
+const store = configure();
 
 const LOAD_TIME = 1000;
 
@@ -63,7 +67,12 @@ class GrailTest {
     // `;
     // wrapper.innerHTML = htmlTemplate;
     document.body.insertBefore(wrapper, document.body.firstChild);
-    ReactDOM.render(<App id='app'/>, document.getElementsByClassName('grail-test-wrapper')[0]);
+    ReactDOM.render(
+      <Provider store={store}>
+        <App id='app'/>
+      </Provider>, 
+      document.getElementsByClassName('grail-test-wrapper')[0]
+    );
   }
 }
 
