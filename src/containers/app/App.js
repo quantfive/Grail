@@ -10,7 +10,6 @@ class App extends Component {
     return (
       <div className="App" id ='app'style={{background: 'transparent'}}>
         <SaveControls id='controls'/>
-        <Indicators />
         <CheckModal />
       </div>
     );

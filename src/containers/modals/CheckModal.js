@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
@@ -15,6 +15,11 @@ class CheckModal extends React.Component {
 
     this.state = {
       login: true,
+      differences: {
+        added: [],
+        modified: [],
+        removed: []
+      },
     }
   }
 
@@ -26,26 +31,63 @@ class CheckModal extends React.Component {
     modalActions.openCheckModal(false);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.grail.differences !== nextProps.grail.differences) {
+      this.parseDifference(nextProps.grail.differences)
+    }
+  }
+
+  parseDifference = (differences) => {
+    let differenceMessages = {added: [], modified: [], removed: []}
+    
+    for (let i = 0; i < differences.added.length; i++) {
+      differenceMessages.added.push({html: differences.added[i].html})
+    }
+    
+    for (let i = 0; i < differences.modified.length; i++) {
+      let changes = {changes: []}
+      for (let j = 0; j < differences.modified[i].changes.length; j++) {
+        let change = differences.modified[i].changes[j]
+        changes.changes.push(`The ${change.attribute} of element "${differences.modified[i].id ? differences.modified[i].id : differences.modified[i].order}" has changed from "${change.old_value}" to "${change.new_value}" `)
+      }
+      differenceMessages.modified.push(changes)
+    }
+
+    for (let i = 0; i < differences.removed.length; i++) {
+    }
+
+    this.setState({
+      differences: {...differenceMessages}
+    })
+  }
+
   render() {
     let { modals, grail } = this.props;
-    let added = grail.differences.added.map((difference, index) => {
+    let added = this.state.differences.added.map((difference, index) => {
       return (
         <div className={css(styles.added)}>
-          Things were added
+          {difference.html}
         </div>
       )
     })
-    let modified = grail.differences.modified.map((difference, index) => {
+    let modified = this.state.differences.modified.map((difference, index) => {
+      let changes = difference.changes.map((change, index) => {
+        return (
+          <div className={css(styles.modified)}>
+            {change}
+          </div>
+        )
+      })
       return (
-        <div className={css(styles.modified)}>
-          Things changed
+        <div>
+          {changes}
         </div>
       )
     })
-    let removed = grail.differences.removed.map((difference, index) => {
+    let removed = this.state.differences.removed.map((difference, index) => {
       return (
-        <div className={css(styles.modified)}>
-          Things were removed
+        <div className={css(styles.removed)}>
+          HELLO
         </div>
       )
     })
@@ -57,9 +99,21 @@ class CheckModal extends React.Component {
         onRequestClose={this.closeModal}
         style={overlayStyles}>
         <div className={css(styles.differenceContainer)}>
-          {added}
-          {modified}
-          {removed}
+          <h3>Added</h3>
+          {added.length !== 0
+            ? added
+            : 'No additions found'
+          }
+          <h3>Modified</h3>
+          {modified.length !== 0
+            ? modified
+            : 'No modifications found'
+          }
+          <h3>Removed</h3>
+          {removed.length !== 0
+            ? removed
+            : 'No removals found'
+          }
         </div>
       </ReactModal>
     );
@@ -92,7 +146,11 @@ var styles = StyleSheet.create({
     top: '50%',
     padding: '25px',
     transform: 'translate(-50%, -50%)',
+    width: '700px',
   },
+  modified: {
+    margin: '5px 0',
+  }
 });
 
 const mapStateToProps = state => ({
