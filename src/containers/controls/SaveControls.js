@@ -179,27 +179,13 @@ class SaveControls extends Component {
 
   clickSave = (e) => {
     // temp
-    var type = 2; // 0 for original, 1 for new, 2 for soup
+    var type = 0;
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
 
-    let page_state = '';
-    let api = '';
-    if (type === 0) {
-      page_state = this.getPageState(); 
-      page_state['active'] = true;
-      api = API.SAVE_PAGE_STATE;
-    } else if (type === 1) {
-      api = API.SAVE_PAGE_STATE2;
-      page_state = this.getAllElements();
-      page_state['active'] = true;
-    } else if (type === 2) {
-      api = API.SAVE_PAGE_STATE3;
-      page_state = this.getAll();
-    } else {
-      alert("error");
-    }
+    let api = API.SAVE_PAGE_STATE;
+    let page_state = this.getAll();
 
     return fetch(api, API.POST_CONFIG({page_state: page_state}))
     .then(Helpers.checkStatus)
@@ -210,33 +196,23 @@ class SaveControls extends Component {
   }
 
   clickCheck = (e) => {
-    let { modalActions, grailActions } = this.props;
-
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
     
-    let type = 2;
-    let page_state = null;
-    let api = '';
-
-    if (type === 0) {
-      page_state = this.getPageState();
-      api = API.DIFF_PAGE_STATE;
-
-    } else if (type === 1) {
-      page_state = this.getAllElements();
-      page_state['active'] = true;
-      api = API.DIFF_PAGE_STATE2;
-    } else if (type === 2) {
-      page_state = this.getAll();
-      api = API.DIFF_PAGE_STATE3;
-    } else {
-      alert("error");
-    }
-
+    let page_state = this.getAll();
+    let api = API.DIFF_PAGE_STATE;
+  
     grailActions.checkPage(api, page_state);
     modalActions.openCheckModal(true);
+    
+    let config = API.POST_CONFIG({page_state: page_state});
+    return fetch(api, config)
+    .then(Helpers.checkStatus)
+    .then(Helpers.parseJSON)
+    .then(json => {
+      console.log(json);
+    });
   }
 
   clickOpenOld = (e) => {
