@@ -19,6 +19,8 @@ import EMPTY_CHROME_STYLES from '../../config/empty_chrome_styles';
 import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
+var oldFetch = fetch;
+
 const SKIPTAGS = {
   script: true,
   head: true,
@@ -179,8 +181,12 @@ class SaveControls extends Component {
   }
 
   clickSave = (e) => {
+
+    fetch = function(api, data) {
+      console.log('test');
+      return oldFetch(api, data);
+    } 
     // temp
-    var type = 0;
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
@@ -216,18 +222,19 @@ class SaveControls extends Component {
     });
   }
 
-  clickOpenOld = (e) => {
+  checkReady = (e) => {
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
+    
+    console.log(this.getDocument().readyState)
 
-    let new_html = this.getDocumentHtml().outerHTML;
-    let res = fetch(API.NIFFY, API.POST_CONFIG({page_state: new_html}))
+    let res = fetch(API.CHECK_READY, API.POST_CONFIG({test: null}))
     .then(Helpers.checkStatus)
     .then(Helpers.parseJSON)
     .then(json => {
       console.log(json);
-      // let niffy = new Niffy();
+      console.log(this.getDocument().readyState)
     });
   }
 
@@ -236,6 +243,7 @@ class SaveControls extends Component {
       <div id='controller' className={css(styles.grailTestController)}>
         <button id='b1' className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button id='b2' className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
+        <button id='b1' className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}> complete </button>
       </div>
     );
   }

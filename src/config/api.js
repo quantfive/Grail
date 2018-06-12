@@ -48,6 +48,8 @@ const API = {
   // Niffy
   NIFFY: BASE_URL + 'niffy/',
 
+  CHECK_READY: BASE_URL + 'wait/',
+
   // HTTP Configurations
   GET_CONFIG: (token=null) => {
     let headers;
