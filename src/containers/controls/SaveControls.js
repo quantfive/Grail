@@ -118,7 +118,6 @@ class SaveControls extends Component {
     // let index = 0;
     let elements = {};
     for (let child of collection) {
-      debugger
       if (!child.id) {
         child.setAttribute('order', tempId);
       }
@@ -182,9 +181,18 @@ class SaveControls extends Component {
 
   clickSave = (e) => {
 
-    fetch = function(api, data) {
+    fetch = async function(api, data) {
       console.log('test');
-      return oldFetch(api, data);
+      let response = await oldFetch(api, data)
+      let clone = response.clone()
+      Helpers.parseJSON(clone)
+      .then((res) => {
+        console.log('RES')
+        console.log(res)
+        console.log('___________________')
+      })
+
+      return response;
     } 
     // temp
     e.stopPropagation();
@@ -203,6 +211,7 @@ class SaveControls extends Component {
   }
 
   clickCheck = (e) => {
+    let { grailActions, modalActions } = this.props;
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
@@ -213,13 +222,6 @@ class SaveControls extends Component {
     grailActions.checkPage(api, page_state);
     modalActions.openCheckModal(true);
     
-    let config = API.POST_CONFIG({page_state: page_state});
-    return fetch(api, config)
-    .then(Helpers.checkStatus)
-    .then(Helpers.parseJSON)
-    .then(json => {
-      console.log(json);
-    });
   }
 
   checkReady = (e) => {

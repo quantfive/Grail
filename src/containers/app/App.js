@@ -13,7 +13,6 @@ class App extends Component {
 
   recordMouseEvents = (e) => {
     if (e.type === 'click') {
-      debugger
       //console.log(e)
       //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
     } else if (e.type === 'mousemove') {
