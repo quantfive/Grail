@@ -116,6 +116,7 @@ class SaveControls extends Component {
     // let index = 0;
     let elements = {};
     for (let child of collection) {
+      debugger
       if (!child.id) {
         child.setAttribute('order', tempId);
       }
