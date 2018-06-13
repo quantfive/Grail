@@ -31,6 +31,15 @@ const SKIPTAGS = {
 class SaveControls extends Component {
   constructor() {
     super();
+    this.state = {
+      isRecodring: false,
+      firstClick: true,
+    }
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousemove', this.recordMouseEvents, false);
+    document.addEventListener('click', this.recordMouseEvents, false)
   }
 
   getWindow() {
@@ -180,17 +189,16 @@ class SaveControls extends Component {
   }
 
   clickSave = (e) => {
-
-    fetch = async function(api, data) {
+    let that = this;
+    debugger
+    fetch = async function(api, data, that=that) {
       console.log('test');
       let response = await oldFetch(api, data)
       let clone = response.clone()
-      Helpers.parseJSON(clone)
-      .then((res) => {
-        console.log('RES')
-        console.log(res)
-        console.log('___________________')
-      })
+      let res = await Helpers.parseJSON(clone)
+      that.fetchTimeout = setTimeout(() => {
+        console.log('DONE')
+      }, 500)
 
       return response;
     } 
@@ -240,12 +248,43 @@ class SaveControls extends Component {
     });
   }
 
+  recordToggle = () => {
+    this.setState({
+      isRecodring: !this.state.isRecodring,
+    })
+  }
+
+  recordMouseEvents = (e) => {
+    if (this.state.isRecodring && !this.state.firstClick) {
+      if (e.type === 'click') {
+        console.log(e)
+        //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
+      } else if (e.type === 'mousemove') {
+        //console.log(`Current Mouse Position: (x: ${e.clientX} y: ${e.clientY})`)
+      }
+    } else if (this.state.isRecodring && this.state.firstClick) {
+      this.setState({
+        firstClick: false,
+      })
+    } else {
+      this.setState({
+        firstClick: true,
+      })
+    }
+  }
+
   render() {
     return (
       <div id='controller' className={css(styles.grailTestController)}>
         <button id='b1' className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button id='b2' className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
         <button id='b1' className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}> complete </button>
+        <button id='b4' className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
+          {this.state.isRecodring
+            ? 'Stop'
+            : 'Record'
+          } 
+        </button>
       </div>
     );
   }
