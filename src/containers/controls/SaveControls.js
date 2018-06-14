@@ -189,20 +189,6 @@ class SaveControls extends Component {
   }
 
   clickSave = (e) => {
-    let that = this;
-    debugger
-    fetch = async function(api, data, that=that) {
-      console.log('test');
-      let response = await oldFetch(api, data)
-      let clone = response.clone()
-      let res = await Helpers.parseJSON(clone)
-      that.fetchTimeout = setTimeout(() => {
-        console.log('DONE')
-      }, 500)
-
-      return response;
-    } 
-    // temp
     e.stopPropagation();
     e.preventDefault();
     window.scrollTo(0,0);
@@ -229,7 +215,6 @@ class SaveControls extends Component {
   
     grailActions.checkPage(api, page_state);
     modalActions.openCheckModal(true);
-    
   }
 
   checkReady = (e) => {
@@ -249,15 +234,47 @@ class SaveControls extends Component {
   }
 
   recordToggle = () => {
+    fetch = this.fetch
+
     this.setState({
       isRecodring: !this.state.isRecodring,
     })
   }
 
+  fetch = async (api, data) => {
+    let { grailActions } = this.props;
+
+    console.log('CUSTOM FETCH CALL');
+    let response = await oldFetch(api, data)
+    let clone = response.clone()
+    let res = await Helpers.parseJSON(clone)
+    let event = {
+      endpoint: api,
+      request_input: data.body ? data.body : null,
+      request_type: data.method,
+      request_output: res ? res : null,
+    }
+
+    grailActions.recordEvent(event)
+    this.fetchTimeout = setTimeout(() => {
+      console.log('DONE')
+    }, 500)
+
+    return response;
+  }
+
   recordMouseEvents = (e) => {
+    let { grailActions } = this.props;
     if (this.state.isRecodring && !this.state.firstClick) {
       if (e.type === 'click') {
         console.log(e)
+        let event = {
+          page_name: window.location.href,
+          action_name: 'click',
+          action_params: e,
+        }
+
+        grailActions.recordEvent(event)
         //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
       } else if (e.type === 'mousemove') {
         //console.log(`Current Mouse Position: (x: ${e.clientX} y: ${e.clientY})`)

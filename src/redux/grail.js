@@ -14,12 +14,12 @@ import Helpers from '../config/helpers';
 
  const GrailConstants = {
   CHECK_PAGE: '@@grail/CHECK_PAGE',
+  RECORD_EVENT: '@@grail/RECORD_EVENT',
 }
 
 export const GrailActions = {
   /***
-   * Opens/closes the modal for authentication
-   * @param: boolean -- true opens modal false closes modal
+   * check page
    */
   checkPage: (api, page_state) => {
     return dispatch => {
@@ -35,6 +35,19 @@ export const GrailActions = {
       });
     }
   },
+
+   /***
+   * record user session
+   */
+  recordEvent: (event) => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.RECORD_EVENT,
+        event: event,
+      })
+    }
+  },
+
 }
 
 /**********************************
@@ -46,7 +59,9 @@ const defaultState = {
     added: [],
     modified: [],
     removed: [],
-  }
+  },
+  recordedSession: [],
+  event: {}
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -55,6 +70,12 @@ const GrailReducer = (state = defaultState, action) => {
       return {
         ...state,
         ...action
+      }
+    case GrailConstants.RECORD_EVENT:
+      return {
+        ...state,
+        ...action,
+        event: {...state.event, ...action.event}
       }
     default:
       return state;

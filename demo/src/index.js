@@ -3,6 +3,9 @@ import {render} from 'react-dom'
 
 import GrailTest from '../../src'
 
+import API from '../../src/config/api';
+import Helpers from '../../src/config/helpers';
+
 class Demo extends Component {
   componentDidMount() {
     this.grailTest = new GrailTest();
@@ -13,6 +16,18 @@ class Demo extends Component {
   onClick = (word) => {
     console.log(word)
   }
+
+  testFetch = (word) => {
+    fetch('https://jsonplaceholder.typicode.com/posts/1', API.GET_CONFIG())
+    .then(Helpers.checkStatus)
+    .then(Helpers.parseJSON)
+    .then((res) => {
+      console.log(res)
+    })
+
+    console.log(word)
+  }
+
   render() {
     return <div id='main'>
         <div id='top'>
@@ -25,6 +40,7 @@ class Demo extends Component {
             <p id='c' onClick={() => this.onClick('HEHE')}> Demo </p>
             <p id='d' onMouseEnter={() => this.onClick('MOSUE OVER')}> Test </p>
         </div>
+        <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
     </div>
   }
 }
