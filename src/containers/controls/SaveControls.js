@@ -297,7 +297,7 @@ class SaveControls extends Component {
     let { grail } = this.props;
 
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
-      // Take a snapshot here
+      // Craig, Take a snapshot here
     }
   }
 
