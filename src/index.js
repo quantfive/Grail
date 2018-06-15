@@ -73,6 +73,10 @@ class GrailTest {
       </Provider>, 
       document.getElementsByClassName('grail-test-wrapper')[0]
     );
+
+    if (process.env.NODE_ENV !== 'production') {
+      window.store = store;
+    }
   }
 }
 
