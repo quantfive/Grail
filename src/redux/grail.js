@@ -18,6 +18,7 @@ import Helpers from '../config/helpers';
   FETCH_STARTING: "@@grail/FETCH_STARTING",
   FETCH_FINISHED: '@@grail/FETCH_FINISHED',
   SAVE_EVENT: '@@grail/SAVE_EVENT',
+  RESET_EVENT: '@@grail/RESET_EVENT',
 }
 
 export const GrailActions = {
@@ -87,8 +88,22 @@ export const GrailActions = {
       .then(json => {
         return dispatch({
           type: GrailConstants.SAVE_EVENT,
+          event: {
+            previous_state_id: json.id
+          }
         })
       });
+    }
+  },
+
+  resetEvent: () => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.RESET_EVENT,
+        event: {
+          previous_state_id: null
+        }
+      })
     }
   }
 
@@ -106,7 +121,9 @@ const defaultState = {
   },
   activeFetchCalls: [],
   recordedSession: [],
-  event: {}
+  event: {
+    previous_state_id: null
+  }
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -114,6 +131,7 @@ const GrailReducer = (state = defaultState, action) => {
   switch(action.type) {
     case GrailConstants.CHECK_PAGE:
     case GrailConstants.SAVE_EVENT:
+    case GrailConstants.RESET_EVENT:
       return {
         ...state,
         ...action

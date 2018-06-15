@@ -246,8 +246,11 @@ class SaveControls extends Component {
   }
 
   recordToggle = () => {
+    let { grailActions } = this.props;
     fetch = this.fetch
-
+    if (this.state.isRecording) {
+      grailActions.resetEvent();
+    }
     this.setState({
       isRecording: !this.state.isRecording,
     })
