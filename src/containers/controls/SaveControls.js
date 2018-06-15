@@ -184,6 +184,14 @@ class SaveControls extends Component {
     return dict;
   }
 
+  compare(json) {
+    let html = json['html'];
+    let css = json['css'];
+    let new_state = this.getAll();
+    console.log(new_state['html'] === html);
+    console.log(new_state);
+  }
+
   clickSave = (e) => {
     e.stopPropagation();
     e.preventDefault();
@@ -243,6 +251,20 @@ class SaveControls extends Component {
     this.setState({
       isRecording: !this.state.isRecording,
     })
+  }
+
+  test = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    window.scrollTo(0,0);
+
+    let res = fetch(API.PLAY_BACK, API.POST_CONFIG({page_state: 42, order: 0}))
+    .then(Helpers.checkStatus)
+    .then(Helpers.parseJSON)
+    .then(json => {
+      console.log(json);
+      this.compare(json);
+    });
   }
 
   fetch = async (api, data, isGrail=false) => {
@@ -326,6 +348,7 @@ class SaveControls extends Component {
             : 'Record'
           } 
         </button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.test}> test </button>
       </div>
     );
   }
