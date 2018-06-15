@@ -89,7 +89,7 @@ export const GrailActions = {
         return dispatch({
           type: GrailConstants.SAVE_EVENT,
           event: {
-            previous_state_id: json.id
+            previous_state: json.id
           }
         })
       });
@@ -101,7 +101,7 @@ export const GrailActions = {
       return dispatch({
         type: GrailConstants.RESET_EVENT,
         event: {
-          previous_state_id: null
+          previous_state: null
         }
       })
     }
@@ -122,7 +122,7 @@ const defaultState = {
   activeFetchCalls: [],
   recordedSession: [],
   event: {
-    previous_state_id: null
+    previous_state: null
   }
 }
 
