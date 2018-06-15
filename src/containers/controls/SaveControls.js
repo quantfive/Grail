@@ -206,7 +206,7 @@ class SaveControls extends Component {
 
     let api = API.SAVE_PAGE_STATE;
     let page_state = this.getAll();
-    grailActions.RECORD_EVENT({snapshot: page_state})
+    grailActions.recordEvent({snapshot: page_state})
   }
 
   clickCheck = (e) => {
@@ -217,8 +217,9 @@ class SaveControls extends Component {
 
     let page_state = this.getAll();
     let api = API.DIFF_PAGE_STATE;
-  
-    grailActions.checkPage(api, page_state);
+    let isGrail = true;
+
+    grailActions.checkPage(api, page_state, isGrail);
     modalActions.openCheckModal(true);
   }
 
@@ -244,26 +245,30 @@ class SaveControls extends Component {
     })
   }
 
-  fetch = async (api, data) => {
+  fetch = async (api, data, isGrail=false) => {
     let { grailActions } = this.props;
+    if (isGrail) {
+      return oldFetch(api, data)
+    } else {
+      clearTimeout(this.snapshotTimeout);
+      grailActions.beforeFetch(api);
+      let response = await oldFetch(api, data)
+      let clone = response.clone()
+      let res = await Helpers.parseJSON(clone)
+      grailActions.fetchFinished(api);
 
-    clearTimeout(this.snapshotTimeout);
-    grailActions.beforeFetch(api);
-    let response = await oldFetch(api, data)
-    let clone = response.clone()
-    let res = await Helpers.parseJSON(clone)
-    grailActions.fetchFinished(api);
+      let event = {
+        endpoint: api,
+        request_input: data.body ? data.body : null,
+        request_type: data.method,
+        request_output: res ? res : null,
+      }
 
-    let event = {
-      endpoint: api,
-      request_input: data.body ? data.body : null,
-      request_type: data.method,
-      request_output: res ? res : null,
+      grailActions.recordEvent(event)
+
+      return response;
     }
-
-    grailActions.recordEvent(event)
-
-    return response;
+    
   }
 
   recordMouseEvents = (e) => {
@@ -276,9 +281,9 @@ class SaveControls extends Component {
           action_params: e,
         }
 
-        this.snapshotTimeout = setTimeout(() => {
-          // Craig, put the snapshot event & send to backend here
-          this.takeSnapshot();
+        this.snapshotTimeout = setTimeout(async () => {
+          await this.takeSnapshot();
+          grailActions.saveEvent()
         }, 500);
 
         grailActions.recordEvent(event)

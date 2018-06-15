@@ -17,6 +17,7 @@ import Helpers from '../config/helpers';
   RECORD_EVENT: '@@grail/RECORD_EVENT',
   FETCH_STARTING: "@@grail/FETCH_STARTING",
   FETCH_FINISHED: '@@grail/FETCH_FINISHED',
+  SAVE_EVENT: '@@grail/SAVE_EVENT',
 }
 
 export const GrailActions = {
@@ -76,6 +77,21 @@ export const GrailActions = {
     }
   },
 
+  saveEvent: () => {
+    return (dispatch, getState) => {
+      let config = API.POST_CONFIG(getState().grail.event);
+      let isGrail = true;
+      return fetch(API.SAVE_PAGE_STATE, config, isGrail)
+      .then(Helpers.checkStatus)
+      .then(Helpers.parseJSON)
+      .then(json => {
+        return dispatch({
+          type: GrailConstants.SAVE_EVENT,
+        })
+      });
+    }
+  }
+
 }
 
 /**********************************
@@ -97,6 +113,7 @@ const GrailReducer = (state = defaultState, action) => {
   let activeFetchCalls = []
   switch(action.type) {
     case GrailConstants.CHECK_PAGE:
+    case GrailConstants.SAVE_EVENT:
       return {
         ...state,
         ...action
