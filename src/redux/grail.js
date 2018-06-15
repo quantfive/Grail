@@ -94,6 +94,7 @@ const defaultState = {
 }
 
 const GrailReducer = (state = defaultState, action) => {
+  let activeFetchCalls = []
   switch(action.type) {
     case GrailConstants.CHECK_PAGE:
       return {
@@ -101,14 +102,14 @@ const GrailReducer = (state = defaultState, action) => {
         ...action
       }
     case GrailConstants.FETCH_STARTING:
-      let activeFetchCalls = [...state.activeFetchCalls, action.url];
+      activeFetchCalls = [...state.activeFetchCalls, action.url];
       return {
         ...state,
         ...action,
         activeFetchCalls: activeFetchCalls,
       }
     case GrailConstants.FETCH_FINISHED:
-      let activeFetchCalls = [...state.activeFetchCalls];
+      activeFetchCalls = [...state.activeFetchCalls];
       let index = activeFetchCalls.indexOf(action.url);
       activeFetchCalls.splice(index, 1);
       return {

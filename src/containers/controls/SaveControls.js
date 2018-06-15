@@ -200,6 +200,15 @@ class SaveControls extends Component {
     });
   }
 
+  takeSnapshot = () => {
+    let { grailActions } = this.props;
+    window.scrollTo(0,0);
+
+    let api = API.SAVE_PAGE_STATE;
+    let page_state = this.getAll();
+    grailActions.RECORD_EVENT({snapshot: page_state})
+  }
+
   clickCheck = (e) => {
     let { grailActions, modalActions } = this.props;
     e.stopPropagation();
@@ -269,7 +278,7 @@ class SaveControls extends Component {
 
         this.snapshotTimeout = setTimeout(() => {
           // Craig, put the snapshot event & send to backend here
-          this.snapshot();
+          this.takeSnapshot();
         }, 500);
 
         grailActions.recordEvent(event)
@@ -295,9 +304,8 @@ class SaveControls extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     let { grail } = this.props;
-
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
-      // Craig, Take a snapshot here
+      this.takeSnapshot()
     }
   }
 
