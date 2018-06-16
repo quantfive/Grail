@@ -214,7 +214,16 @@ class SaveControls extends Component {
 
     let api = API.SAVE_PAGE_STATE;
     let page_state = this.getAll();
-    grailActions.recordEvent({snapshot: page_state})
+    grailActions.recordEvent({snapshot: page_state});
+  }
+
+  playBack = () => {
+    let { grailActions } = this.props;
+    window.scrollTo(0,0);
+
+    let api = API;
+    this.takeSnapshot();
+    grailActions.checkDifferences();
   }
 
   clickCheck = (e) => {
@@ -293,7 +302,6 @@ class SaveControls extends Component {
 
       return response;
     }
-    
   }
 
   recordMouseEvents = (e) => {
@@ -344,14 +352,15 @@ class SaveControls extends Component {
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}> complete </button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}>complete</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
           {this.state.isRecording
             ? 'Stop'
             : 'Record'
           } 
         </button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.test}> test </button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.playBack}>playback</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.test}>test</button>
       </div>
     );
   }

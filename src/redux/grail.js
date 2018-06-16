@@ -19,6 +19,7 @@ import Helpers from '../config/helpers';
   FETCH_FINISHED: '@@grail/FETCH_FINISHED',
   SAVE_EVENT: '@@grail/SAVE_EVENT',
   RESET_EVENT: '@@grail/RESET_EVENT',
+  FETCH_EVENT: '@@grail/FETCH_EVENT',
 }
 
 export const GrailActions = {
@@ -105,8 +106,21 @@ export const GrailActions = {
         }
       })
     }
-  }
+  },
 
+  checkDifferences: () => {
+    return (dispatch, getState) => {
+      let config = API.POST_CONFIG({...getState().grail.event, index: getState().grail.index});
+      console.log(config.body.index);
+      let isGrail = true;
+      return fetch(API.DIFF_PAGE_STATE, config, isGrail)
+      .then(Helpers.checkStatus)
+      .then(Helpers.parseJSON)
+      .then(json => {
+        console.log(json);
+      });
+    }
+  }
 }
 
 /**********************************
@@ -123,7 +137,8 @@ const defaultState = {
   recordedSession: [],
   event: {
     previous_state: null
-  }
+  },
+  index: 0,
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -131,6 +146,7 @@ const GrailReducer = (state = defaultState, action) => {
   switch(action.type) {
     case GrailConstants.CHECK_PAGE:
     case GrailConstants.SAVE_EVENT:
+    case GrailConstants.FETCH_EVENT:
     case GrailConstants.RESET_EVENT:
       return {
         ...state,
@@ -156,7 +172,8 @@ const GrailReducer = (state = defaultState, action) => {
       return {
         ...state,
         ...action,
-        event: {...state.event, ...action.event}
+        event: {...state.event, ...action.event},
+        index: state.index + 1,
       }
     default:
       return state;
