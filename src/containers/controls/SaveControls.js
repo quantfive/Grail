@@ -263,6 +263,8 @@ class SaveControls extends Component {
     fetch = this.fetch
     if (this.state.isRecording && grail.recordedSession.length > 0) {
       grailActions.saveEvent()
+    } else if(!this.state.isRecording) {
+      this.takeSnapshot()
     }
     this.setState({
       isRecording: !this.state.isRecording,
@@ -317,10 +319,11 @@ class SaveControls extends Component {
           action_name: 'click',
           action_params: {
             id: e.srcElement.id !== "" ? e.srcElement.id : null,
-            order: e.srcElement.order ? e.srcElement.order : null,
-            outerHTML: e.srcElement.HTML
+            order: e.srcElement.attributes.order.value ? e.srcElement.attributes.order.value : null,
+            outerHTML: e.srcElement.outerHTML
           },
         }
+
         await grailActions.recordEvent(event)
 
         this.snapshotTimeout = setTimeout(async () => {
