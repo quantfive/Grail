@@ -74,6 +74,7 @@ export const GrailActions = {
    */
   recordEvent: (event) => {
     return dispatch => {
+      console.log(event)
       return dispatch({
         type: GrailConstants.RECORD_EVENT,
         event: event,
@@ -156,7 +157,6 @@ const defaultState = {
   event: {
     previous_state: null
   },
-  index: 0,
   playback: [],
 }
 
@@ -193,7 +193,6 @@ const GrailReducer = (state = defaultState, action) => {
         ...state,
         ...action,
         event: {...state.event, ...action.event},
-        index: state.index + 1,
       }
     case GrailConstants.ADD_EVENT_TO_LIST:
       return {

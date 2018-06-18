@@ -225,6 +225,9 @@ class SaveControls extends Component {
     this.takeSnapshot();
     await grailActions.playback();
 
+    for (let i = 0; i < grail.playback.length; i++) {
+      //let element = grail.playback[i].
+    }
   }
 
   clickCheck = (e) => {
@@ -305,22 +308,26 @@ class SaveControls extends Component {
     }
   }
 
-  recordMouseEvents = (e) => {
+  recordMouseEvents = async (e) => {
     let { grailActions } = this.props;
     if (this.state.isRecording && !this.state.firstClick) {
       if (e.type === 'click') {
         let event = {
           page_name: window.location.href,
           action_name: 'click',
-          action_params: e,
+          action_params: {
+            id: e.srcElement.id !== "" ? e.srcElement.id : null,
+            order: e.srcElement.order ? e.srcElement.order : null,
+            outerHTML: e.srcElement.HTML
+          },
         }
+        await grailActions.recordEvent(event)
 
         this.snapshotTimeout = setTimeout(async () => {
           await this.takeSnapshot();
           grailActions.addEventToList()
         }, 500);
 
-        grailActions.recordEvent(event)
         //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
       } else if (e.type === 'mousemove') {
         //console.log(`Current Mouse Position: (x: ${e.clientX} y: ${e.clientY})`)
