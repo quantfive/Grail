@@ -217,13 +217,14 @@ class SaveControls extends Component {
     grailActions.recordEvent({snapshot: page_state});
   }
 
-  playBack = () => {
-    let { grailActions } = this.props;
+  playBack = async () => {
+    let { grail, grailActions } = this.props;
     window.scrollTo(0,0);
 
     let api = API;
     this.takeSnapshot();
-    grailActions.playback();
+    await grailActions.playback();
+
   }
 
   clickCheck = (e) => {
@@ -255,10 +256,10 @@ class SaveControls extends Component {
   }
 
   recordToggle = () => {
-    let { grailActions } = this.props;
+    let { grail, grailActions } = this.props;
     fetch = this.fetch
-    if (this.state.isRecording) {
-      grailActions.resetEvent();
+    if (this.state.isRecording && grail.recordedSession.length > 0) {
+      grailActions.saveEvent()
     }
     this.setState({
       isRecording: !this.state.isRecording,
@@ -316,7 +317,7 @@ class SaveControls extends Component {
 
         this.snapshotTimeout = setTimeout(async () => {
           await this.takeSnapshot();
-          grailActions.saveEvent()
+          grailActions.addEventToList()
         }, 500);
 
         grailActions.recordEvent(event)
