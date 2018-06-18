@@ -45,7 +45,7 @@ const API = {
   // Diff Page State 3
   DIFF_PAGE_STATE3: BASE_URL + 'diff_page_states3/',
 
-  PLAY_BACK: BASE_URL + 'playback/',
+  PLAYBACK: BASE_URL + 'playback/',
 
   // Niffy
   NIFFY: BASE_URL + 'niffy/',

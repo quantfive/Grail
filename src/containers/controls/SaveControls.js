@@ -223,7 +223,7 @@ class SaveControls extends Component {
 
     let api = API;
     this.takeSnapshot();
-    grailActions.checkDifferences();
+    grailActions.playback();
   }
 
   clickCheck = (e) => {

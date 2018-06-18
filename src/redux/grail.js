@@ -120,7 +120,21 @@ export const GrailActions = {
         console.log(json);
       });
     }
-  }
+  },
+
+  playback: () => {
+    return (dispatch, getState) => {
+      let config = API.GET_CONFIG();
+      let isGrail = true;
+      return fetch(API.PLAYBACK, config, isGrail)
+      .then(Helpers.checkStatus)
+      .then(Helpers.parseJSON)
+      .then(json => {
+        console.log(json);
+      });
+    }
+  },
+
 }
 
 /**********************************
