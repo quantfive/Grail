@@ -99,6 +99,7 @@ export const GrailActions = {
         return dispatch({
           type: GrailConstants.RESET_CHECKSTATES,
           checkStates: [],
+          differences: json.differences
         })
       });
     }
@@ -197,11 +198,7 @@ export const GrailActions = {
  **********************************/
 
 const defaultState = {
-  differences: {
-    added: [],
-    modified: [],
-    removed: [],
-  },
+  differences: [],
   recording: false,
   activeFetchCalls: [],
   recordedSession: [],

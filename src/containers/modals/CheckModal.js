@@ -33,7 +33,7 @@ class CheckModal extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.grail.differences !== nextProps.grail.differences) {
-      this.parseDifference(nextProps.grail.differences)
+      //this.parseDifference(nextProps.grail.differences)
     }
   }
 
