@@ -124,7 +124,7 @@ class SaveControls extends Component {
     let elements = {};
     for (let child of collection) {
       if (!child.id) {
-        child.setAttribute('order', tempId);
+        child.setAttribute('grail-order', tempId);
       }
       if (!child.hasChildNodes()) {
         tempId = tempId + 1;
@@ -152,7 +152,7 @@ class SaveControls extends Component {
 
     for (let child of collection) {
       let css = {}
-      let id = child.id ? child.id : child.getAttribute('order')
+      let id = child.id ? child.id : child.getAttribute('grail-order')
       let rect = this.filter(child.getBoundingClientRect());
 
       // Computed CSS Properties
@@ -209,24 +209,59 @@ class SaveControls extends Component {
   }
 
   takeSnapshot = () => {
-    let { grailActions } = this.props;
+    let { grailActions, grail } = this.props;
     window.scrollTo(0,0);
 
-    let api = API.SAVE_PAGE_STATE;
     let page_state = this.getAll();
-    grailActions.recordEvent({snapshot: page_state});
+    if (grail.recording) {
+      grailActions.recordEvent({
+        snapshot: page_state
+      });
+    }
+
+    return page_state;
   }
 
-  playBack = async () => {
+  getPlayBack = async () => {
     let { grail, grailActions } = this.props;
     window.scrollTo(0,0);
 
     let api = API;
     this.takeSnapshot();
-    await grailActions.playback();
+    let states = await grailActions.playback();
 
-    for (let i = 0; i < grail.playback.length; i++) {
-      //let element = grail.playback[i].
+    let first = states.playback[0];
+    this.playback(first);
+  }
+
+  /***
+   * Plays back a specific state of the app
+   */
+  playback = (pageState) => {
+    let { grailActions } = this.props;
+    let id = pageState.action_params.id;
+    let element;
+    let cur_html = this.getAllElements();
+    if (id) {
+      element = document.getElementById(id);
+    } else {
+      let order = pageState.action_params.order;
+      element = document.querySelectorAll(`[grail-order="${order}"]`)[1];
+    }
+
+    switch(pageState.action_name) {
+      case 'click':
+        element.click()
+        this.snapshotTimeout = setTimeout(() => {
+          let html = this.takeSnapshot();
+          grailActions.checkHTML({
+            cur_html: html,
+            page_state_id: pageState.id,
+          });
+        }, 500);
+        break;
+      default:
+        console.log('no action');
     }
   }
 
@@ -261,6 +296,7 @@ class SaveControls extends Component {
   recordToggle = () => {
     let { grail, grailActions } = this.props;
     fetch = this.fetch
+    grailActions.toggleRecord();
     if (this.state.isRecording && grail.recordedSession.length > 0) {
       grailActions.saveEvent()
     } else if(!this.state.isRecording) {
@@ -327,8 +363,8 @@ class SaveControls extends Component {
         await grailActions.recordEvent(event)
 
         this.snapshotTimeout = setTimeout(async () => {
-          await this.takeSnapshot();
-          grailActions.addEventToList()
+          this.takeSnapshot();
+          grailActions.addEventToList();
         }, 500);
 
         //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
@@ -348,13 +384,26 @@ class SaveControls extends Component {
 
   componentDidMount() {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
-    document.addEventListener('click', this.recordMouseEvents, false)
+    document.addEventListener('click', this.recordMouseEvents, false);
   }
 
   componentDidUpdate(prevProps, prevState) {
-    let { grail } = this.props;
+    let { grail, grailActions } = this.props;
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
-      this.takeSnapshot()
+      let html = this.takeSnapshot();
+      if (grail.isRecording) {
+        grailActions.addEventToList();
+      } else {
+        grailActions.checkHTML({
+          cur_html: html,
+          page_state_id: 0,
+        });
+      }
+    }
+
+    if (grail.playback.length < prevProps.grail.playback.length && grail.playback.length !== 0) {
+      let element = grail.playback[0];
+      this.playback(element);
     }
   }
 
@@ -370,8 +419,7 @@ class SaveControls extends Component {
             : 'Record'
           } 
         </button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.playBack}>playback</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.test}>test</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.getPlayBack}>playback</button>
       </div>
     );
   }

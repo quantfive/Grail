@@ -22,6 +22,8 @@ import Helpers from '../config/helpers';
   FETCH_EVENT: '@@grail/FETCH_EVENT',
   START_PLAYBACK: '@@grail/START_PLAYBACK',
   ADD_EVENT_TO_LIST: '@@grail/ADD_EVENT_TO_LIST',
+  TOGGLE_RECORD: '@@grail/TOGGLE_RECORD',
+  ADD_TO_CHECK_LIST: '@@grail/ADD_TO_CHECK_LIST',
 }
 
 export const GrailActions = {
@@ -57,6 +59,29 @@ export const GrailActions = {
   },
 
   /***
+   * Adds the HTML given to a list for checking
+   */
+  checkHTML: (obj) => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.ADD_TO_CHECK_LIST,
+        obj,
+      });
+    }
+  },
+
+  /***
+   * Once record button is clicked, toggles it to true or false
+   */
+  toggleRecord: () => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.TOGGLE_RECORD,
+      });
+    }
+  },
+
+  /***
    * Before the fetch occurs, put it into a list
    * @params string url -- the url of the fetch
    */
@@ -74,7 +99,6 @@ export const GrailActions = {
    */
   recordEvent: (event) => {
     return dispatch => {
-      console.log(event)
       return dispatch({
         type: GrailConstants.RECORD_EVENT,
         event: event,
@@ -112,8 +136,10 @@ export const GrailActions = {
 
   checkDifferences: () => {
     return (dispatch, getState) => {
-      let config = API.POST_CONFIG({...getState().grail.event, index: getState().grail.index});
-      console.log(config.body.index);
+      let config = API.POST_CONFIG({
+        ...getState().grail.event,
+        index: getState().grail.index
+      });
       let isGrail = true;
       return fetch(API.DIFF_PAGE_STATE, config, isGrail)
       .then(Helpers.checkStatus)
@@ -139,7 +165,6 @@ export const GrailActions = {
       });
     }
   },
-
 }
 
 /**********************************
@@ -152,12 +177,14 @@ const defaultState = {
     modified: [],
     removed: [],
   },
+  recording: false,
   activeFetchCalls: [],
   recordedSession: [],
   event: {
     previous_state: null
   },
   playback: [],
+  checkStates: [],
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -171,6 +198,12 @@ const GrailReducer = (state = defaultState, action) => {
       return {
         ...state,
         ...action
+      }
+    case GrailConstants.TOGGLE_RECORD:
+      return {
+        ...state,
+        ...action,
+        recording: !state.recording,
       }
     case GrailConstants.FETCH_STARTING:
       activeFetchCalls = [...state.activeFetchCalls, action.url];
@@ -199,6 +232,14 @@ const GrailReducer = (state = defaultState, action) => {
         ...state,
         ...action,
         recordedSession: [...state.recordedSession, action.event],
+      }
+    case GrailConstants.ADD_TO_CHECK_LIST:
+      let playbackSessions = [...state.playback];
+      playbackSessions.shift()
+      return {
+        ...state,
+        playback: playbackSessions,
+        checkStates: [...state.checkStates, action.obj],
       }
     default:
       return state;

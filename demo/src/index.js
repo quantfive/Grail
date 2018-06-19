@@ -7,6 +7,13 @@ import API from '../../src/config/api';
 import Helpers from '../../src/config/helpers';
 
 class Demo extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      show: false,
+    }
+  }
   componentDidMount() {
     this.grailTest = new GrailTest();
 
@@ -24,23 +31,22 @@ class Demo extends Component {
     .then((res) => {
       console.log(res)
     })
-
-    console.log(word)
   }
 
   render() {
     return <div id='main'>
         <div id='top'>
             <div onClick={() => this.onClick('CLICK')}>
-              <p id='a' onMouseOver={() => this.onClick('MOSUE OVER')}> Grail </p>
+              <p id='a' onClick={() => this.setState({show: false})}> Grail </p>
             </div>
-            <p id='b' onClick={() => this.onClick('TAP')}> Component </p>
+            <p id='b' onClick={() => this.setState({show: true})}> Component </p>
         </div>
         <div id='bottom' onClick={() => this.onClick('WOW')}>
             <p id='c' onClick={() => this.onClick('HEHE')}> Demo </p>
             <p id='d' onMouseEnter={() => this.onClick('MOSUE OVER')}> Test </p>
         </div>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
+        {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
     </div>
   }
 }
