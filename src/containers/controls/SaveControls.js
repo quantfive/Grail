@@ -383,7 +383,7 @@ class SaveControls extends Component {
       } else {
         grailActions.checkHTML({
           cur_html: page_state.html,
-          css: page_state.css,
+          cur_css: page_state.css,
           page_state_id: 0,
         });
       }
