@@ -94,11 +94,11 @@ export const GrailActions = {
       .then(Helpers.checkStatus)
       .then(Helpers.parseJSON)
       .then(json => {
+        console.log(json);
         return dispatch({
           type: GrailConstants.RESET_CHECKSTATES,
           checkStates: [],
         })
-        console.log(json);
       });
     }
   },
