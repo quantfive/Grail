@@ -253,9 +253,10 @@ class SaveControls extends Component {
       case 'click':
         element.click()
         this.snapshotTimeout = setTimeout(() => {
-          let html = this.takeSnapshot();
+          let page_state = this.takeSnapshot();
           grailActions.checkHTML({
-            cur_html: html,
+            cur_html: page_state.html,
+            cur_css: page_state.css,
             page_state_id: pageState.id,
           });
         }, 500);
@@ -307,20 +308,6 @@ class SaveControls extends Component {
     })
   }
 
-  test = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    window.scrollTo(0,0);
-
-    let res = fetch(API.PLAY_BACK, API.POST_CONFIG({page_state: 42, order: 0}))
-    .then(Helpers.checkStatus)
-    .then(Helpers.parseJSON)
-    .then(json => {
-      console.log(json);
-      this.compare(json);
-    });
-  }
-
   fetch = async (api, data, isGrail=false) => {
     let { grailActions } = this.props;
     if (isGrail) {
@@ -355,7 +342,7 @@ class SaveControls extends Component {
           action_name: 'click',
           action_params: {
             id: e.srcElement.id !== "" ? e.srcElement.id : null,
-            order: e.srcElement.attributes.order ? e.srcElement.attributes.order.value : null,
+            order: e.srcElement.attributes['grail-order'] ? e.srcElement.attributes.order['grail-order'] : null,
             outerHTML: e.srcElement.outerHTML
           },
         }
@@ -390,12 +377,13 @@ class SaveControls extends Component {
   componentDidUpdate(prevProps, prevState) {
     let { grail, grailActions } = this.props;
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
-      let html = this.takeSnapshot();
+      let page_state = this.takeSnapshot();
       if (grail.isRecording) {
         grailActions.addEventToList();
       } else {
         grailActions.checkHTML({
-          cur_html: html,
+          cur_html: page_state.html,
+          css: page_state.css,
           page_state_id: 0,
         });
       }
@@ -404,6 +392,10 @@ class SaveControls extends Component {
     if (grail.playback.length < prevProps.grail.playback.length && grail.playback.length !== 0) {
       let element = grail.playback[0];
       this.playback(element);
+    }
+
+    if (grail.playback.length === 0 && prevProps.grail.playback.length > 0) {
+      grailActions.checkPlayback(grail.checkStates);
     }
   }
 

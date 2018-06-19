@@ -82,6 +82,23 @@ export const GrailActions = {
   },
 
   /***
+   * Playback is done, now check the states on the backend
+   * @params [states] -- a list of states to check
+   */
+  checkPlayback: (states) => {
+    return dispatch => {
+      let config = API.POST_CONFIG({states: states});
+      let isGrail = true;
+      return fetch(API.PLAYBACK, config, isGrail)
+      .then(Helpers.checkStatus)
+      .then(Helpers.parseJSON)
+      .then(json => {
+        console.log(json);
+      });
+    }
+  },
+
+  /***
    * Before the fetch occurs, put it into a list
    * @params string url -- the url of the fetch
    */
