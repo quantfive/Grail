@@ -12,6 +12,7 @@ class Demo extends Component {
 
     this.state = {
       show: false,
+      fetchResults: '',
     }
   }
   componentDidMount() {
@@ -29,6 +30,9 @@ class Demo extends Component {
     .then(Helpers.checkStatus)
     .then(Helpers.parseJSON)
     .then((res) => {
+      this.setState({
+        fetchResults: res.title,
+      });
       console.log(res)
     })
   }
@@ -47,6 +51,12 @@ class Demo extends Component {
         </div>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
+        <div id="fetch-results">
+          {this.state.fetchResults
+            ? this.state.fetchResults
+            : null
+          }
+        </div>
     </div>
   }
 }

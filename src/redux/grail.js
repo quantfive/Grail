@@ -24,6 +24,7 @@ import Helpers from '../config/helpers';
   ADD_EVENT_TO_LIST: '@@grail/ADD_EVENT_TO_LIST',
   TOGGLE_RECORD: '@@grail/TOGGLE_RECORD',
   ADD_TO_CHECK_LIST: '@@grail/ADD_TO_CHECK_LIST',
+  RESET_CHECKSTATES: '@@grail/RESET_CHECKSTATES',
 }
 
 export const GrailActions = {
@@ -94,6 +95,10 @@ export const GrailActions = {
       .then(Helpers.parseJSON)
       .then(json => {
         console.log(json);
+        return dispatch({
+          type: GrailConstants.RESET_CHECKSTATES,
+          checkStates: [],
+        })
       });
     }
   },
@@ -212,6 +217,7 @@ const GrailReducer = (state = defaultState, action) => {
     case GrailConstants.FETCH_EVENT:
     case GrailConstants.RESET_EVENT:
     case GrailConstants.START_PLAYBACK:
+    case GrailConstants.RESET_CHECKSTATES:
       return {
         ...state,
         ...action
