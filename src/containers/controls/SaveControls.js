@@ -224,6 +224,7 @@ class SaveControls extends Component {
 
   getPlayBack = async () => {
     let { grail, grailActions } = this.props;
+    fetch = this.fetch
     window.scrollTo(0,0);
 
     let api = API;
@@ -248,7 +249,7 @@ class SaveControls extends Component {
       let order = pageState.action_params.order;
       element = document.querySelectorAll(`[grail-order="${order}"]`)[1];
     }
-
+    console.log(pageState)
     switch(pageState.action_name) {
       case 'click':
         element.click()
@@ -310,6 +311,7 @@ class SaveControls extends Component {
 
   fetch = async (api, data, isGrail=false) => {
     let { grailActions } = this.props;
+    console.log(isGrail)
     if (isGrail) {
       return oldFetch(api, data)
     } else {
@@ -378,13 +380,13 @@ class SaveControls extends Component {
     let { grail, grailActions } = this.props;
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
       let page_state = this.takeSnapshot();
-      if (grail.isRecording) {
-        grailActions.addEventToList();
+      if (grail.recording) {
+        //grailActions.addEventToList();
       } else {
         grailActions.checkHTML({
           cur_html: page_state.html,
           cur_css: page_state.css,
-          page_state_id: 0,
+          page_state_id: grail.playback[0].id
         });
       }
     }

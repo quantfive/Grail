@@ -47,6 +47,8 @@ const API = {
 
   PLAYBACK: BASE_URL + 'playback/',
 
+  SESSION: BASE_URL + 'session/0',
+
   // Niffy
   NIFFY: BASE_URL + 'niffy/',
 

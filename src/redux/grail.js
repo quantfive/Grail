@@ -88,6 +88,7 @@ export const GrailActions = {
    */
   checkPlayback: (states) => {
     return dispatch => {
+      console.log(states)
       let config = API.POST_CONFIG({states: states});
       let isGrail = true;
       return fetch(API.PLAYBACK, config, isGrail)
@@ -176,13 +177,15 @@ export const GrailActions = {
     return (dispatch, getState) => {
       let config = API.GET_CONFIG();
       let isGrail = true;
-      return fetch(API.PLAYBACK, config, isGrail)
+      return fetch(API.SESSION, config, isGrail)
       .then(Helpers.checkStatus)
       .then(Helpers.parseJSON)
       .then(json => {
         return dispatch({
           type: GrailConstants.START_PLAYBACK,
-          playback: json
+          playback: json.states,
+          checkStates: [],
+          playbackIndex: 0,
         })
       });
     }
