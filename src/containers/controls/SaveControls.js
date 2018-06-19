@@ -342,7 +342,7 @@ class SaveControls extends Component {
           action_name: 'click',
           action_params: {
             id: e.srcElement.id !== "" ? e.srcElement.id : null,
-            order: e.srcElement.attributes['grail-order'] ? e.srcElement.attributes.order['grail-order'] : null,
+            order: e.srcElement.attributes['grail-order'] ? e.srcElement.attributes['grail-order'].value : null,
             outerHTML: e.srcElement.outerHTML
           },
         }
