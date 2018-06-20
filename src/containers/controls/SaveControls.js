@@ -19,7 +19,7 @@ import EMPTY_CHROME_STYLES from '../../config/empty_chrome_styles';
 import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
-var oldFetch = this.fetch;
+var oldFetch = fetch;
 
 const SKIPTAGS = {
   script: true,
