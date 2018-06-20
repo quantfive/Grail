@@ -112,7 +112,7 @@ class SaveControls extends Component {
 
   getAllElements() {
     var body = this.getDocumentHtml().getElementsByTagName("body");
-    let elements = this.getHTMLElements(body, 0);
+    let elements = this.getHTMLElements(body, {id: 0});
     return {'body': elements};
   }
 
@@ -120,17 +120,18 @@ class SaveControls extends Component {
     if (collection.length == 0) {
       return null;
     }
-    // let index = 0;
     let elements = {};
     for (let child of collection) {
       if (!child.id) {
-        child.setAttribute('grail-order', tempId);
+        child.setAttribute('grail-order', tempId.id);
+      } else {
+        tempId.id = tempId.id - 1;
       }
       if (!child.hasChildNodes()) {
-        tempId = tempId + 1;
+        tempId.id = tempId.id + 1;
       } else {
-        this.getHTMLElements(child.children, tempId + 1);
-        tempId = tempId + 1;
+        tempId.id = tempId.id + 1;
+        this.getHTMLElements(child.children, tempId);
       }
     }
     return elements;
