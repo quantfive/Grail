@@ -122,16 +122,18 @@ class SaveControls extends Component {
     }
     let elements = {};
     for (let child of collection) {
-      if (!child.id) {
-        child.setAttribute('grail-order', tempId.id);
-      } else {
-        tempId.id = tempId.id - 1;
-      }
-      if (!child.hasChildNodes()) {
-        tempId.id = tempId.id + 1;
-      } else {
-        tempId.id = tempId.id + 1;
-        this.getHTMLElements(child.children, tempId);
+      if (child.id !== 'wrapper') {
+        if (!child.id) {
+          child.setAttribute('grail-order', tempId.id);
+        } else {
+          tempId.id = tempId.id - 1;
+        }
+        if (!child.hasChildNodes()) {
+          tempId.id = tempId.id + 1;
+        } else {
+          tempId.id = tempId.id + 1;
+          this.getHTMLElements(child.children, tempId);
+        }
       }
     }
     return elements;
@@ -248,7 +250,7 @@ class SaveControls extends Component {
       element = document.getElementById(id);
     } else {
       let order = pageState.action_params.order;
-      element = document.querySelectorAll(`[grail-order="${order}"]`)[1];
+      element = document.querySelectorAll(`[grail-order="${order}"]`)[0];
     }
     console.log(pageState)
     switch(pageState.action_name) {

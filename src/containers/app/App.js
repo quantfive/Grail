@@ -8,7 +8,7 @@ import CheckModal from '../modals/CheckModal';
 class App extends Component {
   render() {
     return (
-      <div className="App" id ='app'style={{background: 'transparent'}}>
+      <div className="App" id ="grail-app" style={{background: 'transparent'}}>
         <SaveControls id='controls'/>
         <CheckModal />
       </div>
