@@ -57,3 +57,10 @@ typings/
 # dotenv environment variables file
 .env
 
+/coverage
+/demo/dist
+/es
+/node_modules
+/umd
+npm-debug.log*
+
