@@ -6,13 +6,13 @@
 
 # Installation
 ```
-yarn add https://github.com/lightninglu10/grail-frontend-test-package.git#grail-component
+yarn add https://github.com/lightninglu10/grail-frontend-test-package.git
 ```
 
 or 
 
 ```
-npm install https://github.com/lightninglu10/grail-frontend-test-package.git#grail-component
+npm install https://github.com/lightninglu10/grail-frontend-test-package.git
 ```
 
 # Usage
