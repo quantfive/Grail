@@ -15,11 +15,7 @@ class CheckModal extends React.Component {
 
     this.state = {
       login: true,
-      differences: {
-        added: [],
-        modified: [],
-        removed: []
-      },
+      differences: [],
     }
   }
 
@@ -33,72 +29,52 @@ class CheckModal extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.grail.differences !== nextProps.grail.differences) {
-      //this.parseDifference(nextProps.grail.differences)
+      this.parseDifference(nextProps.grail.differences)
     }
   }
 
   parseDifference = (differences) => {
-    let differenceMessages = {added: [], modified: [], removed: []}
-    
-    for (let i = 0; i < differences.added.length; i++) {
-      differenceMessages.added.push({html: differences.added[i].html})
-    }
-    
-    for (let i = 0; i < differences.modified.length; i++) {
-      let changes = {changes: []}
-      for (let j = 0; j < differences.modified[i].changes.length; j++) {
-        let change = differences.modified[i].changes[j]
-        changes.changes.push(`The ${change.attribute} of element "${differences.modified[i].id ? differences.modified[i].id : differences.modified[i].order}" has changed from "${change.old_value}" to "${change.new_value}" `)
+    let differenceMessages = []
+    let difference = {added: [], modified: [], removed: []}
+    for (let i = 0; i < differences.length; i++) {
+      for (let j = 0; j < differences[i].added.length; j++) {
+        difference.added.push({html: differences[i].added[j].html})
       }
-      differenceMessages.modified.push(changes)
-    }
+      
+      for (let j = 0; j < differences[i].modified.length; j++) {
+        let changes = {changes: []}
+        for (let k = 0; k < differences[i].modified[j].changes.length; k++) {
+          let change = differences[i].modified[j].changes[k]
+          changes.changes.push(`The ${change.attribute} of element "${differences[i].modified[j].id ? differences[i].modified[j].id : differences[i].modified[j].order}" has changed from "${change.old_value}" to "${change.new_value}" `)
+        }
+        difference.modified.push(changes)
+      }
 
-    for (let i = 0; i < differences.removed.length; i++) {
+      differenceMessages.push(difference)
+      // for (let i = 0; i < differences.removed.length; i++) {
+      // }
     }
 
     this.setState({
-      differences: {...differenceMessages}
+      differences: differenceMessages
     })
   }
 
   render() {
+    console.log(this.state.differences)
     let { modals, grail } = this.props;
-    let added = this.state.differences.added.map((difference, index) => {
-      return (
-        <div className={css(styles.added)}>
-          {difference.html}
-        </div>
-      )
-    })
-    let modified = this.state.differences.modified.map((difference, index) => {
-      let changes = difference.changes.map((change, index) => {
-        return (
-          <div className={css(styles.modified)}>
-            {change}
-          </div>
-        )
+    let differences = this.state.differences.map((difference, index) => {
+      let added = difference.added.map((added, index) => {
+        return added
+      })
+      let modified = difference.modified.map((modified, index) => {
+        return modified
+      })
+      let removed = difference.removed.map((removed, index) => {
+        return removed
       })
       return (
         <div>
-          {changes}
-        </div>
-      )
-    })
-    let removed = this.state.differences.removed.map((difference, index) => {
-      return (
-        <div className={css(styles.removed)}>
-          HELLO
-        </div>
-      )
-    })
-    return (
-      <ReactModal
-        className={css(styles.modal)}
-        isOpen={modals.openCheckModal}
-        contentLabel="CheckModal"
-        onRequestClose={this.closeModal}
-        style={overlayStyles}>
-        <div className={css(styles.differenceContainer)}>
           <h3>Added</h3>
           {added.length !== 0
             ? added
@@ -114,6 +90,17 @@ class CheckModal extends React.Component {
             ? removed
             : 'No removals found'
           }
+        </div>
+      )
+    })
+    return (
+      <ReactModal
+        className={css(styles.modal)}
+        isOpen={modals.openCheckModal}
+        contentLabel="CheckModal"
+        onRequestClose={this.closeModal}
+        style={overlayStyles}>
+        <div className={css(styles.differenceContainer)}>
         </div>
       </ReactModal>
     );
