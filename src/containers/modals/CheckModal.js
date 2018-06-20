@@ -61,17 +61,36 @@ class CheckModal extends React.Component {
   }
 
   render() {
-    console.log(this.state.differences)
     let { modals, grail } = this.props;
     let differences = this.state.differences.map((difference, index) => {
       let added = difference.added.map((added, index) => {
-        return added
+        return (
+          <div>
+            { added.html }
+          </div>
+        )
       })
       let modified = difference.modified.map((modified, index) => {
-        return modified
+        let changes = modified.changes.map((change, index) => {
+          return (
+            <div>
+              { change }
+            </div>
+          )
+        })
+
+        return (
+          <div>
+            { changes }
+          </div>
+        )
       })
       let removed = difference.removed.map((removed, index) => {
-        return removed
+        return (
+          <div>
+            { removed }
+          </div>
+        )
       })
       return (
         <div>
@@ -101,6 +120,7 @@ class CheckModal extends React.Component {
         onRequestClose={this.closeModal}
         style={overlayStyles}>
         <div className={css(styles.differenceContainer)}>
+          { differences }
         </div>
       </ReactModal>
     );

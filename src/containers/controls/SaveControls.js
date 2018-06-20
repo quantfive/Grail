@@ -377,7 +377,7 @@ class SaveControls extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    let { grail, grailActions } = this.props;
+    let { grail, grailActions, modalActions } = this.props;
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
       let page_state = this.takeSnapshot();
       if (grail.recording) {
@@ -398,6 +398,7 @@ class SaveControls extends Component {
 
     if (grail.playback.length === 0 && prevProps.grail.playback.length > 0) {
       grailActions.checkPlayback(grail.checkStates);
+      modalActions.openCheckModal(true);
     }
   }
 
