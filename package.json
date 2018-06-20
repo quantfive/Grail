@@ -21,7 +21,6 @@
   "dependencies": {
     "aphrodite": "^2.2.0",
     "history": "^4.7.2",
-    "phantomjs-prebuilt": "^2.1.16",
     "react-modal": "^3.4.5",
     "react-redux": "^5.0.7",
     "react-router-redux": "^4.0.8",
