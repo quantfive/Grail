@@ -10,6 +10,9 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 // import Niffy from 'niffy';
 
+// Components
+import CheckModal from '../modals/CheckModal';
+
 // Config
 import API from '../../config/api';
 import Helpers from '../../config/helpers';
@@ -408,6 +411,7 @@ class SaveControls extends Component {
   }
 
   render() {
+    let { modal } = this.props;
     return (
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
@@ -420,6 +424,7 @@ class SaveControls extends Component {
           } 
         </button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.getPlayBack}>playback</button>
+        {modal.openCheckModal && <CheckModal />}
       </div>
     );
   }
@@ -465,6 +470,7 @@ let styles = StyleSheet.create({
 
 const mapStateToProps = state => ({
   grail: state.grail,
+  modal: state.modals,
 })
 
 const mapDispatchToProps = (dispatch) => ({
