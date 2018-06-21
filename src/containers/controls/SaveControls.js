@@ -255,7 +255,7 @@ class SaveControls extends Component {
       let order = pageState.action_params.order;
       element = document.querySelectorAll(`[grail-order="${order}"]`)[0];
     }
-    console.log(pageState)
+
     switch(pageState.action_name) {
       case 'click':
         element.click()
@@ -320,16 +320,15 @@ class SaveControls extends Component {
 
   fetch = async (api, data, isGrail=false) => {
     let { grailActions } = this.props;
-    console.log(isGrail)
+    clearTimeout(this.snapshotTimeout);
+    console.log('CLEAR TIMEOUT')
     if (isGrail) {
       return oldFetch(api, data)
     } else {
-      clearTimeout(this.snapshotTimeout);
       grailActions.beforeFetch(api);
       let response = await oldFetch(api, data)
       let clone = response.clone()
       let res = await Helpers.parseJSON(clone)
-      grailActions.fetchFinished(api);
 
       let event = {
         endpoint: api,
@@ -338,7 +337,8 @@ class SaveControls extends Component {
         request_output: res ? res : null,
       }
 
-      grailActions.recordEvent(event)
+      await grailActions.recordEvent(event);
+      grailActions.fetchFinished(api);
 
       return response;
     }
@@ -359,7 +359,7 @@ class SaveControls extends Component {
         }
 
         await grailActions.recordEvent(event)
-
+        console.log('SET TIMEOUT')
         this.snapshotTimeout = setTimeout(async () => {
           this.takeSnapshot();
           //grailActions.addEventToList();
