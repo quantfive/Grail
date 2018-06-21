@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux';
 // NPM Modules
 import { StyleSheet, css } from 'aphrodite';
 import ReactModal from 'react-modal';
+import Collapsible from 'react-collapsible';
 
 // Actions
 import { ModalActions } from '../../redux/modals';
@@ -29,7 +30,9 @@ class CheckModal extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.grail.differences !== nextProps.grail.differences) {
+      console.log(nextProps)
       this.parseDifference(nextProps.grail.differences)
+
     }
   }
 
@@ -93,23 +96,25 @@ class CheckModal extends React.Component {
         )
       })
       return (
-        <div>
-          <h3>Added</h3>
-          {added.length !== 0
-            ? added
-            : 'No additions found'
-          }
-          <h3>Modified</h3>
-          {modified.length !== 0
-            ? modified
-            : 'No modifications found'
-          }
-          <h3>Removed</h3>
-          {removed.length !== 0
-            ? removed
-            : 'No removals found'
-          }
-        </div>
+        <Collapsible trigger={<div className={css(styles.collapsibleTrigger)}>{`Action Trigger`}</div>}>
+          <div className={css(styles.collapsibleContent)}>
+            <h3>Added</h3>
+            {added.length !== 0
+              ? added
+              : 'No additions found'
+            }
+            <h3>Modified</h3>
+            {modified.length !== 0
+              ? modified
+              : 'No modifications found'
+            }
+            <h3>Removed</h3>
+            {removed.length !== 0
+              ? removed
+              : 'No removals found'
+            }
+          </div>
+        </Collapsible>
       )
     })
     return (
@@ -143,7 +148,6 @@ var styles = StyleSheet.create({
   modal: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'center',
     borderRadius: '4px',
     background: '#fff',
     boxSizing: 'border-box',
@@ -154,9 +158,19 @@ var styles = StyleSheet.create({
     padding: '25px',
     transform: 'translate(-50%, -50%)',
     width: '700px',
+    height: '500px',
+    overflow: 'scroll',
   },
   modified: {
     margin: '5px 0',
+  },
+  collapsibleTrigger: {
+    background: '#ddd',
+    padding: '10px',
+    cursor: 'pointer',
+  },
+  collapsibleContent: {
+    paddingLeft: '10px',
   }
 });
 
