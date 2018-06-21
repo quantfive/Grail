@@ -38,6 +38,7 @@ class SaveControls extends Component {
     this.state = {
       isRecording: false,
       firstClick: true,
+      fecthMade: false,
     }
   }
 
@@ -337,6 +338,9 @@ class SaveControls extends Component {
         request_output: res ? res : null,
       }
 
+      this.setState({
+        festhMade: true,
+      })
       await grailActions.recordEvent(event);
       grailActions.fetchFinished(api);
 
@@ -359,11 +363,17 @@ class SaveControls extends Component {
         }
 
         await grailActions.recordEvent(event)
-        console.log('SET TIMEOUT')
-        this.snapshotTimeout = setTimeout(async () => {
-          this.takeSnapshot();
-          //grailActions.addEventToList();
-        }, 500);
+        if (!this.state.fecthMade) {
+          console.log('SET TIMEOUT')
+          this.snapshotTimeout = setTimeout(async () => {
+            this.takeSnapshot();
+            //grailActions.addEventToList();
+          }, 500);  
+        }
+
+        this.setState({
+          fecthMade: false,
+        })
 
         //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
       } else if (e.type === 'mousemove') {
