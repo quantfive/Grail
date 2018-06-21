@@ -362,7 +362,7 @@ class SaveControls extends Component {
 
         this.snapshotTimeout = setTimeout(async () => {
           this.takeSnapshot();
-          grailActions.addEventToList();
+          //grailActions.addEventToList();
         }, 500);
 
         //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
@@ -390,7 +390,7 @@ class SaveControls extends Component {
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
       let page_state = this.takeSnapshot();
       if (grail.recording) {
-        //grailActions.addEventToList();
+        grailActions.addEventToList();
       } else {
         if (grail.playback.length > 0) {
           grailActions.checkHTML({
