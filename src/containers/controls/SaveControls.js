@@ -305,6 +305,9 @@ class SaveControls extends Component {
     let { grail, grailActions } = this.props;
     fetch = this.fetch
     grailActions.toggleRecord();
+    console.log('GRAIL DEBUGGING')
+    console.log(this.state.isRecording)
+    console.log(grail.recordedSession)
     if (this.state.isRecording && grail.recordedSession.length > 0) {
       grailActions.saveEvent()
     } else if(!this.state.isRecording) {
