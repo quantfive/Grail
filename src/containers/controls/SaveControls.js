@@ -386,11 +386,13 @@ class SaveControls extends Component {
       if (grail.recording) {
         //grailActions.addEventToList();
       } else {
-        grailActions.checkHTML({
-          cur_html: page_state.html,
-          cur_css: page_state.css,
-          page_state_id: grail.playback[0].id
-        });
+        if (grail.playback.length > 0) {
+          grailActions.checkHTML({
+            cur_html: page_state.html,
+            cur_css: page_state.css,
+            page_state_id: grail.playback[0].id
+          });
+        }
       }
     }
 
