@@ -38,7 +38,7 @@ class SaveControls extends Component {
     this.state = {
       isRecording: false,
       firstClick: true,
-      fecthMade: false,
+      fetchMade: false,
     }
   }
 
@@ -322,6 +322,9 @@ class SaveControls extends Component {
   fetch = async (api, data, isGrail=false) => {
     let { grailActions } = this.props;
     clearTimeout(this.snapshotTimeout);
+    this.setState({
+      fetchMade: true,
+    })
     console.log('CLEAR TIMEOUT')
     if (isGrail) {
       return oldFetch(api, data)
@@ -337,10 +340,6 @@ class SaveControls extends Component {
         request_type: data.method,
         request_output: res ? res : null,
       }
-
-      this.setState({
-        festhMade: true,
-      })
       await grailActions.recordEvent(event);
       grailActions.fetchFinished(api);
 
@@ -363,7 +362,7 @@ class SaveControls extends Component {
         }
 
         await grailActions.recordEvent(event)
-        if (!this.state.fecthMade) {
+        if (!this.state.fetchMade) {
           console.log('SET TIMEOUT')
           this.snapshotTimeout = setTimeout(async () => {
             this.takeSnapshot();
@@ -372,7 +371,7 @@ class SaveControls extends Component {
         }
 
         this.setState({
-          fecthMade: false,
+          fetchMade: false,
         })
 
         //console.log(`Click event occured at (x: ${e.clientX} y: ${e.clientY})`)
