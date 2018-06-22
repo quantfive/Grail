@@ -96,7 +96,8 @@ class CheckModal extends React.Component {
         )
       })
       return (
-        <Collapsible trigger={<div className={css(styles.collapsibleTrigger)}>{`Action Trigger`}</div>}>
+        <Collapsible trigger={<div className={css(styles.collapsibleTrigger)}>{`${difference.page.action_name} on ${difference.page.action_params.outerHTML}`}</div>}>
+          <div dangerouslySetInnerHTML={difference.page.action_params.outerHTML} />
           <div className={css(styles.collapsibleContent)}>
             <h3>Added</h3>
             {added.length !== 0
@@ -148,17 +149,17 @@ var styles = StyleSheet.create({
   modal: {
     display: 'flex',
     flexDirection: 'column',
-    borderRadius: '4px',
+    borderRadius: 4,
     background: '#fff',
     boxSizing: 'border-box',
     outline: 'none',
     position: 'absolute',
     left: '50%',
     top: '50%',
-    padding: '25px',
+    padding: 25,
     transform: 'translate(-50%, -50%)',
-    width: '700px',
-    height: '500px',
+    width: 700,
+    height: 500,
     overflow: 'scroll',
   },
   modified: {
@@ -166,11 +167,12 @@ var styles = StyleSheet.create({
   },
   collapsibleTrigger: {
     background: '#ddd',
-    padding: '10px',
+    padding: 10,
     cursor: 'pointer',
+    marginBottom: 16,
   },
   collapsibleContent: {
-    paddingLeft: '10px',
+    paddingLeft: 10,
   }
 });
 
