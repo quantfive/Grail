@@ -95,10 +95,9 @@ class CheckModal extends React.Component {
       return (
         <Collapsible trigger={
           <div className={css(styles.collapsibleTrigger)}>
-            {`${index + 1}. ${difference.page.action_name} on ${difference.page.action_params.clickHTML}`}
+            {`${index + 1}. ${difference.page.action_name} on `} <div dangerouslySetInnerHTML={{__html: difference.page.action_params.clickHTML}} />
           </div>
         }>
-          <div dangerouslySetInnerHTML={{__html: difference.page.action_params.clickHTML}} />
           <div className={css(styles.collapsibleContent)}>
             <h3>Added</h3>
             {added.length !== 0
@@ -174,6 +173,7 @@ var styles = StyleSheet.create({
   },
   collapsibleContent: {
     paddingLeft: 10,
+    marginBottom: 16,
   }
 });
 
