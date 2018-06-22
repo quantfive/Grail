@@ -351,13 +351,17 @@ class SaveControls extends Component {
     let { grailActions } = this.props;
     if (this.state.isRecording && !this.state.firstClick) {
       if (e.type === 'click') {
+        let element = e.path[0]
+        if (element instanceof SVGElement) {
+          element = e.path[1]
+        }
         let event = {
           page_name: window.location.href,
           action_name: 'click',
           action_params: {
-            id: e.srcElement.id !== "" ? e.srcElement.id : null,
-            order: e.srcElement.attributes['grail-order'] ? e.srcElement.attributes['grail-order'].value : null,
-            outerHTML: e.srcElement.outerHTML
+            id: element.id !== "" ? element.id : null,
+            order: element.attributes['grail-order'] ? element.attributes['grail-order'].value : null,
+            outerHTML: element.outerHTML
           },
         }
 
