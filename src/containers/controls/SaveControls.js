@@ -355,10 +355,10 @@ class SaveControls extends Component {
           element = e.path[1]
         }
 
-        let clickElement;
+        let clickElement = element;
         for (let i = 0; i < e.path.length; i++) {
           if (e.path[i].onclick) {
-            element = e.path[i];
+            clickElement = e.path[i];
           }
         }
 
