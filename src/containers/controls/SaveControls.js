@@ -368,7 +368,7 @@ class SaveControls extends Component {
         if (!this.state.fetchMade) {
           this.snapshotTimeout = setTimeout(async () => {
             this.takeSnapshot();
-            //grailActions.addEventToList();
+            grailActions.addEventToList();
           }, 500);
         }
 

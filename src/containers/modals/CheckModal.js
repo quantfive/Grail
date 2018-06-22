@@ -30,17 +30,14 @@ class CheckModal extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.grail.differences !== nextProps.grail.differences) {
-      console.log(nextProps)
       this.parseDifference(nextProps.grail.differences)
-
     }
   }
 
   parseDifference = (differences) => {
     let differenceMessages = []
-    let difference = {added: [], modified: [], removed: []}
     for (let i = 0; i < differences.length; i++) {
-
+      let difference = {added: [], modified: [], removed: []}
       for (let j = 0; j < differences[i].added.length; j++) {
         difference.added.push({html: differences[i].added[j].html})
       }
@@ -55,7 +52,6 @@ class CheckModal extends React.Component {
       }
 
       difference['page'] = differences[i].page
-
       differenceMessages.push(difference)
     }
 
@@ -97,8 +93,12 @@ class CheckModal extends React.Component {
         )
       })
       return (
-        <Collapsible trigger={<div className={css(styles.collapsibleTrigger)}>{`${difference.page.action_name} on ${difference.page.action_params.outerHTML}`}</div>}>
-          <div dangerouslySetInnerHTML={difference.page.action_params.outerHTML} />
+        <Collapsible trigger={
+          <div className={css(styles.collapsibleTrigger)}>
+            {`${index + 1}. ${difference.page.action_name} on ${difference.page.action_params.outerHTML}`}
+          </div>
+        }>
+          <div dangerouslySetInnerHTML={{__html: difference.page.action_params.outerHTML}} />
           <div className={css(styles.collapsibleContent)}>
             <h3>Added</h3>
             {added.length !== 0
