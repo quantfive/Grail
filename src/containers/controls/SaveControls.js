@@ -354,13 +354,22 @@ class SaveControls extends Component {
         if (element instanceof SVGElement) {
           element = e.path[1]
         }
+
+        let clickElement;
+        for (let i = 0; i < e.path.length; i++) {
+          if (e.path[i].onclick) {
+            element = e.path[i];
+          }
+        }
+
         let event = {
           page_name: window.location.href,
           action_name: 'click',
           action_params: {
             id: element.id !== "" ? element.id : null,
             order: element.attributes['grail-order'] ? element.attributes['grail-order'].value : null,
-            outerHTML: element.outerHTML
+            outerHTML: element.outerHTML,
+            clickHTML: clickElement.outerHTML,
           },
         }
 
