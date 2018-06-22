@@ -231,7 +231,7 @@ class SaveControls extends Component {
 
   getPlayBack = async () => {
     let { grail, grailActions } = this.props;
-    fetch = this.fetch
+    window.fetch = this.fetch
     window.scrollTo(0,0);
 
     let api = API;
@@ -304,11 +304,8 @@ class SaveControls extends Component {
 
   recordToggle = () => {
     let { grail, grailActions } = this.props;
-    fetch = this.fetch
+    window.fetch = this.fetch
     grailActions.toggleRecord();
-    console.log('GRAIL DEBUGGING')
-    console.log(this.state.isRecording)
-    console.log(grail.recordedSession)
     if (this.state.isRecording && grail.recordedSession.length > 0) {
       grailActions.saveEvent()
     } else if(!this.state.isRecording) {
@@ -325,7 +322,6 @@ class SaveControls extends Component {
     this.setState({
       fetchMade: true,
     })
-    console.log('CLEAR TIMEOUT')
     if (isGrail) {
       return oldFetch(api, data)
     } else {
@@ -341,7 +337,10 @@ class SaveControls extends Component {
         request_output: res ? res : null,
       }
       await grailActions.recordEvent(event);
-      grailActions.fetchFinished(api);
+
+      setTimeout(() => {
+        grailActions.fetchFinished(api);
+      }, 500)
 
       return response;
     }
@@ -367,11 +366,10 @@ class SaveControls extends Component {
 
         await grailActions.recordEvent(event)
         if (!this.state.fetchMade) {
-          console.log('SET TIMEOUT')
           this.snapshotTimeout = setTimeout(async () => {
             this.takeSnapshot();
             //grailActions.addEventToList();
-          }, 500);  
+          }, 500);
         }
 
         this.setState({
@@ -391,6 +389,13 @@ class SaveControls extends Component {
         firstClick: true,
       })
     }
+  }
+
+  fetchListener = (event) => {
+    console.log('fetch');
+    event.respondWith(
+      new Response("Response body", { headers: { "Content-Type" : "text/plain" }})
+    )
   }
 
   componentDidMount() {
