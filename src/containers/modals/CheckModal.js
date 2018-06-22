@@ -40,6 +40,7 @@ class CheckModal extends React.Component {
     let differenceMessages = []
     let difference = {added: [], modified: [], removed: []}
     for (let i = 0; i < differences.length; i++) {
+
       for (let j = 0; j < differences[i].added.length; j++) {
         difference.added.push({html: differences[i].added[j].html})
       }
@@ -53,9 +54,9 @@ class CheckModal extends React.Component {
         difference.modified.push(changes)
       }
 
+      difference['page'] = differences[i].page
+
       differenceMessages.push(difference)
-      // for (let i = 0; i < differences.removed.length; i++) {
-      // }
     }
 
     this.setState({
