@@ -28,6 +28,8 @@ import Helpers from '../config/helpers';
   GET_AVAILABLE_STATES: '@@grail/GET_AVAILABLE_STATES',
   SAVE_STATE: '@@grail/SAVE_STATE',
   ADD_CLICKED: '@@grail/ADD_CLICKED',
+  GET_HREF: '@@grail/GET_HREF',
+  SET_HREF: '@@grail/SET_HREF',
 }
 
 export const GrailActions = {
@@ -229,6 +231,25 @@ export const GrailActions = {
       })
     }
   },
+
+  getHref: () => {
+    return (dispatch, getState) => {
+      let currentHref = getState().grail.currentHref;
+      return dispatch({
+        type: GrailConstants.GET_HREF,
+        currentHref: currentHref,
+      });
+    }
+  },
+
+  setHref: (href) => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.SET_HREF,
+        currentHref: href,
+      });
+    }
+  },
 }
 
 let getAvailableStates = function() {
@@ -252,6 +273,7 @@ const defaultState = {
   availableStates: getAvailableStates(),
   clickedStates: [],
   currentState: null,
+  currentHref: null,
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -269,8 +291,14 @@ const GrailReducer = (state = defaultState, action) => {
     case GrailConstants.FETCH_EVENT:
     case GrailConstants.RESET_EVENT:
     case GrailConstants.START_PLAYBACK:
+    case GrailConstants.GET_HREF:
+    case GrailConstants.SET_HREF:
+      return {
+        ...state,
+        ...action,
+        currentHref: action.currentHref,
+      }
     case GrailConstants.ADD_CLICKED:
-      // debugger;
       return {
         ...state,
         ...action,
