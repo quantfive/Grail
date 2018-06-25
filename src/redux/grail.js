@@ -98,7 +98,6 @@ export const GrailActions = {
       .then(Helpers.checkStatus)
       .then(Helpers.parseJSON)
       .then(json => {
-        console.log(json);
         return dispatch({
           type: GrailConstants.RESET_CHECKSTATES,
           checkStates: [],
@@ -198,14 +197,17 @@ export const GrailActions = {
   getAvailableStates: () => {
     return (dispatch, getState) => {
       let state = null;
+      let currentStates = [...getState().grail.availableStates];
       try {
-        state = getState().grail.availableStates.pop();
+        state = currentStates.pop();
       } catch (error) {
         console.log('No more states');
       }
+
       return dispatch({
         type: GrailConstants.GET_AVAILABLE_STATES,
-        availableStates: state,
+        availableStates: currentStates,
+        currentState: state
       });
     }
   },
@@ -249,12 +251,19 @@ const defaultState = {
   checkStates: [],
   availableStates: getAvailableStates(),
   clickedStates: [],
+  currentState: null,
 }
 
 const GrailReducer = (state = defaultState, action) => {
   let activeFetchCalls = []
   let firstState = null;
   switch(action.type) {
+    case GrailConstants.GET_AVAILABLE_STATES:
+    case GrailConstants.RESET_CHECKSTATES:
+      return {
+        ...state,
+        ...action,
+      }
     case GrailConstants.CHECK_PAGE:
     case GrailConstants.SAVE_EVENT:
     case GrailConstants.FETCH_EVENT:
@@ -267,22 +276,11 @@ const GrailReducer = (state = defaultState, action) => {
         ...action,
         clickedStates: [...state.clickedStates, ...action.clickedStates],
       }
-    case GrailConstants.GET_AVAILABLE_STATES:
-      return {
-        ...state,
-        ...action,
-        availableStates: [...state.availableStates]
-      }
     case GrailConstants.SAVE_STATE:
       return {
         ...state,
         ...action,
         availableStates: [...state.availableStates, action.availableStates],
-      }
-    case GrailConstants.RESET_CHECKSTATES:
-      return {
-        ...state,
-        ...action
       }
     case GrailConstants.TOGGLE_RECORD:
       return {

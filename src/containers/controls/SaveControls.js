@@ -244,61 +244,44 @@ class SaveControls extends Component {
 
     for (let i = 0; i < children.length; i++) {
       let child = children[i];
-      console.log(child);
       grailActions.saveState(child);
     }
+
+    let timeout = setTimeout(() => { 
+      this.clickAll2();
+    }, 200);
   }
 
   sleep = (ms) => {
     return new Promise(resolve => {setTimeout(resolve, ms)});
   }
 
-  clickAll2 = async () => {
+  afterClick = (state, currentHref) => {
+    let { grailActions } = this.props;
+    let newHref = window.location.href;
+    grailActions.addClicked(state);
+    this.checkNewPage(currentHref, newHref);
+    this.addChildrenStates(state);
+  }
+
+  clickAll2 = () => {
     let { grailActions } = this.props;
     // let page = grailActions.getAvailableStates().availableStates;
     let state = null;
-    while (state = grailActions.getAvailableStates().availableStates) {
-      if (state.onclick && state.id !== 'wrapper') {
-        try {
-          debugger;
-          let currentHref = window.location.href;
-          console.log(currentHref);
-          state.click();
-          let newHref = window.location.href;
-          console.log(newHref);
-
-          grailActions.addClicked(state);
-          this.checkNewPage(currentHref, newHref);
-
-          this.addChildrenStates(state);
-        } catch(error) {
-          console.log(error);
-          console.log("element does not exist");
-        }
-      } else {
-        console.log("element has no click function");
-        console.log(state);
-        if (state.id !== 'wrapper') {
-          this.addChildrenStates(state);
-        }
+    state = grailActions.getAvailableStates().currentState;
+    if (state.onclick && state.id !== 'wrapper') {
+      let currentHref = window.location.href;
+      try {
+        state.click();
+        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200); 
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      if (state.id !== 'wrapper') {
+        this.addChildrenStates(state);
       }
     }
-
-    // let children = page.children;
-    // for (let i = 0; i < children.length; i++) {
-    //   let child = children[i];
-    //   if (child.id !== 'wrapper') {
-    //     try {
-    //       child.click();
-    //       this.clickAll(child, true);
-    //     } catch(error) {
-    //       console.log(error);
-    //       console.log("element can't be clicked");
-    //     }
-    //   } else {
-    //     console.log(child);
-    //   }
-    // }
   }
 
   checkNewPage = (currHref, newHref) => {
