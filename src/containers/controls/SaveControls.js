@@ -269,7 +269,7 @@ class SaveControls extends Component {
     // let page = grailActions.getAvailableStates().availableStates;
     let state = null;
     state = grailActions.getAvailableStates().currentState;
-    if (state.onclick && state.id !== 'wrapper') {
+    if (state && state.onclick && state.id !== 'wrapper') {
       let currentHref = window.location.href;
       try {
         state.click();
@@ -278,7 +278,7 @@ class SaveControls extends Component {
         console.log(e);
       }
     } else {
-      if (state.id !== 'wrapper') {
+      if (state && state.id !== 'wrapper') {
         this.addChildrenStates(state);
       }
     }
