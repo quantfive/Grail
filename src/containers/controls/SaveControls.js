@@ -215,6 +215,108 @@ class SaveControls extends Component {
     });
   }
 
+  clickAll = (page, recursive=false) => {
+    // Might have issues with elements that redirect to a new page
+    // TODO: Implement some sort of history to go back to previous page and continue clicking from there
+    // a, b->c->d, e->f, g
+    let children = page.children;
+    for (let i = 0; i < children.length; i++) {
+      let child = children[i];
+      if (child.id !== 'wrapper') {
+        try {
+          child.click();
+          if (recursive) {
+            this.clickAll(child, true);
+          }
+        } catch(error) {
+          console.log(error);
+          console.log("element can't be clicked");
+        }
+      } else {
+        console.log(child);
+      }
+    }
+  }
+
+  addChildrenStates = (state) => {
+    let { grailActions } = this.props;
+    let children = state.children;
+
+    for (let i = 0; i < children.length; i++) {
+      let child = children[i];
+      console.log(child);
+      grailActions.saveState(child);
+    }
+  }
+
+  sleep = (ms) => {
+    return new Promise(resolve => {setTimeout(resolve, ms)});
+  }
+
+  clickAll2 = async () => {
+    let { grailActions } = this.props;
+    // let page = grailActions.getAvailableStates().availableStates;
+    let state = null;
+    while (state = grailActions.getAvailableStates().availableStates) {
+      if (state.onclick && state.id !== 'wrapper') {
+        try {
+          debugger;
+          let currentHref = window.location.href;
+          console.log(currentHref);
+          state.click();
+          let newHref = window.location.href;
+          console.log(newHref);
+
+          grailActions.addClicked(state);
+          this.checkNewPage(currentHref, newHref);
+
+          this.addChildrenStates(state);
+        } catch(error) {
+          console.log(error);
+          console.log("element does not exist");
+        }
+      } else {
+        console.log("element has no click function");
+        console.log(state);
+        if (state.id !== 'wrapper') {
+          this.addChildrenStates(state);
+        }
+      }
+    }
+
+    // let children = page.children;
+    // for (let i = 0; i < children.length; i++) {
+    //   let child = children[i];
+    //   if (child.id !== 'wrapper') {
+    //     try {
+    //       child.click();
+    //       this.clickAll(child, true);
+    //     } catch(error) {
+    //       console.log(error);
+    //       console.log("element can't be clicked");
+    //     }
+    //   } else {
+    //     console.log(child);
+    //   }
+    // }
+  }
+
+  checkNewPage = (currHref, newHref) => {
+    if (currHref !== newHref) {
+      // Do something else
+      console.log('going back');
+      window.history.back();
+    }
+  }
+
+  // newPage = () => {
+  //   console.log("going back");
+  //   let { grailActions } = this.props;
+  //   grailActions.saveState(this.getDocument());
+  //   // Go back logic here
+  //   window.history.back();
+  // }
+
   takeSnapshot = () => {
     let { grailActions, grail } = this.props;
     window.scrollTo(0,0);
@@ -410,6 +512,19 @@ class SaveControls extends Component {
   componentDidMount() {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
+    
+    // let currentPage = window.location.href;
+    // let newPage = this.newPage
+
+    // setInterval(function() {
+    //   let checkPage = window.location.href;
+    //   if (currentPage != checkPage) {
+    //     // currentPage = checkPage;
+    //     // debugger;
+    //     newPage();
+    //   }
+    // }, 100);
+
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -446,6 +561,7 @@ class SaveControls extends Component {
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={() => this.clickAll2(this.getDocument(), true)}>click all</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}>complete</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
           {this.state.isRecording

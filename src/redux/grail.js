@@ -25,6 +25,9 @@ import Helpers from '../config/helpers';
   TOGGLE_RECORD: '@@grail/TOGGLE_RECORD',
   ADD_TO_CHECK_LIST: '@@grail/ADD_TO_CHECK_LIST',
   RESET_CHECKSTATES: '@@grail/RESET_CHECKSTATES',
+  GET_AVAILABLE_STATES: '@@grail/GET_AVAILABLE_STATES',
+  SAVE_STATE: '@@grail/SAVE_STATE',
+  ADD_CLICKED: '@@grail/ADD_CLICKED',
 }
 
 export const GrailActions = {
@@ -191,6 +194,43 @@ export const GrailActions = {
       });
     }
   },
+
+  getAvailableStates: () => {
+    return (dispatch, getState) => {
+      let state = null;
+      try {
+        state = getState().grail.availableStates.pop();
+      } catch (error) {
+        console.log('No more states');
+      }
+      return dispatch({
+        type: GrailConstants.GET_AVAILABLE_STATES,
+        availableStates: state,
+      });
+    }
+  },
+
+  saveState: (state) => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.SAVE_STATE,
+        availableStates: state,
+      });
+    }
+  },
+
+  addClicked: (state) => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.ADD_CLICKED,
+        clickedStates: state,
+      })
+    }
+  },
+}
+
+let getAvailableStates = function() {
+  return [window.document];
 }
 
 /**********************************
@@ -207,16 +247,38 @@ const defaultState = {
   },
   playback: [],
   checkStates: [],
+  availableStates: getAvailableStates(),
+  clickedStates: [],
 }
 
 const GrailReducer = (state = defaultState, action) => {
   let activeFetchCalls = []
+  let firstState = null;
   switch(action.type) {
     case GrailConstants.CHECK_PAGE:
     case GrailConstants.SAVE_EVENT:
     case GrailConstants.FETCH_EVENT:
     case GrailConstants.RESET_EVENT:
     case GrailConstants.START_PLAYBACK:
+    case GrailConstants.ADD_CLICKED:
+      // debugger;
+      return {
+        ...state,
+        ...action,
+        clickedStates: [...state.clickedStates, ...action.clickedStates],
+      }
+    case GrailConstants.GET_AVAILABLE_STATES:
+      return {
+        ...state,
+        ...action,
+        availableStates: [...state.availableStates]
+      }
+    case GrailConstants.SAVE_STATE:
+      return {
+        ...state,
+        ...action,
+        availableStates: [...state.availableStates, action.availableStates],
+      }
     case GrailConstants.RESET_CHECKSTATES:
       return {
         ...state,

@@ -1,4 +1,8 @@
 import React, {Component} from 'react'
+import { BrowserRouter as Router,
+  Route,
+  Link 
+} from 'react-router-dom'
 import {render} from 'react-dom'
 
 import GrailTest from '../../src'
@@ -37,8 +41,30 @@ class Demo extends Component {
     })
   }
 
+  newPage = () => (
+    <div>
+      <h2>page</h2>
+    </div>
+  )
+
+  newPage2 = () => (
+    <div>
+      <h2>page2</h2>
+      <li><Link to="/newpage3">New Page 3 </Link></li>
+
+      <Route exact path="/newpage3" component={this.newPage3}/>
+    </div>
+  )
+
+  newPage3 = () => (
+    <div>
+      <h2>Something happened</h2>
+    </div>
+  )
+
   render() {
-    return <div id='main'>
+    return <Router>
+    <div id='main'>
         <div id='top'>
             <div onClick={() => this.onClick('CLICK')}>
               <p id='a' onClick={() => this.setState({show: false})}> Grail </p>
@@ -57,7 +83,16 @@ class Demo extends Component {
             : null
           }
         </div>
+        <div id='new_page'>
+          <li><Link to="/newpage">New Page</Link></li>
+          <li><Link to="/newpage2">New Page 2 </Link></li>
+        </div>
+
+        <Route exact path="/newpage" component={this.newPage}/>
+        <Route exact path="/newpage2" component={this.newPage2}/>
+        <Route exact path="/newpage3" component={this.newPage3}/>
     </div>
+    </Router>
   }
 }
 
