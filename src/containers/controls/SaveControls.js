@@ -256,8 +256,8 @@ class SaveControls extends Component {
     return new Promise(resolve => {setTimeout(resolve, ms)});
   }
 
-  afterClick = (state, currentHref) => {
-    if (!this.state.fetchMade) {
+  afterClick = (state, currentHref, fetchDone) => {
+    if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
       grailActions.addClicked(state);
@@ -268,11 +268,12 @@ class SaveControls extends Component {
 
   clickAll2 = () => {
     let { grailActions } = this.props;
-    // let page = grailActions.getAvailableStates().availableStates;
+    window.fetch = this.fetch
     let state = null;
     state = grailActions.getAvailableStates().currentState;
     if (state && state.onclick && state.id !== 'wrapper') {
       let currentHref = window.location.href;
+      grailActions.setHref(currentHref);
       try {
         state.click();
         let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 500);
@@ -416,6 +417,9 @@ class SaveControls extends Component {
         request_output: res ? res : null,
       }
       await grailActions.recordEvent(event);
+      this.setState({
+        fetchMade: false,
+      })
 
       // Why is there a timeout on this fetch finished?
       setTimeout(() => {
@@ -521,7 +525,7 @@ class SaveControls extends Component {
         }
 
         if (grail.currentState) {
-          this.afterClick(grail.currentState, grail.currentHref);
+          this.afterClick(grail.currentState, grail.currentHref, true);
         }
       }
     }
