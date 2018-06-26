@@ -252,17 +252,26 @@ class SaveControls extends Component {
     }, 200);
   }
 
-  sleep = (ms) => {
-    return new Promise(resolve => {setTimeout(resolve, ms)});
-  }
-
   afterClick = (state, currentHref, fetchDone) => {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
       grailActions.addClicked(state);
-      this.checkNewPage(currentHref, newHref);
+      this.addVisited(newHref, state);
+      this.checkNewPage(currentHref, newHref, state);
       this.addChildrenStates(state);
+    }
+  }
+
+  addVisited = (href, state) => {
+    let { grailActions } = this.props;
+    let visitedStates = grailActions.getVisited().visitedStates;  
+
+    if (href in visitedStates) {
+      visitedStates[href].push(state);
+      grailActions.addVisited(href, visitedStates[href]);
+    } else {
+      grailActions.addVisited(href, [state]);
     }
   }
 
@@ -287,11 +296,14 @@ class SaveControls extends Component {
     }
   }
 
-  checkNewPage = (currHref, newHref) => {
+  checkNewPage = (currHref, newHref, state) => {
+    let { grailActions } = this.props;
     if (currHref !== newHref) {
-      // Do something else
       console.log('going back');
-      window.history.back();
+      // debugger;
+      grailActions.addNewPage(state);
+
+      window.history.back()
     }
   }
 

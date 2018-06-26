@@ -30,6 +30,9 @@ import Helpers from '../config/helpers';
   ADD_CLICKED: '@@grail/ADD_CLICKED',
   GET_HREF: '@@grail/GET_HREF',
   SET_HREF: '@@grail/SET_HREF',
+  GET_VISITED: '@@grail/GET_VISITED',
+  ADD_VISITED: '@@grail/ADD_VISITED',
+  ADD_NEW_PAGE: '@@grail/ADD_NEW_PAGE',
 }
 
 export const GrailActions = {
@@ -250,6 +253,35 @@ export const GrailActions = {
       });
     }
   },
+
+  addVisited: (key, value) => {
+    return dispatch => {
+      let dict = {};
+      dict[key] = value;
+      return dispatch({
+        type: GrailConstants.ADD_VISITED,
+        visitedStates: dict,
+      });
+    }
+  },
+
+  getVisited: () => {
+    return (dispatch, getState) => {
+      return dispatch({
+        type: GrailConstants.GET_VISITED,
+        visitedStates: getState().grail.visitedStates,
+      })
+    }
+  },
+
+  addNewPage: (state) => {
+    return dispatch => {
+      return dispatch({
+        type: GrailConstants.ADD_NEW_PAGE,
+        newPageStates: state,
+      });
+    }
+  }
 }
 
 let getAvailableStates = function() {
@@ -274,6 +306,8 @@ const defaultState = {
   clickedStates: [],
   currentState: null,
   currentHref: null,
+  visitedStates: {},
+  newPageStates: [],
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -291,6 +325,19 @@ const GrailReducer = (state = defaultState, action) => {
     case GrailConstants.FETCH_EVENT:
     case GrailConstants.RESET_EVENT:
     case GrailConstants.START_PLAYBACK:
+    case GrailConstants.ADD_NEW_PAGE:
+      return {
+        ...state,
+        ...action,
+        newPageStates: [...state.newPageStates, ...action.newPageStates],
+      }
+    case GrailConstants.GET_VISITED:
+    case GrailConstants.ADD_VISITED:
+      return {
+        ...state,
+        ...action,
+        visitedStates: {...state.visitedStates, ...action.visitedStates},
+      }
     case GrailConstants.GET_HREF:
     case GrailConstants.SET_HREF:
       return {
