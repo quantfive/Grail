@@ -28,11 +28,15 @@ import Helpers from '../config/helpers';
   GET_AVAILABLE_STATES: '@@grail/GET_AVAILABLE_STATES',
   SAVE_STATE: '@@grail/SAVE_STATE',
   ADD_CLICKED: '@@grail/ADD_CLICKED',
+  GET_CLICKED: '@@grail/GET_CLICKED',
   GET_HREF: '@@grail/GET_HREF',
   SET_HREF: '@@grail/SET_HREF',
   GET_VISITED: '@@grail/GET_VISITED',
   ADD_VISITED: '@@grail/ADD_VISITED',
   ADD_NEW_PAGE: '@@grail/ADD_NEW_PAGE',
+  GET_NEW_PAGE: '@@grail/GET_NEW_PAGE',
+  IS_NEW_STATE: '@@grail/IS_NEW_STATE',
+  TOGGLE_NEW_STATE: '@@grail/TOGGLE_NEW_STATE', 
 }
 
 export const GrailActions = {
@@ -206,6 +210,7 @@ export const GrailActions = {
       try {
         state = currentStates.pop();
       } catch (error) {
+        state = null;
         console.log('No more states');
       }
 
@@ -232,6 +237,15 @@ export const GrailActions = {
         type: GrailConstants.ADD_CLICKED,
         clickedStates: state,
       })
+    }
+  },
+
+  getClicked: () => {
+    return (dispatch, getState) => {
+      return dispatch({
+        type: GrailConstants.GET_CLICKED,
+        clickedStates: getState().grail.clickedStates,
+      });
     }
   },
 
@@ -281,7 +295,44 @@ export const GrailActions = {
         newPageStates: state,
       });
     }
-  }
+  },
+
+  getNewPage: () => {
+    return (dispatch, getState) => {
+      let state = null;
+      let currentStates = [...getState().grail.newPageStates];
+      try {
+        state = currentStates.pop();
+      } catch(error) {
+        console.log('No more new pages');
+        state = null;
+      }
+      return dispatch({
+        type: GrailConstants.GET_NEW_PAGE,
+        newPageStates: currentStates,
+        newPage: state,
+      });
+    }
+  },
+
+  isNewState: () => {
+    return (dispatch, getState) => {
+      return dispatch({
+        type: GrailConstants.IS_NEW_STATE,
+        newPageState: getState().grail.newPageState,
+      });
+    }
+  },
+
+  toggleNewState: () => {
+    return (dispatch, getState) => {
+      let isNew = getState().grail.newPageState;
+      return dispatch({
+        type: GrailConstants.TOGGLE_NEW_STATE,
+        newPageState: !isNew,
+      });
+    }
+  },
 }
 
 let getAvailableStates = function() {
@@ -308,6 +359,7 @@ const defaultState = {
   currentHref: null,
   visitedStates: {},
   newPageStates: [],
+  newPageState: false,
 }
 
 const GrailReducer = (state = defaultState, action) => {
@@ -325,6 +377,23 @@ const GrailReducer = (state = defaultState, action) => {
     case GrailConstants.FETCH_EVENT:
     case GrailConstants.RESET_EVENT:
     case GrailConstants.START_PLAYBACK:
+    case GrailConstants.IS_NEW_STATE:
+      return {
+        ...state,
+        ...action,
+      }
+    case GrailConstants.TOGGLE_NEW_STATE:
+      return {
+        ...state,
+        ...action,
+        newPageState: action.newPageState,
+      }
+    case GrailConstants.GET_NEW_PAGE:
+      return {
+        ...state,
+        ...action,
+        newPageStates: [...action.newPageStates],
+      }
     case GrailConstants.ADD_NEW_PAGE:
       return {
         ...state,
@@ -344,6 +413,11 @@ const GrailReducer = (state = defaultState, action) => {
         ...state,
         ...action,
         currentHref: action.currentHref,
+      }
+    case GrailConstants.GET_CLICKED:
+      return {
+        ...state,
+        ...action,
       }
     case GrailConstants.ADD_CLICKED:
       return {

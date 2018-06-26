@@ -275,16 +275,43 @@ class SaveControls extends Component {
     }
   }
 
+  getNextState = () => {
+    let { grailActions } = this.props;
+    let clickedStates = grailActions.getClicked().clickedStates;
+    let state = null;
+
+    state = grailActions.getAvailableStates().currentState;
+    console.log(state);
+    
+    if (state === null || state === undefined) {
+      state = grailActions.getNewPage().newPage;
+      grailActions.toggleNewState();
+    } 
+
+    while (clickedStates.includes(state) && !grailActions.isNewState().newPageState) {
+      console.log('Trying to go to new state');
+      state = grailActions.getNewPage().newPage;
+    }
+
+    return state;
+  }
+
   clickAll2 = () => {
     let { grailActions } = this.props;
     window.fetch = this.fetch
-    let state = null;
-    state = grailActions.getAvailableStates().currentState;
+    // let state = null;
+    // state = grailActions.getAvailableStates().currentState;
+    let state = this.getNextState();
+
     if (state && state.onclick && state.id !== 'wrapper') {
       let currentHref = window.location.href;
       grailActions.setHref(currentHref);
       try {
-        state.click();
+        // if (grailActions.isNewState().newPageState) {
+        //   window.location.href = state.href;
+        // } else {
+          state.click();
+        // }
         let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 500);
       } catch (e) {
         console.log(e);
@@ -298,12 +325,19 @@ class SaveControls extends Component {
 
   checkNewPage = (currHref, newHref, state) => {
     let { grailActions } = this.props;
+    let newState = grailActions.isNewState().newPageState;
+    // debugger;
     if (currHref !== newHref) {
       console.log('going back');
       // debugger;
       grailActions.addNewPage(state);
 
-      window.history.back()
+      if (!newState) {
+        window.history.back();
+      } else {
+        console.log('new page state');
+        grailActions.toggleNewState();
+      }
     }
   }
 
