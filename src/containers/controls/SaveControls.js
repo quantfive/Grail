@@ -257,11 +257,13 @@ class SaveControls extends Component {
   }
 
   afterClick = (state, currentHref) => {
-    let { grailActions } = this.props;
-    let newHref = window.location.href;
-    grailActions.addClicked(state);
-    this.checkNewPage(currentHref, newHref);
-    this.addChildrenStates(state);
+    if (!this.state.fetchMade) {
+      let { grailActions } = this.props;
+      let newHref = window.location.href;
+      grailActions.addClicked(state);
+      this.checkNewPage(currentHref, newHref);
+      this.addChildrenStates(state);
+    }
   }
 
   clickAll2 = () => {
@@ -273,7 +275,7 @@ class SaveControls extends Component {
       let currentHref = window.location.href;
       try {
         state.click();
-        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200); 
+        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 500);
       } catch (e) {
         console.log(e);
       }
@@ -291,14 +293,6 @@ class SaveControls extends Component {
       window.history.back();
     }
   }
-
-  // newPage = () => {
-  //   console.log("going back");
-  //   let { grailActions } = this.props;
-  //   grailActions.saveState(this.getDocument());
-  //   // Go back logic here
-  //   window.history.back();
-  // }
 
   takeSnapshot = () => {
     let { grailActions, grail } = this.props;
@@ -423,6 +417,7 @@ class SaveControls extends Component {
       }
       await grailActions.recordEvent(event);
 
+      // Why is there a timeout on this fetch finished?
       setTimeout(() => {
         grailActions.fetchFinished(api);
       }, 500)
@@ -523,6 +518,10 @@ class SaveControls extends Component {
             cur_css: page_state.css,
             page_state_id: grail.playback[0].id
           });
+        }
+
+        if (grail.currentState) {
+          this.afterClick(grail.currentState, grail.currentHref);
         }
       }
     }
