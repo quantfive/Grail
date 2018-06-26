@@ -8,7 +8,7 @@ class App extends Component {
   render() {
     return (
       <div className="App" id ="grail-app" style={{background: 'transparent'}}>
-        <SaveControls id='controls'/>
+        <SaveControls id='controls' history={history} />
       </div>
     );
   }

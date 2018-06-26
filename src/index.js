@@ -44,13 +44,13 @@ class GrailTest {
     }
   }
 
-  run = () => {
+  run = (history) => {
     let test = new GrailTest();
     //setTimeout(test.runTests, LOAD_TIME);
-    setTimeout(test.injectControls.bind(test), LOAD_TIME);
+    setTimeout(test.injectControls.bind(test, history), LOAD_TIME);
   }
 
-  injectControls () {
+  injectControls (history=null) {
     var document = this.getDocument();
 
     // For webpack hot reloads
@@ -69,7 +69,7 @@ class GrailTest {
     document.body.insertBefore(wrapper, document.body.firstChild);
     ReactDOM.render(
       <Provider store={store}>
-        <App id='app'/>
+        <App id='app' history={history}/>
       </Provider>, 
       document.getElementsByClassName('grail-test-wrapper')[0]
     );
