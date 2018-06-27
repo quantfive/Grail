@@ -35,6 +35,7 @@ import Helpers from '../config/helpers';
   ADD_VISITED: '@@grail/ADD_VISITED',
   ADD_NEW_PAGE: '@@grail/ADD_NEW_PAGE',
   GET_NEW_PAGE: '@@grail/GET_NEW_PAGE',
+  GET_NEW_PAGES: '@@grail/GET_NEW_PAGES',
   IS_NEW_STATE: '@@grail/IS_NEW_STATE',
   TOGGLE_NEW_STATE: '@@grail/TOGGLE_NEW_STATE', 
 }
@@ -315,6 +316,15 @@ export const GrailActions = {
     }
   },
 
+  getNewPages: () => {
+    return (dispatch, getState) => {
+      return dispatch({
+        type: GrailConstants.GET_NEW_PAGES,
+        newPageStates: getState().grail.newPageStates,  
+      });
+    }
+  },
+
   isNewState: () => {
     return (dispatch, getState) => {
       return dispatch({
@@ -324,12 +334,12 @@ export const GrailActions = {
     }
   },
 
-  toggleNewState: () => {
+  toggleNewState: (bool) => {
     return (dispatch, getState) => {
       let isNew = getState().grail.newPageState;
       return dispatch({
         type: GrailConstants.TOGGLE_NEW_STATE,
-        newPageState: !isNew,
+        newPageState: bool,
       });
     }
   },
@@ -393,6 +403,12 @@ const GrailReducer = (state = defaultState, action) => {
         ...state,
         ...action,
         newPageStates: [...action.newPageStates],
+      }
+    case GrailConstants.GET_NEW_PAGES:
+      return {
+        ...state,
+        ...action,
+        newPageStates: [...state.newPageStates],
       }
     case GrailConstants.ADD_NEW_PAGE:
       return {

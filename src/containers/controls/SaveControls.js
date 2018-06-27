@@ -242,6 +242,10 @@ class SaveControls extends Component {
     let { grailActions } = this.props;
     let children = state.children;
 
+    if (grailActions.isNewState().newPageState) {
+      children = this.getDocumentHtml().children;
+    }
+
     for (let i = 0; i < children.length; i++) {
       let child = children[i];
       grailActions.saveState(child);
@@ -258,8 +262,8 @@ class SaveControls extends Component {
       let newHref = window.location.href;
       grailActions.addClicked(state);
       this.addVisited(newHref, state);
-      this.checkNewPage(currentHref, newHref, state);
       this.addChildrenStates(state);
+      this.checkNewPage(currentHref, newHref, state);
     }
   }
 
@@ -282,16 +286,34 @@ class SaveControls extends Component {
 
     state = grailActions.getAvailableStates().currentState;
     console.log(state);
-    
-    if (state === null || state === undefined) {
+
+    // debugger;
+    if (clickedStates.includes(state) && !grailActions.getNewPages().newPageStates.includes(state)) {
+      return this.getNextState();
+    }
+    while (state && state.id === 'wrapper') {
+      state = grailActions.getAvailableStates().currentState;
+    }
+
+    while ((state === null || state === undefined) && grailActions.getNewPages().newPageStates.length) {
       state = grailActions.getNewPage().newPage;
-      grailActions.toggleNewState();
+      if (state) {
+        grailActions.toggleNewState(true);
+      }
     } 
 
-    while (clickedStates.includes(state) && !grailActions.isNewState().newPageState) {
-      console.log('Trying to go to new state');
-      state = grailActions.getNewPage().newPage;
-    }
+
+    // if (clickedStates.includes(state) && !grailActions.isNewState().newPageState) {
+    //   return this.getNextState();
+    // }
+
+    // while (clickedStates.includes(state) && !grailActions.isNewState().newPageState) {
+    //   console.log('Trying to go to new state');
+    //   state = grailActions.getNewPage().newPage;
+    //   if (state !== null || state !== undefined) {
+    //     grailActions.toggleNewState();
+    //   }
+    // }
 
     return state;
   }
@@ -301,23 +323,21 @@ class SaveControls extends Component {
     window.fetch = this.fetch
     // let state = null;
     // state = grailActions.getAvailableStates().currentState;
+    // debugger;
     let state = this.getNextState();
 
-    if (state && state.onclick && state.id !== 'wrapper') {
+    if (state && state.onclick) {
       let currentHref = window.location.href;
       grailActions.setHref(currentHref);
       try {
-        // if (grailActions.isNewState().newPageState) {
-        //   window.location.href = state.href;
-        // } else {
-          state.click();
-        // }
-        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 500);
+        state.click();
+        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200);
       } catch (e) {
         console.log(e);
+        alert(e);
       }
     } else {
-      if (state && state.id !== 'wrapper') {
+      if (state) {
         this.addChildrenStates(state);
       }
     }
@@ -326,17 +346,17 @@ class SaveControls extends Component {
   checkNewPage = (currHref, newHref, state) => {
     let { grailActions } = this.props;
     let newState = grailActions.isNewState().newPageState;
-    // debugger;
+
     if (currHref !== newHref) {
       console.log('going back');
-      // debugger;
-      grailActions.addNewPage(state);
 
+      // debugger;
       if (!newState) {
+        grailActions.addNewPage(state);
         window.history.back();
       } else {
         console.log('new page state');
-        grailActions.toggleNewState();
+        grailActions.toggleNewState(false);
       }
     }
   }
