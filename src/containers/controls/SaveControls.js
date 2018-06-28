@@ -260,7 +260,7 @@ class SaveControls extends Component {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
-      grailActions.addClicked(state);
+      // grailActions.addClicked(state);
       this.addVisited(newHref, state);
       this.addChildrenStates(state);
       this.checkNewPage(currentHref, newHref, state);
@@ -268,15 +268,37 @@ class SaveControls extends Component {
   }
 
   addVisited = (href, state) => {
-    let { grailActions } = this.props;
-    let visitedStates = grailActions.getVisited().visitedStates;  
-
-    if (href in visitedStates) {
-      visitedStates[href].push(state);
-      grailActions.addVisited(href, visitedStates[href]);
+    let visited = sessionStorage.getItem('visited');
+    if (!visited) {
+      sessionStorage.setItem('visited', [href]);
     } else {
-      grailActions.addVisited(href, [state]);
+      let visitedPages = visited.split(',');
+      visitedPages.push(href);
+      sessionStorage.setItem('visited', visitedPages);
     }
+  }
+
+  getNewPage = () => {
+    let newPages = sessionStorage.getItem('newPages');
+    if (!newPages) {
+      return null;
+    } else {
+      let pages = newPages.split(',');
+      let newPage = pages.pop();
+      sessionStorage.setItem('newPages', pages);
+      return newPage;
+    }
+  }
+
+  getNewPageStates = (page) => {
+    if (!page) {
+      return null;
+    }
+    sessionStorage.setItem('resume', true);
+    window.location.href = page;
+
+    let x = null;
+    let y = null;
   }
 
   getNextState = () => {
@@ -285,35 +307,15 @@ class SaveControls extends Component {
     let state = null;
 
     state = grailActions.getAvailableStates().currentState;
-    console.log(state);
-
-    // debugger;
-    if (clickedStates.includes(state) && !grailActions.getNewPages().newPageStates.includes(state)) {
-      return this.getNextState();
-    }
+    
     while (state && state.id === 'wrapper') {
       state = grailActions.getAvailableStates().currentState;
     }
 
-    while ((state === null || state === undefined) && grailActions.getNewPages().newPageStates.length) {
-      state = grailActions.getNewPage().newPage;
-      if (state) {
-        grailActions.toggleNewState(true);
-      }
+    if ((state === null || state === undefined)) {
+      let newPage = this.getNewPage();
+      state = this.getNewPageStates(newPage);
     } 
-
-
-    // if (clickedStates.includes(state) && !grailActions.isNewState().newPageState) {
-    //   return this.getNextState();
-    // }
-
-    // while (clickedStates.includes(state) && !grailActions.isNewState().newPageState) {
-    //   console.log('Trying to go to new state');
-    //   state = grailActions.getNewPage().newPage;
-    //   if (state !== null || state !== undefined) {
-    //     grailActions.toggleNewState();
-    //   }
-    // }
 
     return state;
   }
@@ -321,9 +323,6 @@ class SaveControls extends Component {
   clickAll2 = () => {
     let { grailActions } = this.props;
     window.fetch = this.fetch
-    // let state = null;
-    // state = grailActions.getAvailableStates().currentState;
-    // debugger;
     let state = this.getNextState();
 
     if (state && state.onclick) {
@@ -333,7 +332,6 @@ class SaveControls extends Component {
         state.click();
         let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200);
       } catch (e) {
-        console.log(e);
         alert(e);
       }
     } else {
@@ -343,21 +341,72 @@ class SaveControls extends Component {
     }
   }
 
+  hasVisited = (state) => {
+    let href = state.href;
+    let visited = sessionStorage.getItem('visited');
+    let pages = sessionStorage.getItem('newPages');
+
+    if (!visited) {
+      return false;
+    }
+
+    let visitedPages = visited.split(',');
+    let hasVisited = visitedPages.includes(href); 
+    if (!pages) {
+      return hasVisited;
+    } else {
+      let newPages = pages.split(',');
+      return hasVisited || newPages.includes(href);
+    }
+  }
+
   checkNewPage = (currHref, newHref, state) => {
     let { grailActions } = this.props;
     let newState = grailActions.isNewState().newPageState;
 
     if (currHref !== newHref) {
-      console.log('going back');
-
-      // debugger;
       if (!newState) {
-        grailActions.addNewPage(state);
+        let visited = sessionStorage.getItem('visited');
+        if (visited) {
+          let visitedPages = visited.split(',');
+          let index = visitedPages.indexOf(state.href);
+          if (index !== -1) {
+            visitedPages.pop(index);
+            sessionStorage.setItem('visited', visitedPages)
+          }
+        }
+
+        let newPages = sessionStorage.getItem('newPages');
+        let hasVisited = !this.hasVisited(state);
+        if (!newPages && hasVisited) {
+          sessionStorage.setItem('newPages', [state.href]);
+        } else if (hasVisited) {
+          let pages = newPages.split(',');
+          pages.push(state.href);
+          sessionStorage.setItem('newPages', pages);
+        }
+
         window.history.back();
       } else {
-        console.log('new page state');
         grailActions.toggleNewState(false);
       }
+    }
+  }
+
+  handleLoad = () => {
+    console.log('page has loaded');
+    console.log(sessionStorage);
+    let resume = sessionStorage.getItem('resume');
+    let visited = sessionStorage.getItem('visited');
+    if (resume === 'true') {
+      sessionStorage.setItem('resume', false)
+      if (visited) {
+        let visitedPages = visited.split(',');
+        visitedPages.push(window.location.href);
+        sessionStorage.setItem('visited', visitedPages);
+      }
+      // debugger;
+      this.clickAll2();
     }
   }
 
@@ -560,19 +609,8 @@ class SaveControls extends Component {
   componentDidMount() {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
-    
-    // let currentPage = window.location.href;
-    // let newPage = this.newPage
-
-    // setInterval(function() {
-    //   let checkPage = window.location.href;
-    //   if (currentPage != checkPage) {
-    //     // currentPage = checkPage;
-    //     // debugger;
-    //     newPage();
-    //   }
-    // }, 100);
-
+    document.addEventListener('DOMContentLoaded', this.handleLoad, true);
+    this.handleLoad();
   }
 
   componentDidUpdate(prevProps, prevState) {
