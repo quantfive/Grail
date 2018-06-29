@@ -272,7 +272,8 @@ class SaveControls extends Component {
 
   clickAll3 = () => {
     let elements = this.state.elements;
-    let element = elements.pop()
+    let element = elements.pop();
+    window.fetch = this.fetch
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
@@ -615,7 +616,6 @@ class SaveControls extends Component {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
     document.addEventListener('DOMContentLoaded', this.handleLoad, true);
-    window.fetch = this.fetch
     this.handleLoad();
   }
 
