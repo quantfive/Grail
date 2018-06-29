@@ -286,11 +286,15 @@ class SaveControls extends Component {
       let pages = newPages.split(',');
       let newPage = pages.pop();
       sessionStorage.setItem('newPages', pages);
+      if (!newPage) {
+        return this.getNewPage();
+      }
       return newPage;
     }
   }
 
-  getNewPageStates = (page) => {
+  getNewPageStates = () => {
+    let page = this.getNewPage();
     if (!page) {
       return null;
     }
@@ -313,8 +317,7 @@ class SaveControls extends Component {
     }
 
     if ((state === null || state === undefined)) {
-      let newPage = this.getNewPage();
-      state = this.getNewPageStates(newPage);
+      state = this.getNewPageStates();
     } 
 
     return state;
