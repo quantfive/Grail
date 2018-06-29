@@ -327,7 +327,6 @@ class SaveControls extends Component {
 
   clickAll2 = () => {
     let { grailActions } = this.props;
-    window.fetch = this.fetch
     let state = this.getNextState();
 
     if (state && state.onclick) {
@@ -603,15 +602,15 @@ class SaveControls extends Component {
     } else {
       grailActions.beforeFetch(api);
       let response = null;
-      let clonse = null;
+      let resClone = null;
       let res = null;
       try {
         response = await oldFetch(api, data)
-        clone = response.clone()
-        res = await Helpers.parseJSON(clone)
+        resClone = response.clone()
+        res = await Helpers.parseJSON(resClone)
         
       } catch (error) {
-
+        console.log(error);
       }
       let event = {
         endpoint: api,
@@ -627,7 +626,7 @@ class SaveControls extends Component {
       // The timeout for fetch being done is here so the element can render properly
       setTimeout(() => {
         grailActions.fetchFinished(api);
-      }, 1000)
+      }, 200)
 
       return response;
     }
@@ -698,6 +697,7 @@ class SaveControls extends Component {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
     document.addEventListener('DOMContentLoaded', this.handleLoad, true);
+    window.fetch = this.fetch
     this.handleLoad();
   }
 
@@ -717,7 +717,6 @@ class SaveControls extends Component {
         }
 
         if (grail.currentState) {
-          // this.afterClick(grail.currentState, grail.currentHref, true);
           this.afterClick2(grail.currentState, grail.currentHref, true);
         }
       }
