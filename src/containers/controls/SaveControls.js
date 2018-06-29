@@ -367,8 +367,6 @@ class SaveControls extends Component {
       try {
         element.click();
         this.afterClick2(element, currentHref, elements);
-        // this.afterClick2(element, currentHref, elements);
-        // let timeout = setTimeout(this.afterClick2.bind(this, element, currentHref, elements), 10);
       } catch (e) {
         alert(e);
       }
@@ -382,25 +380,41 @@ class SaveControls extends Component {
       let { grailActions } = this.props;
       let newHref = window.location.href;
       this.addVisited(newHref, state);
-      this.checkNewPage2(currentHref, newHref, elements);
-      // this.clickAll3(elements);
+      this.checkNewPage2(currentHref, newHref, state);
 
       // Need this timeout so window.history.back can load;
       let timeout = setTimeout(this.clickAll3.bind(this, elements), 100);
     }
   }
 
-  checkNewPage2 = (currentHref, newHref, elements) => {
+  checkNewPage2 = (currentHref, newHref, state) => {
     if (currentHref !== newHref) {
-      // alert(currentHref, newHref)
+      let visited = sessionStorage.getItem('visited');
+      if (visited) {
+        let visitedPages = visited.split(',');
+        let index = visitedPages.indexOf(state.href);
+        if (index !== -1) {
+          visitedPages.pop(index);
+          sessionStorage.setItem('visited', visitedPages)
+        }
+      }
+
+      let newPages = sessionStorage.getItem('newPages');
+      let hasVisited = !this.hasVisited(state);
+      if (!newPages && hasVisited) {
+        sessionStorage.setItem('newPages', [state.href]);
+      } else if (hasVisited) {
+        let pages = newPages.split(',');
+        pages.push(state.href);
+        sessionStorage.setItem('newPages', pages);
+      }
+
       window.history.back();
-      // this.clickAll3(elements);
     }
   }
 
   startNewPage = () => {
-    // alert("hi");
-    console.log('new page');
+    this.getNewPageStates();
   }
 
   hasVisited = (state) => {
