@@ -41,6 +41,7 @@ class SaveControls extends Component {
       fetchMade: false,
       elements: this.getAllClickableElements(),
       currentElement: null,
+      currentHref: '',
     }
   }
 
@@ -217,60 +218,8 @@ class SaveControls extends Component {
     });
   }
 
-  clickAll = (page, recursive=false) => {
-    // Might have issues with elements that redirect to a new page
-    // TODO: Implement some sort of history to go back to previous page and continue clicking from there
-    // a, b->c->d, e->f, g
-    let children = page.children;
-    for (let i = 0; i < children.length; i++) {
-      let child = children[i];
-      if (child.id !== 'wrapper') {
-        try {
-          child.click();
-          if (recursive) {
-            this.clickAll(child, true);
-          }
-        } catch(error) {
-          console.log(error);
-          console.log("element can't be clicked");
-        }
-      } else {
-        console.log(child);
-      }
-    }
-  }
 
-  addChildrenStates = (state) => {
-    let { grailActions } = this.props;
-    let children = state.children;
-
-    if (grailActions.isNewState().newPageState) {
-      children = this.getDocumentHtml().children;
-    }
-
-    for (let i = 0; i < children.length; i++) {
-      let child = children[i];
-      grailActions.saveState(child);
-    }
-
-    let timeout = setTimeout(() => { 
-      this.clickAll2();
-    }, 200);
-  }
-
-  afterClick = (state, currentHref, fetchDone, elements) => {
-    if (!this.state.fetchMade || fetchDone) {
-      let { grailActions } = this.props;
-      let newHref = window.location.href;
-      // grailActions.addClicked(state);
-      this.addVisited(newHref, state);
-      // this.addChildrenStates(state);
-      this.checkNewPage(currentHref, newHref, state);
-      this.clickAll3(elements);
-    }
-  }
-
-  addVisited = (href, state) => {
+  addVisited = (href) => {
     let visited = sessionStorage.getItem('visited');
     if (!visited) {
       sessionStorage.setItem('visited', [href]);
@@ -308,45 +257,6 @@ class SaveControls extends Component {
     let y = null;
   }
 
-  getNextState = () => {
-    let { grailActions } = this.props;
-    let clickedStates = grailActions.getClicked().clickedStates;
-    let state = null;
-
-    state = grailActions.getAvailableStates().currentState;
-    
-    while (state && state.id === 'wrapper') {
-      state = grailActions.getAvailableStates().currentState;
-    }
-
-    if ((state === null || state === undefined)) {
-      state = this.getNewPageStates();
-    } 
-
-    return state;
-  }
-
-  clickAll2 = () => {
-    let { grailActions } = this.props;
-    let state = this.getNextState();
-
-    if (state && state.onclick) {
-      let currentHref = window.location.href;
-      grailActions.setHref(currentHref);
-      try {
-        state.click();
-        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 10);
-      } catch (e) {
-        alert(e);
-        // let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200);
-      }
-    } else {
-      if (state) {
-        this.addChildrenStates(state);
-      }
-    }
-  }
-
   getAllClickableElements = () => {
     let allElements = this.getDocument().querySelectorAll(':not([class^=grailTest])');
     let filteredElements = [];
@@ -366,37 +276,42 @@ class SaveControls extends Component {
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
-      this.state.currentElement = element;
-      try {
-        element.click();
-        this.afterClick2(element, currentHref);
-      } catch (e) {
-        alert(e);
-      }
+      this.setState({
+        currentHref: currentHref,
+      }, () => {
+        this.state.currentElement = element;
+        try {
+          element.click();
+          this.afterClick2(false);
+        } catch (e) {
+          console.log(e);
+        }
+      });
+      
     } else {
       this.startNewPage();
     }
   }
 
-  afterClick2 = (state, currentHref, fetchDone) => {
-    state = this.state.currentElement;
+  afterClick2 = (fetchDone) => {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
-      this.addVisited(newHref, state);
-      this.checkNewPage2(currentHref, newHref, state);
-
+      this.addVisited(newHref);
+      this.checkNewPage2(newHref);
       // Need this timeout so window.history.back can load;
-      let timeout = setTimeout(this.clickAll3.bind(this), 100);
+      let timeout = setTimeout(this.clickAll3.bind(this), 200);
     }
   }
 
-  checkNewPage2 = (currentHref, newHref, state) => {
+  checkNewPage2 = (newHref) => {
+    let currentElement = this.state.currentElement;
+    let currentHref = this.state.currentHref;
     if (currentHref !== newHref) {
       let visited = sessionStorage.getItem('visited');
       if (visited) {
         let visitedPages = visited.split(',');
-        let index = visitedPages.indexOf(state.href);
+        let index = visitedPages.indexOf(currentElement.href);
         if (index !== -1) {
           visitedPages.pop(index);
           sessionStorage.setItem('visited', visitedPages)
@@ -404,12 +319,12 @@ class SaveControls extends Component {
       }
 
       let newPages = sessionStorage.getItem('newPages');
-      let hasVisited = !this.hasVisited(state);
+      let hasVisited = !this.hasVisited(currentElement);
       if (!newPages && hasVisited) {
-        sessionStorage.setItem('newPages', [state.href]);
+        sessionStorage.setItem('newPages', [currentElement.href]);
       } else if (hasVisited) {
         let pages = newPages.split(',');
-        pages.push(state.href);
+        pages.push(currentElement.href);
         sessionStorage.setItem('newPages', pages);
       }
 
@@ -719,9 +634,7 @@ class SaveControls extends Component {
           });
         }
 
-        if (grail.currentState) {
-          this.afterClick2(grail.currentState, grail.currentHref, true);
-        }
+        this.afterClick2(true);
       }
     }
 
