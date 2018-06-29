@@ -39,6 +39,7 @@ class SaveControls extends Component {
       isRecording: false,
       firstClick: true,
       fetchMade: false,
+      elements: this.getAllClickableElements(),
     }
   }
 
@@ -359,14 +360,15 @@ class SaveControls extends Component {
     return filteredElements;
   }
 
-  clickAll3 = (elements) => {
+  clickAll3 = () => {
+    let elements = this.state.elements;
     let element = elements.pop()
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
       try {
         element.click();
-        this.afterClick2(element, currentHref, elements);
+        this.afterClick2(element, currentHref);
       } catch (e) {
         alert(e);
       }
@@ -375,7 +377,7 @@ class SaveControls extends Component {
     }
   }
 
-  afterClick2 = (state, currentHref, elements) => {
+  afterClick2 = (state, currentHref, fetchDone) => {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
@@ -383,7 +385,7 @@ class SaveControls extends Component {
       this.checkNewPage2(currentHref, newHref, state);
 
       // Need this timeout so window.history.back can load;
-      let timeout = setTimeout(this.clickAll3.bind(this, elements), 100);
+      let timeout = setTimeout(this.clickAll3.bind(this), 100);
     }
   }
 
@@ -484,7 +486,8 @@ class SaveControls extends Component {
       }
       // debugger;
       // this.clickAll();
-      this.clickAll3(this.getAllClickableElements());
+      // this.state.elements = this.getAllClickableElements();
+      this.clickAll3();
     }
   }
 
@@ -714,7 +717,8 @@ class SaveControls extends Component {
         }
 
         if (grail.currentState) {
-          this.afterClick(grail.currentState, grail.currentHref, true);
+          // this.afterClick(grail.currentState, grail.currentHref, true);
+          this.afterClick2(grail.currentState, grail.currentHref, true);
         }
       }
     }

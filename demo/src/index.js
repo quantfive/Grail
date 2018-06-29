@@ -42,12 +42,19 @@ class Demo extends Component {
   }
 
   testFetch2 = () => {
-    fetch(API.NIFFY, API.POST_CONFIG())
+    // fetch(API.NIFFY, API.POST_CONFIG())
+    // .then(Helpers.checkStatus)
+    // .then(Helpers.parseJSON)
+    // .then((res) => {
+    //   console.log(res);
+    // })
+
+    let res = fetch(API.CHECK_READY, API.POST_CONFIG({test: null}))
     .then(Helpers.checkStatus)
     .then(Helpers.parseJSON)
-    .then((res) => {
-      console.log(res);
-    })
+    .then(json => {
+      console.log(json);
+    });
   }
 
   newPage = () => (
