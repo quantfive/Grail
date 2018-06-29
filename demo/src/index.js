@@ -41,6 +41,15 @@ class Demo extends Component {
     })
   }
 
+  testFetch2 = () => {
+    fetch(API.NIFFY, API.POST_CONFIG())
+    .then(Helpers.checkStatus)
+    .then(Helpers.parseJSON)
+    .then((res) => {
+      console.log(res);
+    })
+  }
+
   newPage = () => (
     <div>
       <h2>page</h2>
@@ -75,6 +84,7 @@ class Demo extends Component {
             <p id='c' onClick={() => this.onClick('HEHE')}> Demo </p>
             <p id='d' onMouseEnter={() => this.onClick('MOSUE OVER')}> Test </p>
         </div>
+        <button onClick={() => this.testFetch2()}> Error Fetch </button>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
         <div id="fetch-results">

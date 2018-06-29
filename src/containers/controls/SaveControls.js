@@ -256,14 +256,15 @@ class SaveControls extends Component {
     }, 200);
   }
 
-  afterClick = (state, currentHref, fetchDone) => {
+  afterClick = (state, currentHref, fetchDone, elements) => {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
       // grailActions.addClicked(state);
       this.addVisited(newHref, state);
-      this.addChildrenStates(state);
+      // this.addChildrenStates(state);
       this.checkNewPage(currentHref, newHref, state);
+      this.clickAll3(elements);
     }
   }
 
@@ -333,15 +334,73 @@ class SaveControls extends Component {
       grailActions.setHref(currentHref);
       try {
         state.click();
-        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200);
+        let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 10);
       } catch (e) {
         alert(e);
+        // let timeout = setTimeout(this.afterClick.bind(this, state, currentHref), 200);
       }
     } else {
       if (state) {
         this.addChildrenStates(state);
       }
     }
+  }
+
+  getAllClickableElements = () => {
+    let allElements = this.getDocument().querySelectorAll(':not([class^=grailTest])');
+    let filteredElements = [];
+
+    for (let i = 0; i < allElements.length; i++) {
+      let element = allElements[i];
+      if (element.onclick && element.onclick !== undefined && element) {
+        filteredElements.push(element);
+      }
+    }
+    return filteredElements;
+  }
+
+  clickAll3 = (elements) => {
+    // debugger;
+    let element = elements.pop()
+
+    if (element !== null && element !== undefined) {
+      let currentHref = window.location.href;
+      try {
+        element.click();
+        this.afterClick2(element, currentHref, elements);
+        this.afterClick2(element, currentHref, elements);
+        // let timeout = setTimeout(this.afterClick2.bind(this, element, currentHref, elements), 10);
+      } catch (e) {
+        alert(e);
+      }
+    } else {
+      this.startNewPage();
+    }
+  }
+
+  afterClick2 = (state, currentHref, elements) => {
+    if (!this.state.fetchMade || fetchDone) {
+      let { grailActions } = this.props;
+      let newHref = window.location.href;
+      console.log(currentHref, newHref)
+      this.addVisited(newHref, state);
+      // this.checkNewPage(currentHref, newHref, state);
+      this.checkNewPage2(currentHref, newHref, elements);
+      let timeout = setTimeout(this.clickAll3.bind(this, elements), 20000);
+    }
+  }
+
+  checkNewPage2 = (currentHref, newHref, elements) => {
+    if (currentHref !== newHref) {
+      // alert(currentHref, newHref)
+      window.history.back();
+      // this.clickAll3(elements);
+    }
+  }
+
+  startNewPage = () => {
+    // alert("hi");
+    console.log('new page');
   }
 
   hasVisited = (state) => {
@@ -365,7 +424,8 @@ class SaveControls extends Component {
 
   checkNewPage = (currHref, newHref, state) => {
     let { grailActions } = this.props;
-    let newState = grailActions.isNewState().newPageState;
+    // let newState = grailActions.isNewState().newPageState;
+    let newState = false;
 
     if (currHref !== newHref) {
       if (!newState) {
@@ -409,7 +469,8 @@ class SaveControls extends Component {
         sessionStorage.setItem('visited', visitedPages);
       }
       // debugger;
-      this.clickAll2();
+      // this.clickAll();
+      this.clickAll3(this.getAllClickableElements());
     }
   }
 
@@ -524,10 +585,17 @@ class SaveControls extends Component {
       return oldFetch(api, data)
     } else {
       grailActions.beforeFetch(api);
-      let response = await oldFetch(api, data)
-      let clone = response.clone()
-      let res = await Helpers.parseJSON(clone)
+      let response = null;
+      let clonse = null;
+      let res = null;
+      try {
+        response = await oldFetch(api, data)
+        clone = response.clone()
+        res = await Helpers.parseJSON(clone)
+        
+      } catch (error) {
 
+      }
       let event = {
         endpoint: api,
         request_input: data.body ? data.body : null,
@@ -654,7 +722,7 @@ class SaveControls extends Component {
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={() => this.clickAll2(this.getDocument(), true)}>click all</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={() => this.clickAll3(this.getAllClickableElements())}>click all</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}>complete</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
           {this.state.isRecording
