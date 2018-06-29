@@ -40,7 +40,7 @@ class SaveControls extends Component {
       firstClick: true,
       fetchMade: false,
       elements: this.getAllClickableElements(),
-      state: null,
+      currentElement: null,
     }
   }
 
@@ -366,7 +366,7 @@ class SaveControls extends Component {
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
-      this.state.state = element;
+      this.state.currentElement = element;
       try {
         element.click();
         this.afterClick2(element, currentHref);
@@ -379,7 +379,7 @@ class SaveControls extends Component {
   }
 
   afterClick2 = (state, currentHref, fetchDone) => {
-    state = this.state.state;
+    state = this.state.currentElement;
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
