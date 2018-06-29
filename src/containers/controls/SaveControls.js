@@ -624,10 +624,10 @@ class SaveControls extends Component {
         fetchMade: false,
       })
 
-      // Why is there a timeout on this fetch finished?
+      // The timeout for fetch being done is here so the element can render properly
       setTimeout(() => {
         grailActions.fetchFinished(api);
-      }, 500)
+      }, 1000)
 
       return response;
     }
