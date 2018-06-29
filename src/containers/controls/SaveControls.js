@@ -360,7 +360,6 @@ class SaveControls extends Component {
   }
 
   clickAll3 = (elements) => {
-    // debugger;
     let element = elements.pop()
 
     if (element !== null && element !== undefined) {
@@ -368,7 +367,7 @@ class SaveControls extends Component {
       try {
         element.click();
         this.afterClick2(element, currentHref, elements);
-        this.afterClick2(element, currentHref, elements);
+        // this.afterClick2(element, currentHref, elements);
         // let timeout = setTimeout(this.afterClick2.bind(this, element, currentHref, elements), 10);
       } catch (e) {
         alert(e);
@@ -382,11 +381,12 @@ class SaveControls extends Component {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
-      console.log(currentHref, newHref)
       this.addVisited(newHref, state);
-      // this.checkNewPage(currentHref, newHref, state);
       this.checkNewPage2(currentHref, newHref, elements);
-      let timeout = setTimeout(this.clickAll3.bind(this, elements), 20000);
+      // this.clickAll3(elements);
+
+      // Need this timeout so window.history.back can load;
+      let timeout = setTimeout(this.clickAll3.bind(this, elements), 100);
     }
   }
 
