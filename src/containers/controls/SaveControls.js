@@ -33,7 +33,7 @@ const SKIPTAGS = {
 }
 
 class SaveControls extends Component {
-  constructor() {
+  constructor(props) {
     super(props);
     this.state = {
       isRecording: false,
