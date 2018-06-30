@@ -34,7 +34,7 @@ const SKIPTAGS = {
 
 class SaveControls extends Component {
   constructor() {
-    super();
+    super(props);
     this.state = {
       isRecording: false,
       firstClick: true,
@@ -42,6 +42,11 @@ class SaveControls extends Component {
       elements: [],
       currentElement: null,
       currentHref: '',
+    }
+
+    let resume = sessionStorage.getItem('resume');
+    if (resume === 'true') {
+      window.fetch = this.fetch;
     }
   }
 
@@ -257,6 +262,9 @@ class SaveControls extends Component {
     let y = null;
   }
 
+  /***
+   * Gets all clickable elements on the page
+   */
   getAllClickableElements = () => {
     let allElements = this.getDocument().querySelectorAll(':not([class^=grailTest])');
     let filteredElements = [];
@@ -270,7 +278,21 @@ class SaveControls extends Component {
     return filteredElements;
   }
 
-  clickAll3 = () => {
+  /***
+   * Starting the process of clicking all
+   */
+  startClickAll = () => {
+    let elements = this.getAllClickableElements();
+
+    this.setState({
+      elements,
+    });
+  }
+
+  /***
+   * Clicks all clickable elements
+   */
+  clickAllElements = () => {
     let elements = this.state.elements;
     let element = elements.pop();
     window.fetch = this.fetch
@@ -283,7 +305,7 @@ class SaveControls extends Component {
         this.state.currentElement = element;
         try {
           element.click();
-          this.afterClick2(false);
+          this.clickAllElements2(false);
         } catch (e) {
           console.log(e);
         }
@@ -294,18 +316,24 @@ class SaveControls extends Component {
     }
   }
 
-  afterClick2 = (fetchDone) => {
+  /***
+   * Actions to make after a click is made
+   */
+  afterClick = (fetchDone) => {
     if (!this.state.fetchMade || fetchDone) {
       let { grailActions } = this.props;
       let newHref = window.location.href;
       this.addVisited(newHref);
-      this.checkNewPage2(newHref);
+      this.checkNewPage(newHref);
       // Need this timeout so window.history.back can load;
-      let timeout = setTimeout(this.clickAll3.bind(this), 200);
+      let timeout = setTimeout(this.clickAllElements.bind(this), 200);
     }
   }
 
-  checkNewPage2 = (newHref) => {
+  /***
+   * Checks if we're on a new page or not
+   */
+  checkNewPage = (newHref) => {
     let currentElement = this.state.currentElement;
     let currentHref = this.state.currentHref;
     if (currentHref !== newHref) {
@@ -356,48 +384,9 @@ class SaveControls extends Component {
     }
   }
 
-  checkNewPage = (currHref, newHref, state) => {
-    let { grailActions } = this.props;
-    // let newState = grailActions.isNewState().newPageState;
-    let newState = false;
-
-    if (currHref !== newHref) {
-      if (!newState) {
-        let visited = sessionStorage.getItem('visited');
-        if (visited) {
-          let visitedPages = visited.split(',');
-          let index = visitedPages.indexOf(state.href);
-          if (index !== -1) {
-            visitedPages.pop(index);
-            sessionStorage.setItem('visited', visitedPages)
-          }
-        }
-
-        let newPages = sessionStorage.getItem('newPages');
-        let hasVisited = !this.hasVisited(state);
-        if (!newPages && hasVisited) {
-          sessionStorage.setItem('newPages', [state.href]);
-        } else if (hasVisited) {
-          let pages = newPages.split(',');
-          pages.push(state.href);
-          sessionStorage.setItem('newPages', pages);
-        }
-
-        window.history.back();
-      } else {
-        grailActions.toggleNewState(false);
-      }
-    }
-  }
-
   handleLoad = () => {
     let resume = sessionStorage.getItem('resume');
     let visited = sessionStorage.getItem('visited');
-    let elements = this.getAllClickableElements();
-
-    this.setState({
-      elements,
-    });
     if (resume === 'true') {
       sessionStorage.setItem('resume', false)
       if (visited) {
@@ -405,7 +394,7 @@ class SaveControls extends Component {
         visitedPages.push(window.location.href);
         sessionStorage.setItem('visited', visitedPages);
       }
-      this.clickAll3();
+      this.clickAllElements();
     }
   }
 
@@ -615,8 +604,6 @@ class SaveControls extends Component {
   componentDidMount() {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
-    document.addEventListener('DOMContentLoaded', this.handleLoad, true);
-    this.handleLoad();
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -634,7 +621,11 @@ class SaveControls extends Component {
           });
         }
 
-        this.afterClick2(true);
+        if (resume === 'true') {
+          this.handleLoad();
+        } else {
+          this.afterClick(true);
+        }
       }
     }
 
@@ -655,7 +646,7 @@ class SaveControls extends Component {
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickAll3}>click all</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.startClickAll}>click all</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
           {this.state.isRecording
             ? 'Stop'
