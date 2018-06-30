@@ -283,10 +283,11 @@ class SaveControls extends Component {
    */
   startClickAll = () => {
     let elements = this.getAllClickableElements();
-
     this.setState({
       elements,
     });
+
+    this.clickAllElements()
   }
 
   /***
@@ -305,7 +306,7 @@ class SaveControls extends Component {
         this.state.currentElement = element;
         try {
           element.click();
-          this.clickAllElements2(false);
+          this.afterClick(false);
         } catch (e) {
           console.log(e);
         }
@@ -595,7 +596,6 @@ class SaveControls extends Component {
   }
 
   fetchListener = (event) => {
-    console.log('fetch');
     event.respondWith(
       new Response("Response body", { headers: { "Content-Type" : "text/plain" }})
     )
@@ -604,6 +604,14 @@ class SaveControls extends Component {
   componentDidMount() {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
+    let { grail } = this.props;
+
+    if (grail.activeFetchCalls.length === 0) {
+      let elements = this.getAllClickableElements();
+      this.setState({
+        elements,
+      }, this.handleLoad)
+    }
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -621,8 +629,13 @@ class SaveControls extends Component {
           });
         }
 
+        let resume = sessionStorage.getItem('resume');
         if (resume === 'true') {
-          this.handleLoad();
+          let elements = this.getAllClickableElements();
+          this.setState({
+            elements,
+          }, this.handleLoad)
+          // this.handleLoad();
         } else {
           this.afterClick(true);
         }
