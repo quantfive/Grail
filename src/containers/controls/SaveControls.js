@@ -39,7 +39,7 @@ class SaveControls extends Component {
       isRecording: false,
       firstClick: true,
       fetchMade: false,
-      elements: this.getAllClickableElements(),
+      elements: [],
       currentElement: null,
       currentHref: '',
     }
@@ -263,7 +263,7 @@ class SaveControls extends Component {
 
     for (let i = 0; i < allElements.length; i++) {
       let element = allElements[i];
-      if (element.onclick && element.onclick !== undefined && element) {
+      if (element.onclick) {
         filteredElements.push(element);
       }
     }
@@ -391,10 +391,13 @@ class SaveControls extends Component {
   }
 
   handleLoad = () => {
-    console.log('page has loaded');
-    console.log(sessionStorage);
     let resume = sessionStorage.getItem('resume');
     let visited = sessionStorage.getItem('visited');
+    let elements = this.getAllClickableElements();
+
+    this.setState({
+      elements,
+    });
     if (resume === 'true') {
       sessionStorage.setItem('resume', false)
       if (visited) {
@@ -402,9 +405,6 @@ class SaveControls extends Component {
         visitedPages.push(window.location.href);
         sessionStorage.setItem('visited', visitedPages);
       }
-      // debugger;
-      // this.clickAll();
-      // this.state.elements = this.getAllClickableElements();
       this.clickAll3();
     }
   }
@@ -655,8 +655,7 @@ class SaveControls extends Component {
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={() => this.clickAll3(this.getAllClickableElements())}>click all</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.checkReady}>complete</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickAll3}>click all</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
           {this.state.isRecording
             ? 'Stop'
