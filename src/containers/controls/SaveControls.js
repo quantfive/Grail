@@ -673,7 +673,6 @@ class SaveControls extends Component {
           this.setState({
             elements,
           }, this.handleLoad)
-          // this.handleLoad();
         } else {
           this.afterClick(true);
         }
