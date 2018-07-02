@@ -258,6 +258,7 @@ class SaveControls extends Component {
     sessionStorage.setItem('resume', true);
     window.location.href = page;
 
+    // On page change, some code will be executed
     let x = null;
     let y = null;
   }
@@ -290,6 +291,42 @@ class SaveControls extends Component {
     this.clickAllElements()
   }
 
+  checkClicked = (element) => {
+    let clickedElements = sessionStorage.getItem('clicked');
+
+    if (clickedElements) {
+      let clickedElementsSet = new Set(clickedElements.split(','));
+      return clickedElementsSet.has(element.outerHTML);
+    } else {
+      return false;
+    }
+  }
+
+  saveClicked = (element) => {
+    let clickedElements = sessionStorage.getItem('clicked');
+    let outerHTML = element.outerHTML;
+
+    if (!clickedElements) {
+      // Init clicked elements
+      sessionStorage.setItem('clicked', [outerHTML]);
+    } else {
+      let clickedElementsSet = new Set(clickedElements.split(','));
+      clickedElementsSet.add(outerHTML);
+      sessionStorage.setItem('clicked', Array.from(clickedElementsSet));
+    }
+  }
+
+  /***
+  * Checks if an element has been 
+  * clicked and clicks if it is new
+  */
+  clickElement = (element) => {
+    if (!this.checkClicked(element)) {
+      element.click();
+      this.saveClicked(element);
+    }
+  }
+
   /***
    * Clicks all clickable elements
    */
@@ -305,7 +342,8 @@ class SaveControls extends Component {
       }, () => {
         this.state.currentElement = element;
         try {
-          element.click();
+          this.clickElement(element);
+          // element.click();
           this.afterClick(false);
         } catch (e) {
           console.log(e);
