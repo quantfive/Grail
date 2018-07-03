@@ -231,7 +231,6 @@ class SaveControls extends Component {
       sessionStorage.setItem('visited', visitedJson);
     } else {
       let visitedPages = JSON.parse(visited);
-      // let visitedPages = visited.split(',');
       visitedPages.push(href);
       let visitedJson = JSON.stringify(visitedPages);
       sessionStorage.setItem('visited', visitedJson);
@@ -243,12 +242,16 @@ class SaveControls extends Component {
     if (!newPages) {
       return null;
     } else {
-      // let pages = newPages.split(',');
       let pages = JSON.parse(newPages);
       let newPage = pages.pop();
       let elementJson = JSON.stringify(pages);
 
       sessionStorage.setItem('newPages', elementJson);
+
+      if (newPage === null) {
+        // Need to figure out why some new pages are being saved as null
+        return this.getNewPage();
+      }
       return newPage;
     }
   }
@@ -339,7 +342,6 @@ class SaveControls extends Component {
    * Clicks all clickable elements
    */
   clickAllElements = () => {
-    // let elements = this.state.elements;
     let elements = this.getAllClickableElements();
     let element = elements.pop();
     window.fetch = this.fetch
@@ -388,7 +390,6 @@ class SaveControls extends Component {
       let visited = sessionStorage.getItem('visited');
       if (visited) {
         let visitedPages = JSON.parse(visited);
-        // let visitedPages = visited.split(',');
         let index = visitedPages.indexOf(currentElement.href);
         if (index !== -1) {
           visitedPages.pop(index);
@@ -404,7 +405,6 @@ class SaveControls extends Component {
         sessionStorage.setItem('newPages', elementJson);
       } else if (hasVisited) {
         let pages = JSON.parse(newPages);
-        // let pages = newPages.split(',');
         pages.push(currentElement.href);
         let elementJson = JSON.stringify(pages);
         sessionStorage.setItem('newPages', elementJson);
@@ -427,14 +427,12 @@ class SaveControls extends Component {
       return false;
     }
 
-    // let visitedPages = visited.split(',');
     let visitedPages = JSON.parse(visited);
     let hasVisited = visitedPages.includes(href); 
     if (!pages) {
       return hasVisited;
     } else {
       let newPages = JSON.parse(pages);
-      // let newPages = pages.split(',');
       return hasVisited || newPages.includes(href);
     }
   }
@@ -446,7 +444,6 @@ class SaveControls extends Component {
       sessionStorage.setItem('resume', false)
       if (visited) {
         let visitedPages = JSON.parse(visited);
-        // let visitedPages = visited.split(',');
         visitedPages.push(window.location.href);
         let visitedJson = JSON.stringify(visitedPages);
         sessionStorage.setItem('visited', visitedJson);
