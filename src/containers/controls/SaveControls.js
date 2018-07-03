@@ -227,11 +227,14 @@ class SaveControls extends Component {
   addVisited = (href) => {
     let visited = sessionStorage.getItem('visited');
     if (!visited) {
-      sessionStorage.setItem('visited', [href]);
+      let visitedJson = JSON.stringify([href]);
+      sessionStorage.setItem('visited', visitedJson);
     } else {
-      let visitedPages = visited.split(',');
+      let visitedPages = JSON.parse(visited);
+      // let visitedPages = visited.split(',');
       visitedPages.push(href);
-      sessionStorage.setItem('visited', visitedPages);
+      let visitedJson = JSON.stringify(visitedPages);
+      sessionStorage.setItem('visited', visitedJson);
     }
   }
 
@@ -240,12 +243,12 @@ class SaveControls extends Component {
     if (!newPages) {
       return null;
     } else {
-      let pages = newPages.split(',');
+      // let pages = newPages.split(',');
+      let pages = JSON.parse(newPages);
       let newPage = pages.pop();
-      sessionStorage.setItem('newPages', pages);
-      if (!newPage) {
-        return this.getNewPage();
-      }
+      let elementJson = JSON.stringify(pages);
+
+      sessionStorage.setItem('newPages', elementJson);
       return newPage;
     }
   }
@@ -291,12 +294,16 @@ class SaveControls extends Component {
     this.clickAllElements()
   }
 
+  replaceCommas = (outerHTML) => {
+    outerHTML.replace(new RegExp(','))
+  }
+
   checkClicked = (element) => {
     let clickedElements = sessionStorage.getItem('clicked');
 
     if (clickedElements) {
       let clickedElementsSet = new Set(clickedElements.split(','));
-      let outerHTML = element.outerHTML.replace(',', '_COMMA_')
+      let outerHTML = element.outerHTML.replace(/,/g, '_COMMA_')
       return clickedElementsSet.has(outerHTML);
     } else {
       return false;
@@ -305,7 +312,7 @@ class SaveControls extends Component {
 
   saveClicked = (element) => {
     let clickedElements = sessionStorage.getItem('clicked');
-    let outerHTML = element.outerHTML.replace(',', '_COMMA_');
+    let outerHTML = element.outerHTML.replace(/,/g, '_COMMA_');
 
     if (!clickedElements) {
       // Init clicked elements
@@ -380,22 +387,27 @@ class SaveControls extends Component {
     if (currentHref !== newHref) {
       let visited = sessionStorage.getItem('visited');
       if (visited) {
-        let visitedPages = visited.split(',');
+        let visitedPages = JSON.parse(visited);
+        // let visitedPages = visited.split(',');
         let index = visitedPages.indexOf(currentElement.href);
         if (index !== -1) {
           visitedPages.pop(index);
-          sessionStorage.setItem('visited', visitedPages)
+          let visitedJson = JSON.stringify(visitedPages);
+          sessionStorage.setItem('visited', visitedJson)
         }
       }
 
       let newPages = sessionStorage.getItem('newPages');
       let hasVisited = !this.hasVisited(currentElement);
       if (!newPages && hasVisited) {
-        sessionStorage.setItem('newPages', [currentElement.href]);
+        let elementJson = JSON.stringify([currentElement.href])
+        sessionStorage.setItem('newPages', elementJson);
       } else if (hasVisited) {
-        let pages = newPages.split(',');
+        let pages = JSON.parse(newPages);
+        // let pages = newPages.split(',');
         pages.push(currentElement.href);
-        sessionStorage.setItem('newPages', pages);
+        let elementJson = JSON.stringify(pages);
+        sessionStorage.setItem('newPages', elementJson);
       }
 
       window.history.back();
@@ -415,12 +427,14 @@ class SaveControls extends Component {
       return false;
     }
 
-    let visitedPages = visited.split(',');
+    // let visitedPages = visited.split(',');
+    let visitedPages = JSON.parse(visited);
     let hasVisited = visitedPages.includes(href); 
     if (!pages) {
       return hasVisited;
     } else {
-      let newPages = pages.split(',');
+      let newPages = JSON.parse(pages);
+      // let newPages = pages.split(',');
       return hasVisited || newPages.includes(href);
     }
   }
@@ -431,9 +445,11 @@ class SaveControls extends Component {
     if (resume === 'true') {
       sessionStorage.setItem('resume', false)
       if (visited) {
-        let visitedPages = visited.split(',');
+        let visitedPages = JSON.parse(visited);
+        // let visitedPages = visited.split(',');
         visitedPages.push(window.location.href);
-        sessionStorage.setItem('visited', visitedPages);
+        let visitedJson = JSON.stringify(visitedPages);
+        sessionStorage.setItem('visited', visitedJson);
       }
       this.clickAllElements();
     }
