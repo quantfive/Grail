@@ -272,7 +272,7 @@ class SaveControls extends Component {
 
     for (let i = 0; i < allElements.length; i++) {
       let element = allElements[i];
-      if (element.onclick) {
+      if (element.onclick && !this.checkClicked(element)) {
         filteredElements.push(element);
       }
     }
@@ -331,7 +331,8 @@ class SaveControls extends Component {
    * Clicks all clickable elements
    */
   clickAllElements = () => {
-    let elements = this.state.elements;
+    // let elements = this.state.elements;
+    let elements = this.getAllClickableElements();
     let element = elements.pop();
     window.fetch = this.fetch
 
