@@ -297,7 +297,7 @@ class SaveControls extends Component {
     if (clickedElements) {
       let clickedElementsSet = new Set(clickedElements.split(','));
       let outerHTML = element.outerHTML.replace(',', '_COMMA_')
-      return clickedElementsSet.has(element.outerHTML);
+      return clickedElementsSet.has(outerHTML);
     } else {
       return false;
     }
