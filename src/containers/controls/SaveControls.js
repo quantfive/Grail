@@ -44,7 +44,7 @@ class SaveControls extends Component {
       currentHref: '',
     }
 
-    let resume = sessionStorage.getItem('resume');
+    let resume = sessionStorage.getItem('grail_resume');
     if (resume === 'true') {
       window.fetch = this.fetch;
     }
@@ -265,11 +265,11 @@ class SaveControls extends Component {
   }
 
   addVisited = (href) => {
-    this.addToStorage('visited', href);
+    this.addToStorage('grail_visited', href);
   }
 
   getNewPage = () => {
-    return this.popFromStorage('newPages');
+    return this.popFromStorage('grail_newPages');
   }
 
   getNewPageStates = () => {
@@ -277,7 +277,7 @@ class SaveControls extends Component {
     if (!page) {
       return null;
     }
-    sessionStorage.setItem('resume', true);
+    sessionStorage.setItem('grail_resume', true);
     window.location.href = page;
 
     // On page change, some code will be executed
@@ -409,11 +409,11 @@ class SaveControls extends Component {
     let currentHref = this.state.currentHref;
 
     if (currentHref !== newHref) {
-      let visited = this.retrieveFromStorage('visited');
+      let visited = this.retrieveFromStorage('grail_visited');
       if (visited) {
         let index = visited.indexOf(currentElement.href);
         if (index !== -1) {
-          this.popFromStorage('visited', index);
+          this.popFromStorage('grail_visited', index);
         }
       }
 
@@ -423,7 +423,7 @@ class SaveControls extends Component {
         if (href === undefined || href === null) {
           href = window.location.href;
         }
-        this.addToStorage('newPages', href);
+        this.addToStorage('grail_newPages', href);
       }
       window.history.back();
     }
@@ -435,8 +435,8 @@ class SaveControls extends Component {
 
   hasVisited = (state) => {
     let href = state.href;
-    let visited = this.retrieveFromStorage('visited');
-    let pages = this.retrieveFromStorage('newPages');
+    let visited = this.retrieveFromStorage('grail_visited');
+    let pages = this.retrieveFromStorage('grail_newPages');
 
     if (!visited) {
       return false;
@@ -451,17 +451,17 @@ class SaveControls extends Component {
   }
 
   handleLoad = () => {
-    let resume = sessionStorage.getItem('resume');
+    let resume = sessionStorage.getItem('grail_resume');
 
     if (resume === 'true') {
-      sessionStorage.setItem('resume', false)
-      this.addToStorage('visited', window.location.href);
+      sessionStorage.setItem('grail_resume', false)
+      this.addToStorage('grail_visited', window.location.href);
       this.clickAllElements();
     }
   }
 
   saveError = (api, data, error) => {
-    this.addToStorage('errors', {api: api, data:data, error: error});
+    this.addToStorage('grail_backend_errors', {api: api, data:data, error: error});
   }
 
   takeSnapshot = () => {
@@ -693,7 +693,7 @@ class SaveControls extends Component {
     window.addEventListener('error', this.recordFrontendError, false);
     let { grail } = this.props;
 
-    let resume = sessionStorage.getItem('resume');
+    let resume = sessionStorage.getItem('grail_resume');
     if (grail.activeFetchCalls.length === 0 && resume === 'true') {
       let elements = this.getAllClickableElements();
       this.setState({
@@ -717,7 +717,7 @@ class SaveControls extends Component {
           });
         }
 
-        let resume = sessionStorage.getItem('resume');
+        let resume = sessionStorage.getItem('grail_resume');
         if (resume === 'true') {
           let elements = this.getAllClickableElements();
           this.setState({
