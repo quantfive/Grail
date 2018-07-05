@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { css, StyleSheet } from 'aphrodite';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-// import Niffy from 'niffy';
+import Popup from "reactjs-popup";
 
 // Components
 import CheckModal from '../modals/CheckModal';
@@ -42,12 +42,16 @@ class SaveControls extends Component {
       elements: [],
       currentElement: null,
       currentHref: '',
+      ignoreElements: '',
     }
 
     let resume = sessionStorage.getItem('grail_resume');
     if (resume === 'true') {
       window.fetch = this.fetch;
     }
+
+    this.addToIgnore = this.addToIgnore.bind(this);
+    this.editIgnore = this.editIgnore.bind(this);
   }
 
   getWindow() {
@@ -295,7 +299,8 @@ class SaveControls extends Component {
     for (let i = 0; i < allElements.length; i++) {
       let element = allElements[i];
       let elementClicked = this.checkClicked(element);
-      if ( (element.onclick || element.tagName === 'A') && !elementClicked) {
+      let elementIgnored = this.checkIgnored(element);
+      if ((element.onclick || element.tagName === 'A') && !elementClicked && !elementIgnored) {
         filteredElements.push(element);
       }
     }
@@ -326,6 +331,34 @@ class SaveControls extends Component {
     } else {
       return false;
     }
+  }
+
+  /***
+  * Check if element is in user's ignore list
+  * @params element -- an HTML element
+  */
+  checkIgnored = (element) => {
+    // [Attr = value],[attr=value]
+    let ignoredElements = this.retrieveFromStorage('grail_ignoreElements');
+
+    if (!ignoredElements) {
+      return false;
+    }
+    for (let i = 0; i < ignoredElements.length; i++) {
+      let query = ignoredElements[i][0];
+      let queriedElements = []
+      try {
+        queriedElements = this.getDocument().querySelectorAll(query);
+      } catch (error) {
+        // console.log(error);
+        console.log('invalid query');
+      }
+
+      if (Array.from(queriedElements).includes(element)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /***
@@ -363,9 +396,10 @@ class SaveControls extends Component {
    * Clicks all clickable elements
    */
   clickAllElements = () => {
-    let elements = this.state.elements;
+    let elements = this.getAllClickableElements();
+    // let elements = this.state.elements;
     let element = elements.pop();
-    window.fetch = this.fetch
+    window.fetch = this.fetch;
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
@@ -476,6 +510,18 @@ class SaveControls extends Component {
     }
 
     return page_state;
+  }
+
+  editIgnore = (event) => {
+    this.setState({ignoreElements: event.target.value});
+  }
+
+  addToIgnore = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log(this.state.ignoreElements);
+    this.addToStorage('grail_ignoreElements', [this.state.ignoreElements]);
+    this.setState({ignoreElements: ''});
   }
 
   getPlayBack = async () => {
@@ -742,6 +788,8 @@ class SaveControls extends Component {
 
   render() {
     let { modal } = this.props;
+    let ignoreElements = this.retrieveFromStorage('grail_ignoreElements');
+
     return (
       <div id='controller' className={css(styles.grailTestController)}>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.startClickAll}>click all</button>
@@ -753,6 +801,34 @@ class SaveControls extends Component {
         </button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.getPlayBack}>playback</button>
         {modal.openCheckModal && <CheckModal />}
+        <Popup trigger={
+          <button className={css(styles.grailTestButton, styles.grailTestCheck)}>ignore</button>}
+          modal
+          closeOnDocumentClick
+        >
+        {close => (
+        <div>
+          <form onSubmit={this.addToIgnore}>
+            <p className={css(styles.exampleText)}>
+              Instructions: Submit each element that you want to ignore. Use a comma to separate element attributes
+              and values.
+            </p>
+            <span className={css(styles.exampleText)}> Ex. Format: [attribute=value], [attribute=value], ... </span>
+            <input type='text' onChange={this.editIgnore}/>
+            <input type='submit'/>
+            <p className={css(styles.exampleText)}>
+              Current Ignored Elements:
+            </p>
+            <div className={css(styles.exampleText)}>
+              {ignoreElements
+              ? ignoreElements.toString()
+              : null  }
+            </div>
+          </form>
+          <button onClick={() => {close()}}>close</button>
+        </div>
+        )}
+        </Popup>
       </div>
     );
   }
@@ -794,6 +870,9 @@ let styles = StyleSheet.create({
   grailTestCheck2: {
     marginLeft: 10,
   },
+  exampleText: {
+    color: 'black',
+  }
 })
 
 const mapStateToProps = state => ({

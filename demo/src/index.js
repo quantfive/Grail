@@ -97,7 +97,7 @@ class Demo extends Component {
         </div>
         <button onClick={() => this.testFetch2()}> Error Fetch </button>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
-        <button onClick={this.throwError}> Throw Error </button>
+        <button id='throw' onClick={this.throwError}> Throw Error </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
         <div id="fetch-results">
           {this.state.fetchResults

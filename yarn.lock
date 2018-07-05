@@ -6448,6 +6448,10 @@ react@^16.3.2:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
+reactjs-popup@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/reactjs-popup/-/reactjs-popup-1.1.1.tgz#a0619ba6a309aea379df6e82afc110efea180560"
+
 read-only-stream@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/read-only-stream/-/read-only-stream-2.0.0.tgz#2724fd6a8113d73764ac288d4386270c1dbf17f0"
