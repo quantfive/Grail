@@ -223,39 +223,53 @@ class SaveControls extends Component {
     });
   }
 
-  /***
-   * Adds visited URL to session storage
-   */
-  addVisited = (href) => {
-    let visited = sessionStorage.getItem('visited');
-    if (!visited) {
-      let visitedJson = JSON.stringify([href]);
-      sessionStorage.setItem('visited', visitedJson);
+  stringify = (value) => {
+    let stringifiedValue = JSON.stringify(value);
+    return stringifiedValue;
+  }
+
+  addToStorage = (key, value) => {
+    let items = sessionStorage.getItem(key);
+
+    if (!items) {
+      let valueJson = this.stringify([value]);
+      sessionStorage.setItem(key, valueJson);
     } else {
-      let visitedPages = JSON.parse(visited);
-      visitedPages.push(href);
-      let visitedJson = JSON.stringify(visitedPages);
-      sessionStorage.setItem('visited', visitedJson);
+      let parsedItems = this.retrieveFromStorage(key);
+      parsedItems.push(value);
+      let valueJson = this.stringify(parsedItems);
+      sessionStorage.setItem(key, valueJson);
     }
   }
 
-  getNewPage = () => {
-    let newPages = sessionStorage.getItem('newPages');
-    if (!newPages) {
-      return null;
-    } else {
-      let pages = JSON.parse(newPages);
-      let newPage = pages.pop();
-      let elementJson = JSON.stringify(pages);
+  retrieveFromStorage = (key) => {
+    let items = sessionStorage.getItem(key);
+    let parsedItems = JSON.parse(items);
+    return parsedItems;
+  }
 
-      sessionStorage.setItem('newPages', elementJson);
+  popFromStorage = (key, index=false) => {
+    let items = this.retrieveFromStorage(key);
+    let poppedValue = null;
 
-      if (newPage === null) {
-        // Need to figure out why some new pages are being saved as null
-        return this.getNewPage();
-      }
-      return newPage;
+    if (items && !index) {
+      // Key exists in storage
+      poppedValue = items.pop();
+      sessionStorage.setItem(key, this.stringify(items));
+    } else if (items && index) {
+      // Key exists in storage and index given
+      poppedValue = items.pop(index);
+      sessionStorage.setItem(key, this.stringify(items));
     }
+    return poppedValue;
+  }
+
+  addVisited = (href) => {
+    this.addToStorage('visited', href);
+  }
+
+  getNewPage = () => {
+    return this.popFromStorage('newPages');
   }
 
   getNewPageStates = () => {
@@ -296,13 +310,6 @@ class SaveControls extends Component {
     this.setState({
       elements,
     }, this.clickAllElements);
-  }
-
-  /***
-   * Replace all commas
-   */
-  replaceCommas = (outerHTML) => {
-    outerHTML.replace(new RegExp(','))
   }
 
   /***
@@ -368,7 +375,6 @@ class SaveControls extends Component {
         this.state.currentElement = element;
         try {
           this.clickElement(element);
-          // element.click();
           this.afterClick(false);
         } catch (e) {
           console.log(e);
@@ -401,30 +407,20 @@ class SaveControls extends Component {
   checkNewPage = (newHref) => {
     let currentElement = this.state.currentElement;
     let currentHref = this.state.currentHref;
+
     if (currentHref !== newHref) {
-      let visited = sessionStorage.getItem('visited');
+      let visited = this.retrieveFromStorage('visited');
       if (visited) {
-        let visitedPages = JSON.parse(visited);
-        let index = visitedPages.indexOf(currentElement.href);
+        let index = visited.indexOf(currentElement.href);
         if (index !== -1) {
-          visitedPages.pop(index);
-          let visitedJson = JSON.stringify(visitedPages);
-          sessionStorage.setItem('visited', visitedJson)
+          this.popFromStorage('visited', index);
         }
       }
 
-      let newPages = sessionStorage.getItem('newPages');
       let hasVisited = !this.hasVisited(currentElement);
-      if (!newPages && hasVisited) {
-        let elementJson = JSON.stringify([currentElement.href])
-        sessionStorage.setItem('newPages', elementJson);
-      } else if (hasVisited) {
-        let pages = JSON.parse(newPages);
-        pages.push(currentElement.href);
-        let elementJson = JSON.stringify(pages);
-        sessionStorage.setItem('newPages', elementJson);
+      if (hasVisited) {
+        this.addToStorage('newPages', currentElement.href);
       }
-
       window.history.back();
     }
   }
@@ -435,36 +431,33 @@ class SaveControls extends Component {
 
   hasVisited = (state) => {
     let href = state.href;
-    let visited = sessionStorage.getItem('visited');
-    let pages = sessionStorage.getItem('newPages');
+    let visited = this.retrieveFromStorage('visited');
+    let pages = this.retrieveFromStorage('newPages');
 
     if (!visited) {
       return false;
     }
 
-    let visitedPages = JSON.parse(visited);
-    let hasVisited = visitedPages.includes(href); 
+    let hasVisited = visited.includes(href); 
     if (!pages) {
       return hasVisited;
     } else {
-      let newPages = JSON.parse(pages);
-      return hasVisited || newPages.includes(href);
+      return hasVisited || pages.includes(href);
     }
   }
 
   handleLoad = () => {
     let resume = sessionStorage.getItem('resume');
-    let visited = sessionStorage.getItem('visited');
+
     if (resume === 'true') {
       sessionStorage.setItem('resume', false)
-      if (visited) {
-        let visitedPages = JSON.parse(visited);
-        visitedPages.push(window.location.href);
-        let visitedJson = JSON.stringify(visitedPages);
-        sessionStorage.setItem('visited', visitedJson);
-      }
+      this.addToStorage('visited', window.location.href);
       this.clickAllElements();
     }
+  }
+
+  saveError = (api, data, error) => {
+    this.addToStorage('errors', {api: api, data:data, error: error});
   }
 
   takeSnapshot = () => {
@@ -587,7 +580,7 @@ class SaveControls extends Component {
         res = await Helpers.parseJSON(resClone)
         
       } catch (error) {
-        console.log(error);
+        this.saveError(api, data, error.toString());
       }
       let event = {
         endpoint: api,
