@@ -29,7 +29,7 @@ const SKIPTAGS = {
   head: true,
   meta: true,
   style: true,
-  title: true,  
+  title: true,
 }
 
 class SaveControls extends Component {
@@ -223,7 +223,9 @@ class SaveControls extends Component {
     });
   }
 
-
+  /***
+   * Adds visited URL to session storage
+   */
   addVisited = (href) => {
     let visited = sessionStorage.getItem('visited');
     if (!visited) {
@@ -278,7 +280,8 @@ class SaveControls extends Component {
 
     for (let i = 0; i < allElements.length; i++) {
       let element = allElements[i];
-      if (element.onclick && !this.checkClicked(element)) {
+      let elementClicked = this.checkClicked(element);
+      if ( (element.onclick || element.tagName === 'A') && !elementClicked) {
         filteredElements.push(element);
       }
     }
@@ -292,15 +295,20 @@ class SaveControls extends Component {
     let elements = this.getAllClickableElements();
     this.setState({
       elements,
-    });
-
-    this.clickAllElements()
+    }, this.clickAllElements);
   }
 
+  /***
+   * Replace all commas
+   */
   replaceCommas = (outerHTML) => {
     outerHTML.replace(new RegExp(','))
   }
 
+  /***
+   * Checked if we've clicked on the element or not
+   * @params element -- an HTML element
+   */
   checkClicked = (element) => {
     let clickedElements = sessionStorage.getItem('clicked');
 
@@ -313,6 +321,11 @@ class SaveControls extends Component {
     }
   }
 
+  /***
+   * Save that we've clicked on a specific element
+   * save the full outer HTML
+   * @params element -- an HTML element
+   */
   saveClicked = (element) => {
     let clickedElements = sessionStorage.getItem('clicked');
     let outerHTML = element.outerHTML.replace(/,/g, '_COMMA_');
@@ -330,6 +343,7 @@ class SaveControls extends Component {
   /***
   * Checks if an element has been 
   * clicked and clicks if it is new
+  * @params element -- an HTML element
   */
   clickElement = (element) => {
     if (!this.checkClicked(element)) {
@@ -342,7 +356,7 @@ class SaveControls extends Component {
    * Clicks all clickable elements
    */
   clickAllElements = () => {
-    let elements = this.getAllClickableElements();
+    let elements = this.state.elements;
     let element = elements.pop();
     window.fetch = this.fetch
 
@@ -368,6 +382,7 @@ class SaveControls extends Component {
 
   /***
    * Actions to make after a click is made
+   * @params boolean fetchDone -- indicates whether the fetch has finished or not
    */
   afterClick = (fetchDone) => {
     if (!this.state.fetchMade || fetchDone) {
@@ -654,12 +669,35 @@ class SaveControls extends Component {
     )
   }
 
+  /***
+   * Records the frontend error and saves it to sessionStorage
+   * @params error e -- the error object
+   */
+  recordFrontendError = (e) => {
+    let currentErrors = sessionStorage.getItem('grail-frontend-errors');
+    let currentHref = window.location.pathname
+    let errors = {}
+    if (currentErrors) {
+      errors = JSON.parse(currentErrors);
+      if (currentHref in errors) {
+        errors[currentHref] = [...errors[currentHref], e.error.stack];
+      } else {
+        errors[currentHref] = [e.error.stack];
+      }
+    } else {
+      errors[currentHref] = [e.error.stack];
+    }
+    sessionStorage.setItem('grail-frontend-errors', JSON.stringify(errors))
+  }
+
   componentDidMount() {
     document.addEventListener('mousemove', this.recordMouseEvents, false);
     document.addEventListener('click', this.recordMouseEvents, false);
+    window.addEventListener('error', this.recordFrontendError, false);
     let { grail } = this.props;
 
-    if (grail.activeFetchCalls.length === 0) {
+    let resume = sessionStorage.getItem('resume');
+    if (grail.activeFetchCalls.length === 0 && resume === 'true') {
       let elements = this.getAllClickableElements();
       this.setState({
         elements,
@@ -709,8 +747,6 @@ class SaveControls extends Component {
     let { modal } = this.props;
     return (
       <div id='controller' className={css(styles.grailTestController)}>
-        <button className={css(styles.grailTestButton)} onClick={this.clickSave}>save</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.clickCheck}>check</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.startClickAll}>click all</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
           {this.state.isRecording

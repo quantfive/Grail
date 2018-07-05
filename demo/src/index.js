@@ -57,6 +57,10 @@ class Demo extends Component {
     });
   }
 
+  throwError = () => {
+    throw new Error('new error');
+  }
+
   newPage = () => (
     <div>
       <h2>page</h2>
@@ -93,6 +97,7 @@ class Demo extends Component {
         </div>
         <button onClick={() => this.testFetch2()}> Error Fetch </button>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
+        <button onClick={this.throwError}> Throw Error </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
         <div id="fetch-results">
           {this.state.fetchResults
