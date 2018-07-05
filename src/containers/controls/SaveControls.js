@@ -420,10 +420,10 @@ class SaveControls extends Component {
       let hasVisited = !this.hasVisited(currentElement);
       if (hasVisited) {
         let href = currentElement.href;
-        if (!href) {
+        if (href === undefined || href === null) {
           href = window.location.href;
         }
-        this.addToStorage('newPages', currentElement.href);
+        this.addToStorage('newPages', href);
       }
       window.history.back();
     }
