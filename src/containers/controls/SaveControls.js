@@ -409,10 +409,10 @@ class SaveControls extends Component {
         this.state.currentElement = element;
         try {
           this.clickElement(element);
-          this.afterClick(false);
         } catch (e) {
           console.log(e);
         }
+        this.afterClick(false);
       });
       
     } else {
