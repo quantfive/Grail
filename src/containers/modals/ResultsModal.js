@@ -78,30 +78,31 @@ class ResultsModal extends React.Component {
       return (
         <div className={css(styles.errorLabel)} >
           <Collapsible trigger={
-            <div>
+            <div className={css(styles.collapsibleTrigger)}>
               <div className={css(styles.dataMethod)} >
-                { dataMethod }
+                { dataMethod.toUpperCase() } { api }
               </div>
-              <div className={css(styles.collapsibleTrigger)}>
-                { api }
+              <div className={css(styles.errorLabel)} >
+                { errorMessage }
               </div>
             </div>
           }>
           <div className={css(styles.dataBody)} >
-            { dataBody }
+            Body: { dataBody }
           </div>
-          <div className={css(styles.headers)} >
-            <Collapsible trigger={
-              <div className={css(styles.collapsibleTrigger)}>
-                headers
-              </div>
-            }>
-              { headers }
-            </Collapsible>
-          </div>
-          <div className={css(styles.errorLabel)} >
-            { errorMessage }
-          </div>
+          { headers ?
+            <div className={css(styles.headers)} >
+              <Collapsible trigger={
+                <div className={css(styles.collapsibleTrigger)}>
+                  Headers:
+                </div>
+              } open={true}>
+                { headers }
+              </Collapsible>
+            </div>
+            :
+            null
+          }
           </Collapsible>
         </div>
       );
