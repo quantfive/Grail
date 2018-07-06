@@ -387,8 +387,8 @@ class SaveControls extends Component {
   */
   clickElement = (element) => {
     if (!this.checkClicked(element)) {
-      element.click();
       this.saveClicked(element);
+      element.click();
     }
   }
 
