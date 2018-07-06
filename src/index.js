@@ -10,7 +10,7 @@ import { configure, history } from './config/configure-store';
 
 const store = configure();
 
-const LOAD_TIME = 1000;
+const LOAD_TIME = 100;
 
 class GrailTest {
   getWindow() {
@@ -47,11 +47,13 @@ class GrailTest {
   run = (history) => {
     let test = new GrailTest();
     //setTimeout(test.runTests, LOAD_TIME);
-    setTimeout(test.injectControls.bind(test, history), LOAD_TIME);
+    if (process.env.NODE_ENV !== 'production') {
+      setTimeout(test.injectControls.bind(test, history), LOAD_TIME);
+    }
   }
 
   injectControls (history=null) {
-    var document = this.getDocument();
+    let document = this.getDocument();
 
     // For webpack hot reloads
     if (document.querySelector('.grail-test-wrapper')) { // Already injected controls
