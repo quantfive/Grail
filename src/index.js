@@ -47,7 +47,7 @@ class GrailTest {
   run = (history) => {
     let test = new GrailTest();
     //setTimeout(test.runTests, LOAD_TIME);
-    if (process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV !== 'production' || process.env.SHOW_GRAIL_COMPONENT) {
       setTimeout(test.injectControls.bind(test, history), LOAD_TIME);
     }
   }
