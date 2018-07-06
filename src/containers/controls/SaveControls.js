@@ -774,17 +774,18 @@ class SaveControls extends Component {
    */
   recordFrontendError = (e) => {
     let currentErrors = sessionStorage.getItem('grail-frontend-errors');
+    let currentError = {stack: e.error.stack, message: e.message, filename: e.filename, lineno: e.lineno};
     let currentHref = window.location.pathname
     let errors = {}
     if (currentErrors) {
       errors = JSON.parse(currentErrors);
       if (currentHref in errors) {
-        errors[currentHref] = [...errors[currentHref], e.error.stack];
+        errors[currentHref] = [...errors[currentHref], currentError];
       } else {
-        errors[currentHref] = [e.error.stack];
+        errors[currentHref] = [currentError];
       }
     } else {
-      errors[currentHref] = [e.error.stack];
+      errors[currentHref] = [currentError];
     }
     sessionStorage.setItem('grail-frontend-errors', JSON.stringify(errors))
   }
