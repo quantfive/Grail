@@ -57,6 +57,12 @@ class Demo extends Component {
     });
   }
 
+  xmlFetch = () => {
+    let req = new XMLHttpRequest();
+    req.open('POST', API.CHECK_READY);
+    req.send();
+  }
+
   throwError = () => {
     throw new Error('new error');
   }
@@ -98,6 +104,7 @@ class Demo extends Component {
         <button onClick={() => this.testFetch2()}> Error Fetch </button>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
         <button id='throw' onClick={this.throwError}> Throw Error </button>
+        <button onClick={this.xmlFetch}> XML </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
         <div id="fetch-results">
           {this.state.fetchResults

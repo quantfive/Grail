@@ -24,6 +24,8 @@ import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
 let oldFetch = window.fetch;
+let oldSend = window.XMLHttpRequest.prototype.send;
+window.XMLHttpRequest.oldSend = oldSend;
 
 const SKIPTAGS = {
   script: true,
@@ -44,11 +46,14 @@ class SaveControls extends Component {
       currentElement: null,
       currentHref: '',
       ignoreElements: '',
+      currentElementHtml:'',
     }
 
     let resume = sessionStorage.getItem('grail_resume');
     if (resume === 'true') {
       window.fetch = this.fetch;
+      window.XMLHttpRequest.prototype.send = this.send;
+      window.XMLHttpRequest.prototype.oldSend = oldSend;
     }
 
     this.addToIgnore = this.addToIgnore.bind(this);
@@ -389,6 +394,7 @@ class SaveControls extends Component {
   */
   clickElement = (element) => {
     if (!this.checkClicked(element)) {
+      this.setState({currentElementHtml: element.outerHTML});
       this.saveClicked(element);
       element.click();
     }
@@ -402,6 +408,8 @@ class SaveControls extends Component {
     // let elements = this.state.elements;
     let element = elements.pop();
     window.fetch = this.fetch;
+    window.XMLHttpRequest.prototype.send = this.send;
+    window.XMLHttpRequest.prototype.oldSend = oldSend;
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
@@ -656,6 +664,47 @@ class SaveControls extends Component {
       }, 200)
 
       return response;
+    }
+  }
+
+  send = (data, isGrail=false) => {
+    window.XMLHttpRequest.prototype.oldSend = oldSend;
+    let scThis = this;
+    let { grailActions } = scThis.props;
+    let api = 'xml';
+    let type = null; // How to get request type?
+
+    if (isGrail) {
+      try {
+        this.oldSend(data);
+      } catch (error) {
+        console.log('Using wrong this');
+      }
+    } else {
+      grailActions.beforeFetch(api);
+      try {
+        this.oldsend(data)
+      } catch (error) {
+        api = this.responseUrl;
+        this.saveError(api, data, error.toString());
+      }
+      let event = {
+        endpoint: api,
+        request_input: data ? data : null,
+        request_type: type,
+        request_output: null,
+      }
+      grailActions.recordEvent(event);
+      this.setState({
+        fetchMade: false,
+      })
+
+      // The timeout for fetch being done is here so the element can render properly
+      setTimeout(() => {
+        grailActions.fetchFinished(api);
+      }, 200)
+
+      return;
     }
   }
 
