@@ -9,7 +9,7 @@
 yarn add https://github.com/lightninglu10/grail-frontend-test-package.git
 ```
 
-or 
+or
 
 ```
 npm install https://github.com/lightninglu10/grail-frontend-test-package.git

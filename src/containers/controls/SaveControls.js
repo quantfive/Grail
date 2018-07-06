@@ -12,6 +12,7 @@ import Popup from "reactjs-popup";
 
 // Components
 import CheckModal from '../modals/CheckModal';
+import ResultsModal from '../modals/ResultsModal';
 
 // Config
 import API from '../../config/api';
@@ -279,7 +280,7 @@ class SaveControls extends Component {
   getNewPageStates = () => {
     let page = this.getNewPage();
     if (!page) {
-      return null;
+      return false;
     }
     sessionStorage.setItem('grail_resume', true);
     window.location.href = page;
@@ -287,6 +288,7 @@ class SaveControls extends Component {
     // On page change, some code will be executed
     let x = null;
     let y = null;
+    return true;
   }
 
   /***
@@ -381,7 +383,7 @@ class SaveControls extends Component {
   }
 
   /***
-  * Checks if an element has been 
+  * Checks if an element has been
   * clicked and clicks if it is new
   * @params element -- an HTML element
   */
@@ -405,8 +407,8 @@ class SaveControls extends Component {
       let currentHref = window.location.href;
       this.setState({
         currentHref: currentHref,
+        currentElement: element,
       }, () => {
-        this.state.currentElement = element;
         try {
           this.clickElement(element);
         } catch (e) {
@@ -414,7 +416,7 @@ class SaveControls extends Component {
         }
         this.afterClick(false);
       });
-      
+
     } else {
       this.startNewPage();
     }
@@ -464,7 +466,12 @@ class SaveControls extends Component {
   }
 
   startNewPage = () => {
-    this.getNewPageStates();
+    let { modalActions } = this.props;
+    let newPageState = this.getNewPageStates();
+    if (!newPageState) {
+      console.log("finished cycle");
+      modalActions.openResultsModal(true);
+    }
   }
 
   hasVisited = (state) => {
@@ -476,7 +483,7 @@ class SaveControls extends Component {
       return false;
     }
 
-    let hasVisited = visited.includes(href); 
+    let hasVisited = visited.includes(href);
     if (!pages) {
       return hasVisited;
     } else {
@@ -628,7 +635,7 @@ class SaveControls extends Component {
         response = await oldFetch(api, data)
         resClone = response.clone()
         res = await Helpers.parseJSON(resClone)
-        
+
       } catch (error) {
         this.saveError(api, data, error.toString());
       }
@@ -795,10 +802,11 @@ class SaveControls extends Component {
           {this.state.isRecording
             ? 'Stop'
             : 'Record'
-          } 
+          }
         </button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.getPlayBack}>playback</button>
         {modal.openCheckModal && <CheckModal />}
+        {modal.openResultsModal && <ResultsModal />}
         <Popup trigger={
           <button className={css(styles.grailTestButton, styles.grailTestCheck)}>ignore</button>}
           modal
