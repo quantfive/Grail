@@ -523,7 +523,6 @@ class SaveControls extends Component {
     let { modalActions } = this.props;
     let newPageState = this.getNewPageStates();
     if (!newPageState) {
-      console.log("finished cycle");
       modalActions.openResultsModal(true);
       this.resetGrail();
 
