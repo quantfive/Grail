@@ -734,8 +734,6 @@ class SaveControls extends Component {
   }
 
   componentDidMount() {
-    document.addEventListener('mousemove', this.recordMouseEvents, false);
-    document.addEventListener('click', this.recordMouseEvents, false);
     window.addEventListener('error', this.recordFrontendError, false);
     let { grail } = this.props;
 
@@ -751,8 +749,8 @@ class SaveControls extends Component {
   componentDidUpdate(prevProps, prevState) {
     let { grail, grailActions, modalActions } = this.props;
     if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
-      let page_state = this.takeSnapshot();
       if (grail.recording) {
+        let page_state = this.takeSnapshot();
         grailActions.addEventToList();
       } else {
         if (grail.playback.length > 0) {
