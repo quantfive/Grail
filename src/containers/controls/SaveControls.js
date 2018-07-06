@@ -8,7 +8,8 @@ import React, { Component } from 'react';
 import { css, StyleSheet } from 'aphrodite';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import Popup from "reactjs-popup";
+import Popup from 'reactjs-popup';
+import xhook from 'xhook';
 
 // Components
 import CheckModal from '../modals/CheckModal';
@@ -24,8 +25,9 @@ import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
 let oldFetch = window.fetch;
-let oldSend = window.XMLHttpRequest.prototype.send;
-window.XMLHttpRequest.oldSend = oldSend;
+xhook.enable();
+// let oldSend = window.XMLHttpRequest.prototype.send;
+// window.XMLHttpRequest.oldSend = oldSend;
 
 const SKIPTAGS = {
   script: true,
@@ -39,6 +41,7 @@ class SaveControls extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      start: false,
       isRecording: false,
       firstClick: true,
       fetchMade: false,
@@ -52,8 +55,6 @@ class SaveControls extends Component {
     let resume = sessionStorage.getItem('grail_resume');
     if (resume === 'true') {
       window.fetch = this.fetch;
-      window.XMLHttpRequest.prototype.send = this.send;
-      window.XMLHttpRequest.prototype.oldSend = oldSend;
     }
 
     this.addToIgnore = this.addToIgnore.bind(this);
@@ -321,6 +322,7 @@ class SaveControls extends Component {
     let elements = this.getAllClickableElements();
     this.setState({
       elements,
+      start: true,
     }, this.clickAllElements);
   }
 
@@ -408,8 +410,6 @@ class SaveControls extends Component {
     // let elements = this.state.elements;
     let element = elements.pop();
     window.fetch = this.fetch;
-    window.XMLHttpRequest.prototype.send = this.send;
-    window.XMLHttpRequest.prototype.oldSend = oldSend;
 
     if (element !== null && element !== undefined) {
       let currentHref = window.location.href;
@@ -510,7 +510,13 @@ class SaveControls extends Component {
   }
 
   saveError = (api, data, error) => {
-    this.addToStorage('grail_backend_errors', {api: api, data:data, error: error});
+    this.addToStorage('grail_backend_errors', {
+      api: api, 
+      data:data, 
+      error: error, 
+      element: this.state.currentElementHtml,
+      page: window.location.href,
+    });
   }
 
   takeSnapshot = () => {
@@ -667,8 +673,35 @@ class SaveControls extends Component {
     }
   }
 
+  xmlBeforeHook = (request) => {
+    if (this.state.start) {
+      let { grailActions } = this.props;
+      let api = request.url;
+      grailActions.beforeFetch(api);
+    }
+  }
+
+  xmlAfterHook = (request, response) => {
+    let { grailActions } = this.props;
+    if (this.state.start) {
+      let api = request.url;
+      let body = request.body;
+      let method = request.method;
+
+      let event = {
+        endpoint: api,
+        request_input: body ? body : null,
+        request_type: method,
+        request_output: response,
+      }
+
+      setTimeout(() => {
+        grailActions.fetchFinished(api);
+      }, 200)
+    }
+  }
+
   send = (data, isGrail=false) => {
-    window.XMLHttpRequest.prototype.oldSend = oldSend;
     let scThis = this;
     let { grailActions } = scThis.props;
     let api = 'xml';
@@ -801,6 +834,9 @@ class SaveControls extends Component {
         elements,
       }, this.handleLoad)
     }
+
+    xhook.before(this.xmlBeforeHook);
+    xhook.after(this.xmlAfterHook);
   }
 
   componentDidUpdate(prevProps, prevState) {
