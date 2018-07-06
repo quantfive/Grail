@@ -847,18 +847,11 @@ class SaveControls extends Component {
 
     return (
       <div id='controller' className={css(styles.grailTestController)}>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.startClickAll}>click all</button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.recordToggle}>
-          {this.state.isRecording
-            ? 'Stop'
-            : 'Record'
-          }
-        </button>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.getPlayBack}>playback</button>
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.startClickAll}>Click All</button>
         {modal.openCheckModal && <CheckModal />}
         {modal.openResultsModal && <ResultsModal />}
         <Popup trigger={
-          <button className={css(styles.grailTestButton, styles.grailTestCheck)}>ignore</button>}
+          <button className={css(styles.grailTestButton, styles.grailTestCheck)}>Ignore Element</button>}
           modal
           closeOnDocumentClick
         >
