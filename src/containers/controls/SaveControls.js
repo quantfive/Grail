@@ -837,6 +837,7 @@ class SaveControls extends Component {
 
     xhook.before(this.xmlBeforeHook);
     xhook.after(this.xmlAfterHook);
+    window.fetch = this.fetch;
   }
 
   componentDidUpdate(prevProps, prevState) {

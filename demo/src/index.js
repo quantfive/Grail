@@ -42,19 +42,19 @@ class Demo extends Component {
   }
 
   testFetch2 = () => {
-    // fetch(API.NIFFY, API.POST_CONFIG())
-    // .then(Helpers.checkStatus)
-    // .then(Helpers.parseJSON)
-    // .then((res) => {
-    //   console.log(res);
-    // })
-
-    let res = fetch(API.CHECK_READY, API.POST_CONFIG({test: null}))
+    fetch(API.NIFFY, API.POST_CONFIG())
     .then(Helpers.checkStatus)
     .then(Helpers.parseJSON)
-    .then(json => {
-      console.log(json);
-    });
+    .then((res) => {
+      console.log(res);
+    })
+
+    // let res = fetch(API.CHECK_READY, API.POST_CONFIG({test: null}))
+    // .then(Helpers.checkStatus)
+    // .then(Helpers.parseJSON)
+    // .then(json => {
+    //   console.log(json);
+    // });
   }
 
   xmlFetch = () => {
