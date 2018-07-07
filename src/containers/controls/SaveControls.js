@@ -690,7 +690,8 @@ class SaveControls extends Component {
         res = await Helpers.parseJSON(resClone)
 
       } catch (error) {
-        this.saveError(api, data, error.toString());
+        // console.log('Saving error from fetch call')
+        // this.saveError(api, data, error.toString());
       }
       let event = {
         endpoint: api,
@@ -712,6 +713,10 @@ class SaveControls extends Component {
     }
   }
 
+  /***
+  * Starts fetch timer when a request is made
+  * @params request - Unused request object
+  */
   xmlBeforeHook = (request) => {
     if (this.state.start) {
       let { grailActions } = this.props;
@@ -720,12 +725,22 @@ class SaveControls extends Component {
     }
   }
 
+  /***
+  * Checks for errors and if all fetches are finished
+  * @params request - Request object
+  * @params response - Response object
+  */
   xmlAfterHook = (request, response) => {
     let { grailActions } = this.props;
     if (this.state.start) {
       let api = request.url;
       let body = request.body;
       let method = request.method;
+      let data = {
+        method: request.method,
+        body: request.body,
+        headers: request.headers,
+      }
 
       let event = {
         endpoint: api,
@@ -734,51 +749,16 @@ class SaveControls extends Component {
         request_output: response,
       }
 
+      if (response.status >= 400) {
+        this.saveError(api, data, response.statusText);
+      }
+
       setTimeout(() => {
         grailActions.fetchFinished(api);
       }, 200)
     }
   }
 
-  send = (data, isGrail=false) => {
-    let scThis = this;
-    let { grailActions } = scThis.props;
-    let api = 'xml';
-    let type = null; // How to get request type?
-
-    if (isGrail) {
-      try {
-        this.oldSend(data);
-      } catch (error) {
-        console.log('Using wrong this');
-      }
-    } else {
-      grailActions.beforeFetch(api);
-      try {
-        this.oldsend(data)
-      } catch (error) {
-        api = this.responseUrl;
-        this.saveError(api, data, error.toString());
-      }
-      let event = {
-        endpoint: api,
-        request_input: data ? data : null,
-        request_type: type,
-        request_output: null,
-      }
-      grailActions.recordEvent(event);
-      this.setState({
-        fetchMade: false,
-      })
-
-      // The timeout for fetch being done is here so the element can render properly
-      setTimeout(() => {
-        grailActions.fetchFinished(api);
-      }, 200)
-
-      return;
-    }
-  }
 
   recordMouseEvents = async (e) => {
     let { grailActions } = this.props;

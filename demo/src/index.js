@@ -5,6 +5,9 @@ import { BrowserRouter as Router,
 } from 'react-router-dom'
 import {render} from 'react-dom'
 
+// Testing axios
+import axios from 'axios';
+
 import GrailTest from '../../src'
 
 import API from '../../src/config/api';
@@ -63,6 +66,17 @@ class Demo extends Component {
     req.send();
   }
 
+  axiosRequest = () => {
+    let api = ''
+    api = 'https://jsonplaceholder.typicode.com/posts/1';
+    api = API.NIFFY;
+    axios.post(api)
+      .then(res => {
+        console.log('AXIOS');
+        console.log(res.data.body);
+      });
+  }
+
   throwError = () => {
     throw new Error('new error');
   }
@@ -105,6 +119,7 @@ class Demo extends Component {
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
         <button id='throw' onClick={this.throwError}> Throw Error </button>
         <button onClick={this.xmlFetch}> XML </button>
+        <button onClick={this.axiosRequest}> Axios </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
         <div id="fetch-results">
           {this.state.fetchResults
