@@ -25,7 +25,6 @@ import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
 let oldFetch = window.fetch;
-xhook.enable();
 // let oldSend = window.XMLHttpRequest.prototype.send;
 // window.XMLHttpRequest.oldSend = oldSend;
 
@@ -42,6 +41,7 @@ class SaveControls extends Component {
     super(props);
     this.state = {
       start: false,
+      paused: false,
       isRecording: false,
       firstClick: true,
       fetchMade: false,
@@ -320,10 +320,39 @@ class SaveControls extends Component {
    */
   startClickAll = () => {
     let elements = this.getAllClickableElements();
+
+    xhook.enable()
+    xhook.before(this.xmlBeforeHook);
+    xhook.after(this.xmlAfterHook);
+    window.fetch = this.fetch;
+
     this.setState({
       elements,
       start: true,
     }, this.clickAllElements);
+  }
+
+  /***
+=======
+  * Pauses click all
+  */
+  pause = () => {
+    this.setState({paused: true});
+  }
+
+  /***
+  * Resumes click all
+  */
+  resume = () => {
+    this.setState({paused: false});
+    this.clickAllElements();
+  }
+
+  /***
+   * Replace all commas
+   */
+  replaceCommas = (outerHTML) => {
+    outerHTML.replace(new RegExp(','))
   }
 
   /***
@@ -411,7 +440,7 @@ class SaveControls extends Component {
     let element = elements.pop();
     window.fetch = this.fetch;
 
-    if (element !== null && element !== undefined) {
+    if (element !== null && element !== undefined && !this.state.paused) {
       let currentHref = window.location.href;
       this.setState({
         currentHref: currentHref,
@@ -425,8 +454,11 @@ class SaveControls extends Component {
         this.afterClick(false);
       });
 
-    } else {
+    } else if (!this.state.paused) {
       this.startNewPage();
+    } else {
+      console.log(this.state);
+      console.log('paused');
     }
   }
 
@@ -473,12 +505,19 @@ class SaveControls extends Component {
     }
   }
 
+  resetGrail = () => {
+    window.fetch = oldFetch;
+    xhook.disable();
+  }
+
   startNewPage = () => {
     let { modalActions } = this.props;
     let newPageState = this.getNewPageStates();
     if (!newPageState) {
       console.log("finished cycle");
       modalActions.openResultsModal(true);
+      this.resetGrail();
+
     }
   }
 
@@ -834,10 +873,6 @@ class SaveControls extends Component {
         elements,
       }, this.handleLoad)
     }
-
-    xhook.before(this.xmlBeforeHook);
-    xhook.after(this.xmlAfterHook);
-    window.fetch = this.fetch;
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -881,10 +916,20 @@ class SaveControls extends Component {
   render() {
     let { modal } = this.props;
     let ignoreElements = this.retrieveFromStorage('grail_ignoreElements');
+    let start = this.state.start;
+    let paused = this.state.paused;
 
     return (
       <div id='controller' className={css(styles.grailTestController)}>
-        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.startClickAll}>Click All</button>
+        {!start
+          ? <button className={css(styles.grailTestButton)} onClick={this.startClickAll}>Click All</button>
+          : <div>
+              {paused
+                ? <button className={css(styles.grailTestButton)} onClick={this.resume}>Resume</button>
+                : <button className={css(styles.grailTestButton)} onClick={this.pause}>Pause</button>
+              }
+            </div>
+        }
         {modal.openCheckModal && <CheckModal />}
         {modal.openResultsModal && <ResultsModal />}
         <Popup trigger={
