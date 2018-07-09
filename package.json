@@ -20,15 +20,10 @@
   },
   "dependencies": {
     "aphrodite": "^2.2.0",
-    "history": "^4.7.2",
     "react-collapsible": "^2.2.0",
     "react-modal": "^3.4.5",
     "react-redux": "^5.0.7",
-    "react-router-dom": "^4.3.1",
-    "react-router-redux": "^4.0.8",
-    "redux": "^4.0.0",
-    "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.3.0"
+    "redux": "^4.0.0"
   },
   "peerDependencies": {
     "react": "16.x"
@@ -36,11 +31,16 @@
   "devDependencies": {
     "nwb": "^0.22.0",
     "react": "^16.3.2",
-    "react-dom": "^16.3.2"
+    "react-dom": "^16.3.2",
+    "react-router-dom": "^4.3.1",
+    "react-router-redux": "^4.0.8",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
+    "history": "^4.7.2"
   },
-  "author": "",
-  "homepage": "",
-  "license": "MIT",
+  "author": "Quant Five",
+  "homepage": "grailhq.com",
+  "license": "BSD 3-Clause",
   "repository": "",
   "keywords": [
     "react-component"
