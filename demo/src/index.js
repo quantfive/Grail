@@ -77,6 +77,11 @@ class Demo extends Component {
       });
   }
 
+  newWindow = (event) => {
+    debugger;
+    window.open('www.google.com','_blank');
+  }
+
   throwError = () => {
     throw new Error('new error');
   }

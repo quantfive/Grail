@@ -50,6 +50,7 @@ class SaveControls extends Component {
       currentHref: '',
       ignoreElements: '',
       currentElementHtml:'',
+      currentBackgroundColor: '',
     }
 
     let resume = sessionStorage.getItem('grail_resume');
@@ -307,8 +308,7 @@ class SaveControls extends Component {
     for (let i = 0; i < allElements.length; i++) {
       let element = allElements[i];
       let elementClicked = this.checkClicked(element);
-      let elementIgnored = this.checkIgnored(element);
-      if ((element.onclick || element.tagName === 'A') && !elementClicked && !elementIgnored) {
+      if ((element.onclick || element.tagName === 'A') && !elementClicked) {
         filteredElements.push(element);
       }
     }
@@ -356,11 +356,15 @@ class SaveControls extends Component {
   }
 
   /***
-   * Checked if we've clicked on the element or not
+   * Checked if we've clicked on the element or not or if it is ignored
    * @params element -- an HTML element
    */
   checkClicked = (element) => {
     let clickedElements = sessionStorage.getItem('clicked');
+
+    if (this.checkIgnored(element)) {
+      return true;
+    }
 
     if (clickedElements) {
       let clickedElementsSet = new Set(clickedElements.split(','));
@@ -379,24 +383,29 @@ class SaveControls extends Component {
     // [Attr = value],[attr=value]
     let ignoredElements = this.retrieveFromStorage('grail_ignoreElements');
 
-    if (!ignoredElements) {
+    if(!ignoredElements) {
       return false;
     }
-    for (let i = 0; i < ignoredElements.length; i++) {
-      let query = ignoredElements[i][0];
-      let queriedElements = []
-      try {
-        queriedElements = this.getDocument().querySelectorAll(query);
-      } catch (error) {
-        // console.log(error);
-        console.log('invalid query');
-      }
 
-      if (Array.from(queriedElements).includes(element)) {
-        return true;
-      }
-    }
-    return false;
+    return ignoredElements.includes(element.outerHTML); 
+    // if (!ignoredElements) {
+    //   return false;
+    // }
+    // for (let i = 0; i < ignoredElements.length; i++) {
+    //   let query = ignoredElements[i][0];
+    //   let queriedElements = []
+    //   try {
+    //     queriedElements = this.getDocument().querySelectorAll(query);
+    //   } catch (error) {
+    //     // console.log(error);
+    //     console.log('invalid query');
+    //   }
+
+    //   if (Array.from(queriedElements).includes(element)) {
+    //     return true;
+    //   }
+    // }
+    // return false;
   }
 
   /***
@@ -573,15 +582,77 @@ class SaveControls extends Component {
   }
 
   editIgnore = (event) => {
+    // Old functionality
     this.setState({ignoreElements: event.target.value});
   }
 
+  /***
+  * Creates listeners for click and hover
+  * to detect user selection of elements.
+  * @params event - Event object that holds click information
+  */
   addToIgnore = (event) => {
+    // Old Functionality - Maybe we want both?
+    // event.preventDefault();
+    // event.stopPropagation();
+    // console.log(this.state.ignoreElements);
+    // this.addToStorage('grail_ignoreElements', [this.state.ignoreElements]);
+    // this.setState({ignoreElements: ''});
+    // document.onclick = this.selectElement;
+    document.addEventListener('click', this.selectElement, true);
+    document.body.addEventListener('mouseover', this.highlightElement, false);
+    document.body.addEventListener('mouseout', this.revertHighlight, false);
+  }
+
+  /***
+  * Adds clicked element to ignore list in storage
+  * @params event - Event object that holds click information
+  */
+  selectElement = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    console.log(this.state.ignoreElements);
-    this.addToStorage('grail_ignoreElements', [this.state.ignoreElements]);
-    this.setState({ignoreElements: ''});
+
+    this.revertHighlight(event.target, true);
+    this.addToStorage('grail_ignoreElements', event.target.outerHTML);
+    this.removeListeners();
+  }
+
+  /***
+  * Removes the click and hover listeners
+  * to restore original functionality
+  */
+  removeListeners = () => {
+    document.removeEventListener('click', this.selectElement, true);
+    document.body.removeEventListener('mouseover', this.highlightElement, false);
+    document.body.removeEventListener('mouseout', this.revertHighlight, false);
+  }
+
+  /*** 
+  * Highlights an element by temporarily
+  * creating a blue background
+  * @params event - Event object that holds click information
+  */
+  highlightElement = (event) => {
+    let element = event.target;
+    this.setState({currentBackgroundColor: element.style.backgroundColor});
+    element.style.backgroundColor = '#A8C5E5';
+
+  }
+
+  /***
+  * Sets the background color of element
+  * back to its original color
+  * @params event - Event object that holds click information
+  * @params specific - If specific, then event is target element
+  */
+  revertHighlight = (event, specific=false) => {
+    let element = null;
+    if (specific) {
+      element = event;
+    } else {
+      element = event.fromElement;
+    }
+    element.style.backgroundColor = this.state.currentBackgroundColor;
   }
 
   getPlayBack = async () => {
@@ -749,8 +820,13 @@ class SaveControls extends Component {
         request_output: response,
       }
 
-      if (response.status >= 400) {
-        this.saveError(api, data, response.statusText);
+      if (response.status >= 400 || response.status === 0 || response instanceof Error) {
+        let error = response.statusText;
+
+        if(!error) {
+          error = Response.toString();
+        }
+        this.saveError(api, data, error);
       }
 
       setTimeout(() => {
@@ -898,21 +974,8 @@ class SaveControls extends Component {
     let ignoreElements = this.retrieveFromStorage('grail_ignoreElements');
     let start = this.state.start;
     let paused = this.state.paused;
-
-    return (
-      <div id='controller' className={css(styles.grailTestController)}>
-        {!start
-          ? <button className={css(styles.grailTestButton)} onClick={this.startClickAll}>Click All</button>
-          : <div>
-              {paused
-                ? <button className={css(styles.grailTestButton)} onClick={this.resume}>Resume</button>
-                : <button className={css(styles.grailTestButton)} onClick={this.pause}>Pause</button>
-              }
-            </div>
-        }
-        {modal.openCheckModal && <CheckModal />}
-        {modal.openResultsModal && <ResultsModal />}
-        <Popup trigger={
+    let ignoreElementsModal = 
+      <Popup trigger={
           <button className={css(styles.grailTestButton, styles.grailTestCheck)}>Ignore Element</button>}
           modal
           closeOnDocumentClick
@@ -940,6 +1003,22 @@ class SaveControls extends Component {
         </div>
         )}
         </Popup>
+
+    return (
+      <div id='controller' className={css(styles.grailTestController)}>
+        {!start
+          ? <button className={css(styles.grailTestButton)} onClick={this.startClickAll}>Click All</button>
+          : <div>
+              {paused
+                ? <button className={css(styles.grailTestButton)} onClick={this.resume}>Resume</button>
+                : <button className={css(styles.grailTestButton)} onClick={this.pause}>Pause</button>
+              }
+            </div>
+        }
+        {modal.openCheckModal && <CheckModal />}
+        {modal.openResultsModal && <ResultsModal />}
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.addToIgnore}>Ignore Element</button>
+        
       </div>
     );
   }
@@ -983,6 +1062,9 @@ let styles = StyleSheet.create({
   },
   exampleText: {
     color: 'black',
+  },
+  grailHover: {
+    backgroundColor: 'black',
   }
 })
 
