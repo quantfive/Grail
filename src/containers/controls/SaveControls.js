@@ -51,6 +51,7 @@ class SaveControls extends Component {
       ignoreElements: '',
       currentElementHtml:'',
       currentBackgroundColor: '',
+      currentStyles: null,
     }
 
     let resume = sessionStorage.getItem('grail_resume');
@@ -677,7 +678,10 @@ class SaveControls extends Component {
   */
   highlightElement = (event) => {
     let element = event.target;
-    this.setState({currentBackgroundColor: element.style.backgroundColor});
+    this.setState({
+      currentBackgroundColor: element.style.backgroundColor,
+      currentStyles: element.getAttribute('style'),
+    });
     element.style.backgroundColor = '#A8C5E5';
 
   }
@@ -690,12 +694,19 @@ class SaveControls extends Component {
   */
   revertHighlight = (event, specific=false) => {
     let element = null;
+    let styles = this.state.currentStyles;
     if (specific) {
       element = event;
     } else {
       element = event.fromElement;
     }
+
     element.style.backgroundColor = this.state.currentBackgroundColor;
+    if (!styles) {
+      element.removeAttribute('style');
+    } else {
+      element.setAttribute('style', styles);
+    }
   }
 
   getPlayBack = async () => {

@@ -123,6 +123,7 @@ class Demo extends Component {
         <button onClick={() => this.testFetch2()}> Error Fetch </button>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
         <button id='throw' onClick={this.throwError}> Throw Error </button>
+        <div style={{opacity: 0.2}}> Styles </div>
         <button onClick={this.xmlFetch}> XML </button>
         <button onClick={this.axiosRequest}> Axios </button>
         {this.state.show && <div id="bamba"> NEW THING HERE YO! </div>}
