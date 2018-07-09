@@ -65,68 +65,92 @@ class ResultsModal extends React.Component {
 
     let backendErrors = sessionStorage.getItem('grail_backend_errors');
     backendErrors = JSON.parse(backendErrors);
-    let backendDisplay = backendErrors.map((error, index) => {
-      let api = error['api'];
-      let errorMessage = error['error'];
-      let data = error['data'];
+    let backendDisplay = Object.keys(backendErrors).map((page, index) => {
+      let errorMessages = backendErrors[page].map((error, index) => {
+        let api = error['api'];
+        let errorMessage = error['error'];
+        let data = error['data'];
 
-      let dataMethod = '';
-      let dataBody = '';
-      let dataHeaders = null;
-      let headers = null;
-      if (data) {
-        dataMethod = data['method'];
-        dataBody = data['body'];
-        dataHeaders = data['headers'];
+        let dataMethod = '';
+        let dataBody = '';
+        let dataHeaders = null;
+        let headers = null;
+        if (data) {
+          dataMethod = data['method'];
+          dataBody = data['body'];
+          dataHeaders = data['headers'];
 
-        headers = Object.keys(dataHeaders).map((header, index) => {
-          return (
-            <div className={css(styles.header)} >
-              { header } : { dataHeaders[header] }
-            </div>
-          );
-        });
-      }
+          headers = Object.keys(dataHeaders).map((header, index) => {
+            return (
+              <div className={css(styles.header)} >
+                { header } : { dataHeaders[header] }
+              </div>
+            );
+          });
+        }
 
+        return (
+          <div className={css(styles.errorLabel)} >
+            <Collapsible
+              trigger={
+                <div className={css(styles.collapsibleTrigger)}>
+                  <div className={css(styles.dataMethod)} >
+                    { dataMethod.toUpperCase() } { api }
+                  </div>
+                  <div className={css(styles.errorLabel)} >
+                    { errorMessage }
+                  </div>
+                </div>
+              }>
+              <div className={css(styles.collapsibleContent)}>
+                <div className={css(styles.dataBody)} >
+                  Body: { dataBody }
+                </div>
+                { headers ?
+                  <div className={css(styles.headers)} >
+                    <Collapsible trigger={
+                      <div className={css(styles.collapsibleTrigger)}>
+                        Headers:
+                      </div>
+                    } open={true}>
+                      { headers }
+                    </Collapsible>
+                  </div>
+                  :
+                  null
+                }
+              </div>
+            </Collapsible>
+          </div>
+        );
+      });
       return (
-        <div className={css(styles.errorLabel)} >
-          <Collapsible 
+        <div className={css(styles.page)}>
+          <Collapsible
             trigger={
               <div className={css(styles.collapsibleTrigger)}>
-                <div className={css(styles.dataMethod)} >
-                  { dataMethod.toUpperCase() } { api }
+                <div className={css(styles.pageLabel)}>
+                  { page }
                 </div>
-                <div className={css(styles.errorLabel)} >
-                  { errorMessage }
+                <div className={css(styles.errorNumber)}>
+                  { errorMessages.length } Errors
                 </div>
               </div>
             }>
             <div className={css(styles.collapsibleContent)}>
-              <div className={css(styles.dataBody)} >
-                Body: { dataBody }
-              </div>
-              { headers ?
-                <div className={css(styles.headers)} >
-                  <Collapsible trigger={
-                    <div className={css(styles.collapsibleTrigger)}>
-                      Headers:
-                    </div>
-                  } open={true}>
-                    { headers }
-                  </Collapsible>
-                </div>
-                :
-                null
-              }
+              { errorMessages }
             </div>
           </Collapsible>
         </div>
       );
     });
 
-    let frontendErrorCount = 0;
+    let errorCount = 0;
     for (let key in frontendErrors) {
-      frontendErrorCount += frontendErrors[key].length
+      errorCount += frontendErrors[key].length
+    }
+    for (let key in backendErrors) {
+      errorCount += backendErrors[key].length
     }
 
     return (
@@ -141,7 +165,7 @@ class ResultsModal extends React.Component {
             ×
           </div>
           <div className={css(styles.grailHeader)}>
-            Grail Found { backendErrors.length + frontendErrorCount } errors
+            Grail Found { errorCount } errors
           </div>
           <div className={css(styles.differenceContainer)}>
             <div className={css(styles.frontendDisplay)}>

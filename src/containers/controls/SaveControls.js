@@ -254,6 +254,22 @@ class SaveControls extends Component {
     }
   }
 
+  addToStorageByPage = (key, value, page) => {
+    let currentValue = sessionStorage.getItem(key);
+
+    let items = {};
+    if (currentValue) {
+      items = JSON.parse(currentValue);
+    }
+
+    if (page in items) {
+      items[page].push(value);
+    } else {
+      items[page] = [value];
+    }
+    sessionStorage.setItem(key, JSON.stringify(items));
+  }
+
   retrieveFromStorage = (key) => {
     let items = sessionStorage.getItem(key);
     let parsedItems = JSON.parse(items);
@@ -387,7 +403,7 @@ class SaveControls extends Component {
       return false;
     }
 
-    return ignoredElements.includes(element.outerHTML); 
+    return ignoredElements.includes(element.outerHTML);
     // if (!ignoredElements) {
     //   return false;
     // }
@@ -557,13 +573,15 @@ class SaveControls extends Component {
   }
 
   saveError = (api, data, error) => {
-    this.addToStorage('grail_backend_errors', {
-      api: api, 
-      data:data, 
-      error: error, 
+    this.addToStorageByPage('grail_backend_errors', {
+      api: api,
+      data: data,
+      error: error,
       element: this.state.currentElementHtml,
       page: window.location.href,
-    });
+    },
+    api
+    );
   }
 
   takeSnapshot = () => {
@@ -626,7 +644,7 @@ class SaveControls extends Component {
     document.body.removeEventListener('mouseout', this.revertHighlight, false);
   }
 
-  /*** 
+  /***
   * Highlights an element by temporarily
   * creating a blue background
   * @params event - Event object that holds click information
@@ -900,21 +918,14 @@ class SaveControls extends Component {
    * @params error e -- the error object
    */
   recordFrontendError = (e) => {
-    let currentErrors = sessionStorage.getItem('grail-frontend-errors');
-    let currentError = {stack: e.error.stack, message: e.message, filename: e.filename, lineno: e.lineno};
-    let currentHref = window.location.pathname
-    let errors = {}
-    if (currentErrors) {
-      errors = JSON.parse(currentErrors);
-      if (currentHref in errors) {
-        errors[currentHref] = [...errors[currentHref], currentError];
-      } else {
-        errors[currentHref] = [currentError];
-      }
-    } else {
-      errors[currentHref] = [currentError];
-    }
-    sessionStorage.setItem('grail-frontend-errors', JSON.stringify(errors))
+    this.addToStorageByPage('grail-frontend-errors', {
+      stack: e.error.stack,
+      message: e.message,
+      filename: e.filename,
+      lineno: e.lineno
+    },
+    window.location.pathname
+    );
   }
 
   componentDidMount() {
@@ -973,7 +984,7 @@ class SaveControls extends Component {
     let ignoreElements = this.retrieveFromStorage('grail_ignoreElements');
     let start = this.state.start;
     let paused = this.state.paused;
-    let ignoreElementsModal = 
+    let ignoreElementsModal =
       <Popup trigger={
           <button className={css(styles.grailTestButton, styles.grailTestCheck)}>Ignore Element</button>}
           modal
@@ -1017,7 +1028,7 @@ class SaveControls extends Component {
         {modal.openCheckModal && <CheckModal />}
         {modal.openResultsModal && <ResultsModal />}
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.addToIgnore}>Ignore Element</button>
-        
+
       </div>
     );
   }
