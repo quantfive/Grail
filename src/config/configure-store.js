@@ -12,13 +12,13 @@ const middleware = [
   routerMiddleware(history),
 ]
 
-// Configure the logger middleware
-const logger = createLogger({
-  level: 'info',
-  collapsed: true,
-});
-
 if (process.env.NODE_ENV === 'development') {
+  // Configure the logger middleware
+  const logger = createLogger({
+    level: 'info',
+    collapsed: true,
+  });
+
   // const devToolsExtension = window.devToolsExtension;
 
   // if (typeof devToolsExtension === 'function') {
