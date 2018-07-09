@@ -25,8 +25,6 @@ import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
 let oldFetch = window.fetch;
-// let oldSend = window.XMLHttpRequest.prototype.send;
-// window.XMLHttpRequest.oldSend = oldSend;
 
 const SKIPTAGS = {
   script: true,
@@ -350,7 +348,6 @@ class SaveControls extends Component {
   }
 
   /***
-=======
   * Pauses click all
   */
   pause = () => {
@@ -397,7 +394,6 @@ class SaveControls extends Component {
   * @params element -- an HTML element
   */
   checkIgnored = (element) => {
-    // [Attr = value],[attr=value]
     let ignoredElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
 
     if(!ignoredElements) {
@@ -405,24 +401,6 @@ class SaveControls extends Component {
     }
 
     return ignoredElements.includes(element.outerHTML);
-    // if (!ignoredElements) {
-    //   return false;
-    // }
-    // for (let i = 0; i < ignoredElements.length; i++) {
-    //   let query = ignoredElements[i][0];
-    //   let queriedElements = []
-    //   try {
-    //     queriedElements = this.getDocument().querySelectorAll(query);
-    //   } catch (error) {
-    //     // console.log(error);
-    //     console.log('invalid query');
-    //   }
-
-    //   if (Array.from(queriedElements).includes(element)) {
-    //     return true;
-    //   }
-    // }
-    // return false;
   }
 
   /***
@@ -610,13 +588,6 @@ class SaveControls extends Component {
   * @params event - Event object that holds click information
   */
   addToIgnore = (event) => {
-    // Old Functionality - Maybe we want both?
-    // event.preventDefault();
-    // event.stopPropagation();
-    // console.log(this.state.ignoreElements);
-    // this.addToStorage('grail_ignoreElements', [this.state.ignoreElements]);
-    // this.setState({ignoreElements: ''});
-    // document.onclick = this.selectElement;
     document.addEventListener('click', this.addSelectedElement, true);
     document.body.addEventListener('mouseover', this.highlightElement, false);
     document.body.addEventListener('mouseout', this.revertHighlight, false);
@@ -815,8 +786,7 @@ class SaveControls extends Component {
         res = await Helpers.parseJSON(resClone)
 
       } catch (error) {
-        // console.log('Saving error from fetch call')
-        // this.saveError(api, data, error.toString());
+        console.log(error);
       }
       let event = {
         endpoint: api,
@@ -1018,41 +988,8 @@ class SaveControls extends Component {
 
   render() {
     let { modal } = this.props;
-    let parser = new DOMParser();
-    let ignoreElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
-    let ignoredElements = parser.parseFromString(ignoreElements, 'text/xml')[0];
-
     let start = this.state.start;
     let paused = this.state.paused;
-    let ignoreElementsModal =
-      <Popup trigger={
-          <button className={css(styles.grailTestButton, styles.grailTestCheck)}>Ignore Element</button>}
-          modal
-          closeOnDocumentClick
-        >
-        {close => (
-        <div>
-          <form onSubmit={this.addToIgnore}>
-            <p className={css(styles.exampleText)}>
-              Instructions: Submit each element that you want to ignore. Use a comma to separate element attributes
-              and values.
-            </p>
-            <span className={css(styles.exampleText)}> Ex. Format: [attribute=value], [attribute=value], ... </span>
-            <input type='text' onChange={this.editIgnore}/>
-            <input type='submit'/>
-            <p className={css(styles.exampleText)}>
-              Current Ignored Elements:
-            </p>
-            <div className={css(styles.exampleText)}>
-              {ignoreElements
-              ? ignoreElements.toString()
-              : null  }
-            </div>
-          </form>
-          <button onClick={() => {close()}}>close</button>
-        </div>
-        )}
-        </Popup>
 
     return (
       <div id='controller' className={css(styles.grailTestController)}>
