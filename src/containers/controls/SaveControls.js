@@ -240,22 +240,22 @@ class SaveControls extends Component {
     return stringifiedValue;
   }
 
-  addToStorage = (key, value) => {
-    let items = sessionStorage.getItem(key);
+  addToStorage = (key, value, storage=sessionStorage) => {
+    let items = storage.getItem(key);
 
     if (!items) {
       let valueJson = this.stringify([value]);
-      sessionStorage.setItem(key, valueJson);
+      storage.setItem(key, valueJson);
     } else {
-      let parsedItems = this.retrieveFromStorage(key);
+      let parsedItems = this.retrieveFromStorage(key, storage);
       parsedItems.push(value);
       let valueJson = this.stringify(parsedItems);
-      sessionStorage.setItem(key, valueJson);
+      storage.setItem(key, valueJson);
     }
   }
 
-  addToStorageByPage = (key, value, page) => {
-    let currentValue = sessionStorage.getItem(key);
+  addToStorageByPage = (key, value, page, storage=sessionStorage) => {
+    let currentValue = storage.getItem(key);
 
     let items = {};
     if (currentValue) {
@@ -267,27 +267,27 @@ class SaveControls extends Component {
     } else {
       items[page] = [value];
     }
-    sessionStorage.setItem(key, JSON.stringify(items));
+    storage.setItem(key, JSON.stringify(items));
   }
 
-  retrieveFromStorage = (key) => {
-    let items = sessionStorage.getItem(key);
+  retrieveFromStorage = (key, storage=sessionStorage) => {
+    let items = storage.getItem(key);
     let parsedItems = JSON.parse(items);
     return parsedItems;
   }
 
-  popFromStorage = (key, index=false) => {
-    let items = this.retrieveFromStorage(key);
+  popFromStorage = (key, index=false, storage=sessionStorage) => {
+    let items = this.retrieveFromStorage(key, storage);
     let poppedValue = null;
 
     if (items && !index) {
       // Key exists in storage
       poppedValue = items.pop();
-      sessionStorage.setItem(key, this.stringify(items));
+      storage.setItem(key, this.stringify(items));
     } else if (items && index) {
       // Key exists in storage and index given
       poppedValue = items.pop(index);
-      sessionStorage.setItem(key, this.stringify(items));
+      storage.setItem(key, this.stringify(items));
     }
     return poppedValue;
   }
@@ -397,7 +397,7 @@ class SaveControls extends Component {
   */
   checkIgnored = (element) => {
     // [Attr = value],[attr=value]
-    let ignoredElements = this.retrieveFromStorage('grail_ignoreElements');
+    let ignoredElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
 
     if(!ignoredElements) {
       return false;
@@ -616,7 +616,18 @@ class SaveControls extends Component {
     // this.addToStorage('grail_ignoreElements', [this.state.ignoreElements]);
     // this.setState({ignoreElements: ''});
     // document.onclick = this.selectElement;
-    document.addEventListener('click', this.selectElement, true);
+    document.addEventListener('click', this.addSelectedElement, true);
+    document.body.addEventListener('mouseover', this.highlightElement, false);
+    document.body.addEventListener('mouseout', this.revertHighlight, false);
+  }
+
+  /***
+  * Creates listeners for click and hover
+  * to detect user selection of elements.
+  * @params event - Event object that holds click information
+  */
+  removeFromIgnore = (event) => {
+    document.addEventListener('click', this.removeSelectedElement, true);
     document.body.addEventListener('mouseover', this.highlightElement, false);
     document.body.addEventListener('mouseout', this.revertHighlight, false);
   }
@@ -625,21 +636,36 @@ class SaveControls extends Component {
   * Adds clicked element to ignore list in storage
   * @params event - Event object that holds click information
   */
-  selectElement = (event) => {
+  addSelectedElement = (event) => {
     event.preventDefault();
     event.stopPropagation();
 
     this.revertHighlight(event.target, true);
-    this.addToStorage('grail_ignoreElements', event.target.outerHTML);
-    this.removeListeners();
+    this.addToStorage('grail_ignoreElements', event.target.outerHTML, localStorage);
+    this.removeListeners(this.addSelectedElement);
+  }
+
+  /***
+  * Remove clicked element from ignore list in storage
+  * @params event - Event object that holds click information
+  */
+  removeSelectedElement = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    let ignoredElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
+
+    this.revertHighlight(event.target, true);
+    let index = ignoredElements.indexOf(event.target.outerHTML);
+    this.popFromStorage('grail_ignoreElements', index, localStorage);
+    this.removeListeners(this.removeSelectedElement);
   }
 
   /***
   * Removes the click and hover listeners
   * to restore original functionality
   */
-  removeListeners = () => {
-    document.removeEventListener('click', this.selectElement, true);
+  removeListeners = (selectFunc) => {
+    document.removeEventListener('click', selectFunc, true);
     document.body.removeEventListener('mouseover', this.highlightElement, false);
     document.body.removeEventListener('mouseout', this.revertHighlight, false);
   }
@@ -981,7 +1007,10 @@ class SaveControls extends Component {
 
   render() {
     let { modal } = this.props;
-    let ignoreElements = this.retrieveFromStorage('grail_ignoreElements');
+    let parser = new DOMParser();
+    let ignoreElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
+    let ignoredElements = parser.parseFromString(ignoreElements, 'text/xml')[0];
+
     let start = this.state.start;
     let paused = this.state.paused;
     let ignoreElementsModal =
@@ -1028,7 +1057,7 @@ class SaveControls extends Component {
         {modal.openCheckModal && <CheckModal />}
         {modal.openResultsModal && <ResultsModal />}
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.addToIgnore}>Ignore Element</button>
-
+        <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.removeFromIgnore}>Remove Ignored Element</button>
       </div>
     );
   }
@@ -1063,6 +1092,10 @@ let styles = StyleSheet.create({
     fontSize: 14,
     outline: 'none',
     border: '1px solid white',
+
+    ':active': {
+      color: 'gray',
+    }
   },
   grailTestCheck: {
     marginLeft: 10,
