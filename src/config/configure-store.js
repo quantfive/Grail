@@ -12,7 +12,7 @@ const middleware = [
   routerMiddleware(history),
 ]
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && createLogger) {
   // Configure the logger middleware
   const logger = createLogger({
     level: 'info',
