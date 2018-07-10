@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import ReactDOMServer from 'react-dom/server'
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
@@ -29,10 +30,16 @@ class ResultsModal extends React.Component {
     if (!frontendErrors) frontendErrors = [];
     let frontendDisplay = Object.keys(frontendErrors).map((page, index) => {
       let errorMessages = frontendErrors[page].map((error, index) => {
+      let element = {__html: error.element};
         return (
           <Collapsible trigger={
             <div className={css(styles.collapsibleTrigger, styles.errorCollapsible)}>
-              { error['message'] } (in { error['filename'] }: { error['lineno'] })
+              <div>
+                { error['message'] } (in { error['filename'] }: { error['lineno'] })
+                <div className={css(styles.element)}>
+                  Element:  <div style={{marginLeft: 5}} dangerouslySetInnerHTML={element}/>
+                </div>
+              </div>
             </div>
           }>
             <div className={css(styles.errorMessage)}>
@@ -72,11 +79,15 @@ class ResultsModal extends React.Component {
         let api = error['api'];
         let errorMessage = error['error'];
         let data = error['data'];
+        let element = error['element']
 
         let dataMethod = '';
         let dataBody = '';
         let dataHeaders = null;
         let headers = null;
+
+        element = {__html: element}
+
         if (data) {
           dataMethod = data['method'];
           dataBody = data['body'];
@@ -123,6 +134,9 @@ class ResultsModal extends React.Component {
                 }
               </div>
             </Collapsible>
+            <div className={css(styles.element)}>
+              Element:  <div style={{marginLeft: 5}} dangerouslySetInnerHTML={element}/>
+            </div>
           </div>
         );
       });
@@ -282,6 +296,12 @@ var styles = StyleSheet.create({
     right: -16,
     cursor: 'pointer',
   },
+  element: {
+    // marginTop: 7,
+    display: 'flex',
+    marginTop: 3,
+    padding: 4,
+  }
 });
 
 const mapStateToProps = state => ({

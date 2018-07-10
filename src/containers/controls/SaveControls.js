@@ -848,8 +848,8 @@ class SaveControls extends Component {
       if (response.status >= 400 || response.status === 0 || response instanceof Error) {
         let error = response.statusText;
 
-        if(!error) {
-          error = Response.toString();
+        if(error === null || error === undefined) {
+          error = response.toString();
         }
         this.saveError(api, data, error);
       }
@@ -930,7 +930,8 @@ class SaveControls extends Component {
       stack: e.error.stack,
       message: e.message,
       filename: e.filename,
-      lineno: e.lineno
+      lineno: e.lineno,
+      element: this.state.currentElement.outerHTML,
     },
     window.location.pathname
     );
