@@ -1,7 +1,7 @@
 {
   "name": "grail-component",
   "version": "1.0.2",
-  "description": "grail-component React component",
+  "description": "Grail's click all javascript component to click every single element in the app and look for errors",
   "main": "lib/index.js",
   "module": "es/index.js",
   "files": [
