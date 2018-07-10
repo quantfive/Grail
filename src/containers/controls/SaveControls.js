@@ -442,9 +442,10 @@ class SaveControls extends Component {
     let elements = this.getAllClickableElements();
     // let elements = this.state.elements;
     let element = elements.pop();
+    let start = this.state.start;
     window.fetch = this.fetch;
 
-    if (element !== null && element !== undefined && !this.state.paused) {
+    if (element !== null && element !== undefined && !this.state.paused && start) {
       let currentHref = window.location.href;
       this.setState({
         currentHref: currentHref,
@@ -461,8 +462,7 @@ class SaveControls extends Component {
     } else if (!this.state.paused) {
       this.startNewPage();
     } else {
-      console.log(this.state);
-      console.log('paused');
+      return;
     }
   }
 
@@ -512,6 +512,7 @@ class SaveControls extends Component {
   resetGrail = () => {
     window.fetch = oldFetch;
     xhook.disable();
+    this.setState({start: false})
   }
 
   startNewPage = () => {
@@ -520,7 +521,7 @@ class SaveControls extends Component {
     if (!newPageState) {
       modalActions.openResultsModal(true);
       this.resetGrail();
-
+      return;
     }
   }
 
