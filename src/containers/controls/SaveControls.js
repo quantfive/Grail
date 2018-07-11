@@ -135,11 +135,11 @@ class SaveControls extends Component {
    * Starting the process of clicking all
    */
   startClickAll = () => {
-    let elements = this.getAllClickableElements();
-
     xhook.enable();
     xhook.before(this.xmlBeforeHook);
     xhook.after(this.xmlAfterHook);
+
+    let elements = this.getAllClickableElements();
 
     this.setState({
       elements,
