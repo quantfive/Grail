@@ -37,6 +37,7 @@ const SKIPTAGS = {
 class SaveControls extends Component {
   constructor(props) {
     super(props);
+    debugger;
     this.state = {
       start: false,
       paused: false,
