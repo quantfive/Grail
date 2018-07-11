@@ -37,7 +37,7 @@ import Helpers from '../config/helpers';
   GET_NEW_PAGE: '@@grail/GET_NEW_PAGE',
   GET_NEW_PAGES: '@@grail/GET_NEW_PAGES',
   IS_NEW_STATE: '@@grail/IS_NEW_STATE',
-  TOGGLE_NEW_STATE: '@@grail/TOGGLE_NEW_STATE', 
+  TOGGLE_NEW_STATE: '@@grail/TOGGLE_NEW_STATE',
 }
 
 export const GrailActions = {
@@ -320,7 +320,7 @@ export const GrailActions = {
     return (dispatch, getState) => {
       return dispatch({
         type: GrailConstants.GET_NEW_PAGES,
-        newPageStates: getState().grail.newPageStates,  
+        newPageStates: getState().grail.newPageStates,
       });
     }
   },

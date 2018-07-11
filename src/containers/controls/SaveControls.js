@@ -71,22 +71,6 @@ class SaveControls extends Component {
     }
   }
 
-  addToStorageByPage = (key, value, page, storage=sessionStorage) => {
-    let currentValue = storage.getItem(key);
-
-    let items = {};
-    if (currentValue) {
-      items = JSON.parse(currentValue);
-    }
-
-    if (page in items) {
-      items[page].push(value);
-    } else {
-      items[page] = [value];
-    }
-    storage.setItem(key, JSON.stringify(items));
-  }
-
   retrieveFromStorage = (key, storage=sessionStorage) => {
     let items = storage.getItem(key);
     let parsedItems = JSON.parse(items);
@@ -107,6 +91,22 @@ class SaveControls extends Component {
       storage.setItem(key, JSON.stringify(items));
     }
     return poppedValue;
+  }
+
+  addToStorageByPage = (key, value, page, storage=sessionStorage) => {
+    let currentValue = storage.getItem(key);
+
+    let items = {};
+    if (currentValue) {
+      items = JSON.parse(currentValue);
+    }
+
+    if (page in items) {
+      items[page].push(value);
+    } else {
+      items[page] = [value];
+    }
+    storage.setItem(key, JSON.stringify(items));
   }
 
   addVisited = (href) => {
@@ -132,33 +132,14 @@ class SaveControls extends Component {
   }
 
   /***
-   * Gets all clickable elements on the page
-   */
-  getAllClickableElements = () => {
-    let allElements = document.querySelectorAll(':not([class^=grailTest])');
-    let filteredElements = [];
-
-    for (let i = 0; i < allElements.length; i++) {
-      let element = allElements[i];
-      let elementClicked = this.checkClicked(element);
-      if ((element.onclick || element.tagName === 'A') && !elementClicked) {
-        filteredElements.push(element);
-      }
-    }
-    return filteredElements;
-  }
-
-  /***
    * Starting the process of clicking all
    */
   startClickAll = () => {
     let elements = this.getAllClickableElements();
 
-    debugger;
-    xhook.enable()
+    xhook.enable();
     xhook.before(this.xmlBeforeHook);
     xhook.after(this.xmlAfterHook);
-    //window.fetch = this.fetch;
 
     this.setState({
       elements,
@@ -167,25 +148,26 @@ class SaveControls extends Component {
   }
 
   /***
-  * Pauses click all
-  */
-  pause = () => {
-    this.setState({paused: true});
-  }
+   * Gets all clickable elements on the page
+   */
+  getAllClickableElements = () => {
+    let allElements = document.querySelectorAll(':not([class^=grailTest])');
+    let filteredElements = [];
 
-  /***
-  * Resumes click all
-  */
-  resume = () => {
-    this.setState({paused: false});
-    this.clickAllElements();
+    for (let i = 0; i < allElements.length; i++) {
+      let element = allElements[i];
+      if ((element.onclick || element.tagName === 'A') && !this.hasBeenClicked(element)) {
+        filteredElements.push(element);
+      }
+    }
+    return filteredElements;
   }
 
   /***
    * Checked if we've clicked on the element or not or if it is ignored
    * @params element -- an HTML element
    */
-  checkClicked = (element) => {
+  hasBeenClicked = (element) => {
     let clickedElements = sessionStorage.getItem('clicked');
 
     if (this.checkIgnored(element)) {
@@ -198,6 +180,50 @@ class SaveControls extends Component {
       return clickedElementsSet.has(outerHTML);
     } else {
       return false;
+    }
+  }
+
+  /***
+   * Clicks all clickable elements
+   */
+  clickAllElements = () => {
+    let elements = this.getAllClickableElements();
+    // let elements = this.state.elements;
+    let element = elements.pop();
+    let start = this.state.start;
+    //window.fetch = this.fetch;
+
+    if (element !== null && element !== undefined && !this.state.paused && start) {
+      let currentHref = window.location.href;
+      this.setState({
+        currentHref: currentHref,
+        currentElement: element,
+      }, () => {
+        try {
+          this.clickElement(element);
+        } catch (e) {
+          console.log(e);
+        }
+        this.afterClick(false);
+      });
+
+    } else if (!this.state.paused) {
+      this.startNewPage();
+    } else {
+      return;
+    }
+  }
+
+  /***
+  * Checks if an element has been
+  * clicked and clicks if it is new
+  * @params element -- an HTML element
+  */
+  clickElement = (element) => {
+    if (!this.hasBeenClicked(element)) {
+      this.setState({currentElementHtml: element.outerHTML});
+      this.saveClicked(element);
+      element.click();
     }
   }
 
@@ -234,62 +260,30 @@ class SaveControls extends Component {
     }
   }
 
-  /***
-  * Checks if an element has been
-  * clicked and clicks if it is new
-  * @params element -- an HTML element
-  */
-  clickElement = (element) => {
-    if (!this.checkClicked(element)) {
-      this.setState({currentElementHtml: element.outerHTML});
-      this.saveClicked(element);
-      element.click();
-    }
-  }
-
-  /***
-   * Clicks all clickable elements
-   */
-  clickAllElements = () => {
-    let elements = this.getAllClickableElements();
-    // let elements = this.state.elements;
-    let element = elements.pop();
-    let start = this.state.start;
-    //window.fetch = this.fetch;
-
-    if (element !== null && element !== undefined && !this.state.paused && start) {
-      let currentHref = window.location.href;
-      this.setState({
-        currentHref: currentHref,
-        currentElement: element,
-      }, () => {
-        try {
-          this.clickElement(element);
-        } catch (e) {
-          console.log(e);
-        }
-        this.afterClick(false);
-      });
-
-    } else if (!this.state.paused) {
-      this.startNewPage();
-    } else {
+  startNewPage = () => {
+    let { modalActions } = this.props;
+    let newPageState = this.getNewPageStates();
+    if (!newPageState) {
+      modalActions.openResultsModal(true);
+      this.resetGrail();
       return;
     }
   }
 
-  /***
-   * Actions to make after a click is made
-   * @params boolean fetchDone -- indicates whether the fetch has finished or not
-   */
-  afterClick = (fetchDone) => {
-    if (!this.state.fetchMade || fetchDone) {
-      let { grailActions } = this.props;
-      let newHref = window.location.href;
-      this.addVisited(newHref);
-      this.checkNewPage(newHref);
-      // Need this timeout so window.history.back can load;
-      let timeout = setTimeout(this.clickAllElements.bind(this), 200);
+  hasVisited = (state) => {
+    let href = state.href;
+    let visited = this.retrieveFromStorage('grail_visited');
+    let pages = this.retrieveFromStorage('grail_newPages');
+
+    if (!visited) {
+      return false;
+    }
+
+    let hasVisited = visited.includes(href);
+    if (!pages) {
+      return hasVisited;
+    } else {
+      return hasVisited || pages.includes(href);
     }
   }
 
@@ -321,36 +315,39 @@ class SaveControls extends Component {
     }
   }
 
+  /***
+  * Pauses click all
+  */
+  pause = () => {
+    this.setState({paused: true});
+  }
+
+  /***
+  * Resumes click all
+  */
+  resume = () => {
+    this.setState({paused: false});
+    this.clickAllElements();
+  }
+
+  /***
+   * Actions to make after a click is made
+   * @params boolean fetchDone -- indicates whether the fetch has finished or not
+   */
+  afterClick = (fetchDone) => {
+    if (!this.state.fetchMade || fetchDone) {
+      let { grailActions } = this.props;
+      let newHref = window.location.href;
+      this.addVisited(newHref);
+      this.checkNewPage(newHref);
+      // Need this timeout so window.history.back can load;
+      let timeout = setTimeout(this.clickAllElements.bind(this), 200);
+    }
+  }
+
   resetGrail = () => {
     xhook.disable();
     this.setState({start: false})
-  }
-
-  startNewPage = () => {
-    let { modalActions } = this.props;
-    let newPageState = this.getNewPageStates();
-    if (!newPageState) {
-      modalActions.openResultsModal(true);
-      this.resetGrail();
-      return;
-    }
-  }
-
-  hasVisited = (state) => {
-    let href = state.href;
-    let visited = this.retrieveFromStorage('grail_visited');
-    let pages = this.retrieveFromStorage('grail_newPages');
-
-    if (!visited) {
-      return false;
-    }
-
-    let hasVisited = visited.includes(href);
-    if (!pages) {
-      return hasVisited;
-    } else {
-      return hasVisited || pages.includes(href);
-    }
   }
 
   handleLoad = () => {
@@ -361,18 +358,6 @@ class SaveControls extends Component {
       this.addToStorage('grail_visited', window.location.href);
       this.clickAllElements();
     }
-  }
-
-  saveError = (api, data, error) => {
-    this.addToStorageByPage('grail_backend_errors', {
-      api: api,
-      data: data,
-      error: error,
-      element: this.state.currentElementHtml,
-      page: window.location.href,
-    },
-    api
-    );
   }
 
   /***
@@ -417,13 +402,31 @@ class SaveControls extends Component {
         if(!error) {
           error = Response.toString();
         }
-        this.saveError(api, data, error);
+        this.recordBackendError(api, data, error);
       }
 
       setTimeout(() => {
         grailActions.fetchFinished(api);
       }, 200)
     }
+  }
+
+  /***
+   * Records the backend error and saves it to sessionStorage
+   * @params error error -- the error object
+   * @params endpoint api -- the endpoint for the backend call
+   * @params data data -- the data used in the call
+   */
+  recordBackendError = (api, data, error) => {
+    this.addToStorageByPage('grail_backend_errors', {
+      api: api,
+      data: data,
+      error: error,
+      element: this.state.currentElementHtml,
+      page: window.location.href,
+    },
+    api
+    );
   }
 
   /***
