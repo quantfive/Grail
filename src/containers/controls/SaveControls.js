@@ -38,7 +38,7 @@ class SaveControls extends Component {
     }
 
     this.clickedElements = (JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || {})[this.state.grailCurrentHref] || [];
-    this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements'));
+    this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements')) || [];
     this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages')) || [];
     this.activeRequests = [];
     // TODO double check ignoring element logic
@@ -162,7 +162,7 @@ class SaveControls extends Component {
   }
 
   checkIgnored = (element) => {
-    return this.ignoredElements && this.ignoredElements.includes(element.outerHTML);
+    return this.ignoredElements.includes(element.outerHTML);
   }
 
   markClick = (element) => {
