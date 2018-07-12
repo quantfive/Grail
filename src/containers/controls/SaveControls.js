@@ -148,7 +148,7 @@ class SaveControls extends Component {
   }
 
   clickable = (element) => {
-    // TODO Check if this is sufficient to know if it's "clickable"
+    // TODO Is sufficient to know if it's "clickable"?
     return !this.hasClicked(element) && (element.onclick || element.tagName === 'A');
   }
 
