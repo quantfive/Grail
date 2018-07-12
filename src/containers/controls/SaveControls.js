@@ -34,12 +34,12 @@ class SaveControls extends Component {
     super(props);
     // TODO Check on correct Domain
     this.state = {
-      grailCurrentHref: '',
+      grailCurrentHref: window.location.href,
       grailRunning: false,
       grailPaused: false,
     }
 
-    this.clickedElements = JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || [];
+    this.clickedElements = (JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || {})[this.state.grailCurrentHref] || [];
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements'));
     this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages')) || [];
     this.activeRequests = [];
@@ -54,7 +54,6 @@ class SaveControls extends Component {
     sessionStorage.setItem('grail-running', true);
     this.setState({
       grailRunning: true,
-      grailCurrentHref: window.location.href,
     }, this.clickAllElements);
   }
 
