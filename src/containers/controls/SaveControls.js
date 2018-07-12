@@ -43,19 +43,15 @@ class SaveControls extends Component {
     this.clickedElements = JSON.parse(sessionStorage.getItem('grail-clicked-elements'));
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements'));
     this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages'));
+    this.activeRequests = [];
     // TODO check we're at the correct domain
-    // TODO fix component Mount
     // TODO double check ignoring element logic
-    // TODO figure xml hooks and redux
+    // TODO remove excess code in other file (esp redux)
 
     this.addToIgnore = this.addToIgnore.bind(this);
   }
 
   startClickAll = () => {
-    xhook.enable();
-    xhook.before(this.xmlBeforeHook);
-    xhook.after(this.xmlAfterHook);
-
     sessionStorage.setItem('grail-running', true);
     this.setState({
       grailRunning: true,
@@ -109,13 +105,19 @@ class SaveControls extends Component {
 
       this.addToStorage('grail-page-queue', this.state.grailCurrentHref);
 
+      if (this.activeRequests.length > 0) {
+        setTimeout(this.clickAllElements, 100);
+        return;
+      }
+
       let elements = this.addToStorageByPage('grail-element-queue', this.state.grailCurrentHref, this.getClickableElements());
 
-      for (let element in elements) {
+      if (elements.length > 0) {
         if (this.state.grailPaused) {
           return;
         }
-        this.clickElement(element);
+        this.clickElement(elements[0]);
+        return;
       }
 
       this.markPage(this.state.grailCurrentHref);
@@ -149,6 +151,7 @@ class SaveControls extends Component {
   clickElement = (element) => {
     this.markClick(element);
     element.click();
+    setTimeout(this.clickAllElements, 100);
   }
 
   checkIgnored = (element) => {
@@ -174,9 +177,7 @@ class SaveControls extends Component {
   * @params request - Unused request object
   */
   xmlBeforeHook = (request) => {
-    if (this.state.grailRunning) {
-      this.props.grailActions.beforeFetch(request.url);
-    }
+    this.activeRequests.push(request.url);
   }
 
   /***
@@ -185,51 +186,30 @@ class SaveControls extends Component {
   * @params response - Response object
   */
   xmlAfterHook = (request, response) => {
-    let { grailActions } = this.props;
-    if (this.state.grailRunning) {
-      let api = request.url;
-      let body = request.body;
-      let method = request.method;
-      let data = {
-        method: request.method,
-        body: request.body,
-        headers: request.headers,
-      }
-
-      let event = {
-        endpoint: api,
-        request_input: body ? body : null,
-        request_type: method,
-        request_output: response,
-      }
-
-      if (response.status >= 400 || response.status === 0 || response instanceof Error) {
-        let error = response.statusText;
-
-        if(!error) {
-          error = Response.toString();
-        }
-        this.recordBackendError(api, data, error);
-      }
-
-      setTimeout(() => {
-        grailActions.fetchFinished(api);
-      }, 200)
+    let index = this.activeRequests.indexOf(request.url);
+    if (index !== -1) {
+      this.activeRequests.splice(index, 1);
     }
-  }
 
-  /***
-   * Actions to make after a click is made
-   * @params boolean fetchDone -- indicates whether the fetch has finished or not
-   */
-  afterClick = (fetchDone) => {
-    if (!this.state.fetchMade || fetchDone) {
-      let { grailActions } = this.props;
-      let newHref = window.location.href;
-      this.addVisited(newHref);
-      this.checkNewPage(newHref);
-      // Need this timeout so window.history.back can load;
-      let timeout = setTimeout(this.clickAllElements.bind(this), 200);
+    if (this.state.grailPaused) {
+      return;
+    }
+
+    if (response.status >= 400 || response.status === 0 || response instanceof Error) {
+      let error = response.statusText;
+
+      if(!error) {
+        error = response.toString();
+      }
+      this.recordBackendError(
+        request.url,
+        {
+          method: request.method,
+          body: request.body,
+          headers: request.headers,
+        },
+        error
+      );
     }
   }
 
@@ -415,13 +395,17 @@ class SaveControls extends Component {
   componentDidMount() {
     window.addEventListener('error', this.recordFrontendError, false);
 
-    if (this.props.grail.activeFetchCalls.length === 0) {
+    xhook.enable();
+    xhook.before(this.xmlBeforeHook);
+    xhook.after(this.xmlAfterHook);
+
+    if (this.activeRequests.length === 0) {
       this.handleLoad();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
+    if (this.activeRequests.length === 0) {
       this.handleLoad();
     }
   }
