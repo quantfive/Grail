@@ -35,65 +35,54 @@ class SaveControls extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      start: false,
-      paused: false,
-      isRecording: false,
-      firstClick: true,
-      fetchMade: false,
-      elements: [],
-      currentElement: null,
-      currentHref: '',
-      ignoreElements: '',
-      currentElementHtml:'',
-      currentBackgroundColor: '',
-      currentStyles: null,
+      grailCurrentHref: '',
+      grailRunning: false,
+      grailPaused: false,
     }
 
-    let resume = sessionStorage.getItem('grail_resume');
-    if (resume === 'true') {
-      //window.fetch = this.fetch;
-    }
+    this.clickedElements = JSON.parse(sessionStorage.getItem('grail-clicked-elements'));
+    this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements'));
+    // TODO set visited pages
+    // TODO check we're at the correct domain
+    // TODO fix component Mount
+    // TODO double check ignoring element logic
+    // TODO figure xml hooks and redux
 
     this.addToIgnore = this.addToIgnore.bind(this);
   }
 
-  addToStorage = (key, value, storage=sessionStorage) => {
-    let items = storage.getItem(key);
+  startClickAll = () => {
+    xhook.enable();
+    xhook.before(this.xmlBeforeHook);
+    xhook.after(this.xmlAfterHook);
 
-    if (!items) {
-      let valueJson = JSON.stringify([value]);
-      storage.setItem(key, valueJson);
-    } else {
-      let parsedItems = this.retrieveFromStorage(key, storage);
-      parsedItems.push(value);
-      let valueJson = JSON.stringify(parsedItems);
-      storage.setItem(key, valueJson);
+    sessionStorage.setItem('grail-running', true);
+    this.setState({
+      grailRunning: true,
+      grailCurrentHref: window.location.href,
+    }, this.clickAllElements);
+  }
+
+  handleLoad = () => {
+    let running = sessionStorage.getItem('grail-running');
+
+    if (running && !this.state.grailRunning) {
+
+      xhook.enable();
+      xhook.before(this.xmlBeforeHook);
+      xhook.after(this.xmlAfterHook);
+
+      this.setState({
+        grailRunning: true,
+        grailCurrentHref: window.location.href,
+      }, this.clickAllElements);
     }
   }
 
-  retrieveFromStorage = (key, storage=sessionStorage) => {
-    let items = storage.getItem(key);
-    let parsedItems = JSON.parse(items);
-    return parsedItems;
-  }
+  // STORAGE FUNCTIONS
 
-  popFromStorage = (key, index=false, storage=sessionStorage) => {
-    let items = this.retrieveFromStorage(key, storage);
-    let poppedValue = null;
-
-    if (items && !index) {
-      // Key exists in storage
-      poppedValue = items.pop();
-      storage.setItem(key, JSON.stringify(items));
-    } else if (items && index) {
-      // Key exists in storage and index given
-      poppedValue = items.pop(index);
-      storage.setItem(key, JSON.stringify(items));
-    }
-    return poppedValue;
-  }
-
-  addToStorageByPage = (key, value, page, storage=sessionStorage) => {
+  // Adds all values to page (doesn't guarentee uniqueness)
+  addToStorageByPage = (key, page, values, storage=sessionStorage) => {
     let currentValue = storage.getItem(key);
 
     let items = {};
@@ -102,188 +91,161 @@ class SaveControls extends Component {
     }
 
     if (page in items) {
-      items[page].push(value);
+      items[page].push(...values);
     } else {
-      items[page] = [value];
+      items[page] = values;
     }
     storage.setItem(key, JSON.stringify(items));
+
+    return items[page];
   }
 
-  addVisited = (href) => {
-    this.addToStorage('grail_visited', href);
-  }
+  popFromStorage = (key, storage=sessionStorage) => {
+    let items = JSON.parse(storage.getItem(key));
 
-  getNewPage = () => {
-    return this.popFromStorage('grail_newPages');
-  }
-
-  getNewPageStates = () => {
-    let page = this.getNewPage();
-    if (!page) {
-      return false;
-    }
-    sessionStorage.setItem('grail_resume', true);
-    window.location.href = page;
-
-    // On page change, some code will be executed
-    let x = null;
-    let y = null;
-    return true;
-  }
-
-  /***
-   * Starting the process of clicking all
-   */
-  startClickAll = () => {
-    xhook.enable();
-    xhook.before(this.xmlBeforeHook);
-    xhook.after(this.xmlAfterHook);
-
-    let elements = this.getAllClickableElements();
-
-    this.setState({
-      elements,
-      start: true,
-    }, this.clickAllElements);
-  }
-
-  /***
-   * Gets all clickable elements on the page
-   */
-  getAllClickableElements = () => {
-    let allElements = document.querySelectorAll(':not([class^=grailTest])');
-    let filteredElements = [];
-
-    for (let i = 0; i < allElements.length; i++) {
-      let element = allElements[i];
-      if ((element.onclick || element.tagName === 'A') && !this.hasBeenClicked(element)) {
-        filteredElements.push(element);
-      }
-    }
-    return filteredElements;
-  }
-
-  /***
-   * Checked if we've clicked on the element or not or if it is ignored
-   * @params element -- an HTML element
-   */
-  hasBeenClicked = (element) => {
-    let clickedElements = sessionStorage.getItem('clicked');
-
-    if (this.checkIgnored(element)) {
-      return true;
-    }
-
-    if (clickedElements) {
-      let clickedElementsSet = new Set(clickedElements.split(','));
-      let outerHTML = element.outerHTML.replace(/,/g, '_COMMA_')
-      return clickedElementsSet.has(outerHTML);
-    } else {
-      return false;
+    if (items) {
+      let value = items.pop();
+      storage.setItem(key, JSON.stringify(items));
+      return value;
     }
   }
 
-  /***
-   * Clicks all clickable elements
-   */
+  // Only adds unique values
+  addToStorage = (key, value, storage=sessionStorage) => {
+    let items = JSON.parse(storage.getItem(key));
+    if (!items.includes(value)) {
+      items.push(value);
+      storage.setItem(key, JSON.stringify(items));
+    }
+  }
+
+  // CLICK LOGIC
   clickAllElements = () => {
-    let elements = this.getAllClickableElements();
-    // let elements = this.state.elements;
-    let element = elements.pop();
-    let start = this.state.start;
-    //window.fetch = this.fetch;
+    if (!this.visitedPages.includes(this.state.grailCurrentHref)) {
 
-    if (element !== null && element !== undefined && !this.state.paused && start) {
-      let currentHref = window.location.href;
-      this.setState({
-        currentHref: currentHref,
-        currentElement: element,
-      }, () => {
-        try {
-          this.clickElement(element);
-        } catch (e) {
-          console.log(e);
+      this.addToStorage('grail-page-queue', this.state.grailCurrentHref);
+
+      let elements = this.addToStorageByPage('grail-element-queue', this.state.grailCurrentHref, this.getClickableElements());
+
+      for (let element in elements) {
+        if (this.state.grailPaused) {
+          return;
         }
-        this.afterClick(false);
-      });
+        this.clickElement(element);
+      }
 
-    } else if (!this.state.paused) {
-      this.startNewPage();
-    } else {
-      return;
-    }
-  }
-
-  /***
-  * Checks if an element has been
-  * clicked and clicks if it is new
-  * @params element -- an HTML element
-  */
-  clickElement = (element) => {
-    if (!this.hasBeenClicked(element)) {
-      this.setState({currentElementHtml: element.outerHTML});
-      this.saveClicked(element);
-      element.click();
-    }
-  }
-
-  /***
-  * Check if element is in user's ignore list
-  * @params element -- an HTML element
-  */
-  checkIgnored = (element) => {
-    let ignoredElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
-
-    if(!ignoredElements) {
-      return false;
+      this.markPage(this.state.grailCurrentHref);
     }
 
-    return ignoredElements.includes(element.outerHTML);
-  }
-
-  /***
-   * Save that we've clicked on a specific element
-   * save the full outer HTML
-   * @params element -- an HTML element
-   */
-  saveClicked = (element) => {
-    let clickedElements = sessionStorage.getItem('clicked');
-    let outerHTML = element.outerHTML.replace(/,/g, '_COMMA_');
-
-    if (!clickedElements) {
-      // Init clicked elements
-      sessionStorage.setItem('clicked', [outerHTML]);
-    } else {
-      let clickedElementsSet = new Set(clickedElements.split(','));
-      clickedElementsSet.add(outerHTML);
-      sessionStorage.setItem('clicked', Array.from(clickedElementsSet));
-    }
-  }
-
-  startNewPage = () => {
-    let { modalActions } = this.props;
-    let newPageState = this.getNewPageStates();
-    if (!newPageState) {
-      modalActions.openResultsModal(true);
+    let page = this.popFromStorage('grail-page-queue');
+    if (!page) { // traversed all pages
       this.resetGrail();
-      return;
+      this.props.modalActions.openResultsModal(true);
+    } else {
+      if (this.state.grailPaused) {
+        return;
+      }
+      window.location = page;
     }
   }
 
-  hasVisited = (state) => {
-    let href = state.href;
-    let visited = this.retrieveFromStorage('grail_visited');
-    let pages = this.retrieveFromStorage('grail_newPages');
+  getClickableElements = () => {
+    return document.querySelectorAll(':not([class^=grailTest])').filter(this.clickable);
+  }
 
-    if (!visited) {
-      return false;
+  clickable = (element) => {
+    // TODO Check if this is sufficient to know if it's "clickable"
+    return !this.hasClicked(element) && (element.onclick || element.tagName === 'A');
+  }
+
+  hasClicked = (element) => {
+    return this.checkIgnored(element) || this.clickedElements.includes(element.outerHTML);
+  }
+
+  clickElement = (element) => {
+    this.markClick(element);
+    element.click();
+  }
+
+  checkIgnored = (element) => {
+    return this.ignoredElements && this.ignoredElements.includes(element.outerHTML);
+  }
+
+  markClick = (element) => {
+    addToStorageByPage('grail-clicked-elements', this.state.grailCurrentHref, [element.outerHTML]);
+  }
+
+  markPage = (page) => {
+    addToStorage('grail-visited-pages', page);
+  }
+
+  resetGrail = () => {
+    xhook.disable();
+    sessionStorage.setItem('grail-running', false);
+    this.setState({grailRunning: false});
+  }
+
+  /***
+  * Starts fetch timer when a request is made
+  * @params request - Unused request object
+  */
+  xmlBeforeHook = (request) => {
+    if (this.state.grailRunning) {
+      this.props.grailActions.beforeFetch(request.url);
     }
+  }
 
-    let hasVisited = visited.includes(href);
-    if (!pages) {
-      return hasVisited;
-    } else {
-      return hasVisited || pages.includes(href);
+  /***
+  * Checks for errors and if all fetches are finished
+  * @params request - Request object
+  * @params response - Response object
+  */
+  xmlAfterHook = (request, response) => {
+    let { grailActions } = this.props;
+    if (this.state.grailRunning) {
+      let api = request.url;
+      let body = request.body;
+      let method = request.method;
+      let data = {
+        method: request.method,
+        body: request.body,
+        headers: request.headers,
+      }
+
+      let event = {
+        endpoint: api,
+        request_input: body ? body : null,
+        request_type: method,
+        request_output: response,
+      }
+
+      if (response.status >= 400 || response.status === 0 || response instanceof Error) {
+        let error = response.statusText;
+
+        if(!error) {
+          error = Response.toString();
+        }
+        this.recordBackendError(api, data, error);
+      }
+
+      setTimeout(() => {
+        grailActions.fetchFinished(api);
+      }, 200)
+    }
+  }
+
+  /***
+   * Actions to make after a click is made
+   * @params boolean fetchDone -- indicates whether the fetch has finished or not
+   */
+  afterClick = (fetchDone) => {
+    if (!this.state.fetchMade || fetchDone) {
+      let { grailActions } = this.props;
+      let newHref = window.location.href;
+      this.addVisited(newHref);
+      this.checkNewPage(newHref);
+      // Need this timeout so window.history.back can load;
+      let timeout = setTimeout(this.clickAllElements.bind(this), 200);
     }
   }
 
@@ -315,100 +277,14 @@ class SaveControls extends Component {
     }
   }
 
-  /***
-  * Pauses click all
-  */
   pause = () => {
-    this.setState({paused: true});
+    this.setState({grailPaused: true});
   }
 
-  /***
-  * Resumes click all
-  */
   resume = () => {
-    this.setState({paused: false});
-    this.clickAllElements();
-  }
-
-  /***
-   * Actions to make after a click is made
-   * @params boolean fetchDone -- indicates whether the fetch has finished or not
-   */
-  afterClick = (fetchDone) => {
-    if (!this.state.fetchMade || fetchDone) {
-      let { grailActions } = this.props;
-      let newHref = window.location.href;
-      this.addVisited(newHref);
-      this.checkNewPage(newHref);
-      // Need this timeout so window.history.back can load;
-      let timeout = setTimeout(this.clickAllElements.bind(this), 200);
-    }
-  }
-
-  resetGrail = () => {
-    xhook.disable();
-    this.setState({start: false})
-  }
-
-  handleLoad = () => {
-    let resume = sessionStorage.getItem('grail_resume');
-
-    if (resume === 'true') {
-      sessionStorage.setItem('grail_resume', false)
-      this.addToStorage('grail_visited', window.location.href);
-      this.clickAllElements();
-    }
-  }
-
-  /***
-  * Starts fetch timer when a request is made
-  * @params request - Unused request object
-  */
-  xmlBeforeHook = (request) => {
-    if (this.state.start) {
-      let { grailActions } = this.props;
-      let api = request.url;
-      grailActions.beforeFetch(api);
-    }
-  }
-
-  /***
-  * Checks for errors and if all fetches are finished
-  * @params request - Request object
-  * @params response - Response object
-  */
-  xmlAfterHook = (request, response) => {
-    let { grailActions } = this.props;
-    if (this.state.start) {
-      let api = request.url;
-      let body = request.body;
-      let method = request.method;
-      let data = {
-        method: request.method,
-        body: request.body,
-        headers: request.headers,
-      }
-
-      let event = {
-        endpoint: api,
-        request_input: body ? body : null,
-        request_type: method,
-        request_output: response,
-      }
-
-      if (response.status >= 400 || response.status === 0 || response instanceof Error) {
-        let error = response.statusText;
-
-        if(!error) {
-          error = Response.toString();
-        }
-        this.recordBackendError(api, data, error);
-      }
-
-      setTimeout(() => {
-        grailActions.fetchFinished(api);
-      }, 200)
-    }
+    this.setState({
+      grailPaused: false
+    }, this.clickAllElements);
   }
 
   /***
@@ -443,6 +319,8 @@ class SaveControls extends Component {
     window.location.pathname
     );
   }
+
+  // IGNORE ELEMENTS
 
   /***
   * Creates listeners for click and hover
@@ -594,15 +472,12 @@ class SaveControls extends Component {
 
   render() {
     let { modal } = this.props;
-    let start = this.state.start;
-    let paused = this.state.paused;
-
     return (
       <div id='controller' className={css(styles.grailTestController)}>
-        {!start
+        {!this.state.grailRunning
           ? <button className={css(styles.grailTestButton)} onClick={this.startClickAll}>Click All</button>
           : <div>
-              {paused
+              {this.state.grailPaused
                 ? <button className={css(styles.grailTestButton)} onClick={this.resume}>Resume</button>
                 : <button className={css(styles.grailTestButton)} onClick={this.pause}>Pause</button>
               }
