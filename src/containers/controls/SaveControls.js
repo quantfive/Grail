@@ -18,7 +18,6 @@ import API from '../../config/api';
 import Helpers from '../../config/helpers';
 
 // Redux
-import { GrailActions } from '../../redux/grail';
 import { ModalActions } from '../../redux/modals';
 
 const SKIPTAGS = {
@@ -270,6 +269,7 @@ class SaveControls extends Component {
    * @params data data -- the data used in the call
    */
   recordBackendError = (api, data, error) => {
+    // TODO add current page where the error occured here and in results modal
     this.addToStorageByPage(
       'grail-backend-errors',
       api,
@@ -499,12 +499,10 @@ let styles = StyleSheet.create({
 })
 
 const mapStateToProps = state => ({
-  grail: state.grail,
   modal: state.modals,
 })
 
 const mapDispatchToProps = (dispatch) => ({
-  grailActions: bindActionCreators(GrailActions, dispatch),
   modalActions: bindActionCreators(ModalActions, dispatch)
 });
 
