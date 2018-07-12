@@ -67,15 +67,7 @@ class SaveControls extends Component {
     let running = sessionStorage.getItem('grail-running');
 
     if (running && !this.state.grailRunning) {
-
-      xhook.enable();
-      xhook.before(this.xmlBeforeHook);
-      xhook.after(this.xmlAfterHook);
-
-      this.setState({
-        grailRunning: true,
-        grailCurrentHref: window.location.href,
-      }, this.clickAllElements);
+      this.startClickAll();
     }
   }
 
