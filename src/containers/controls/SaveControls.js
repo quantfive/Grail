@@ -113,7 +113,6 @@ class SaveControls extends Component {
       let elementQueue = this.addToStorageByPage('grail-element-queue', this.state.grailCurrentHref, elements.map((e) => { return e.outerHTML; }));
 
       // TODO search for more elements in queue that are not currently visible?
-      debugger;
       if (elements.length > 0) {
         if (this.state.grailPaused) {
           return;
