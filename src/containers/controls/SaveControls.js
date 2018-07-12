@@ -31,7 +31,7 @@ class SaveControls extends Component {
       grailCurrentHref: window.location.href,
       grailRunning: false,
       grailPaused: sessionStorage.getItem('grail-paused') === 'true',
-    }
+    };
 
     this.clickedElements = (JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || {})[this.state.grailCurrentHref] || [];
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements')) || [];
@@ -42,8 +42,8 @@ class SaveControls extends Component {
   componentDidMount() {
     window.addEventListener('error', this.recordFrontendError, false);
 
-    xhook.before(this.xmlBeforeHook);
-    xhook.after(this.xmlAfterHook);
+    xhook.before(this.xhookBeforeAction);
+    xhook.after(this.xhookAfterAction);
     xhook.enable();
 
     if (this.activeRequests.length === 0) {
@@ -79,7 +79,9 @@ class SaveControls extends Component {
   startClickAll = () => {
     sessionStorage.setItem('grail-running', true);
     sessionStorage.setItem('grail-origin', window.location.origin);
+
     xhook.enable();
+
     this.setState({
       grailRunning: true,
     }, this.clickAllElements);
@@ -87,12 +89,12 @@ class SaveControls extends Component {
 
   // CLICK LOGIC
   clickAllElements = () => {
-    // TODO make chrome extension? and inject on every page (so when we hit external links we can "go back" )
+    // TODO create options so you can have multiple origins?
     if (window.location.origin === sessionStorage.getItem('grail-origin') && !this.visitedPages.includes(this.state.grailCurrentHref)) {
 
       this.addToStorage('grail-page-queue', this.state.grailCurrentHref);
 
-      // TODO Time bound these so that we don't get caught be "interval requests"
+      // TODO Time bound these so that we don't get caught be setInterval or requests that execute periodically
       if (this.activeRequests.length > 0) {
         setTimeout(this.clickAllElements, 100);
         return;
@@ -126,7 +128,8 @@ class SaveControls extends Component {
   }
 
   getClickableElements = () => {
-    // TODO simplify to return [...document.querySelectorAll(':not([class^=grailTest])')].filter(this.clickable);
+    // TODO simplify to to something like:
+    // return [...document.querySelectorAll(':not([class^=grailTest])')].filter(this.clickable);
     let nodes = document.querySelectorAll(':not([class^=grailTest])');
     let filteredNodes = [];
     for (let i = 0; i < nodes.length; i++) {
@@ -139,10 +142,10 @@ class SaveControls extends Component {
 
   clickable = (element) => {
     // TODO Is sufficient to know if it's "clickable"?
-    return !this.hasClicked(element) && (element.onclick || element.tagName === 'A');
+    return !this.hasBeenClicked(element) && (element.onclick || element.tagName === 'A');
   }
 
-  hasClicked = (element) => {
+  hasBeenClicked = (element) => {
     return this.checkIgnored(element) || this.clickedElements.includes(element.outerHTML);
   }
 
@@ -161,23 +164,14 @@ class SaveControls extends Component {
   }
 
   markPage = (page) => {
-    this.addToStorage('grail-visited-pages', page);
+    this.visitedPages = this.addToStorage('grail-visited-pages', page);
   }
 
-  /***
-  * Starts fetch timer when a request is made
-  * @params request - Unused request object
-  */
-  xmlBeforeHook = (request) => {
+  xhookBeforeAction = (request) => {
     this.activeRequests.push(request.url);
   }
 
-  /***
-  * Checks for errors and if all fetches are finished
-  * @params request - Request object
-  * @params response - Response object
-  */
-  xmlAfterHook = (request, response) => {
+  xhookAfterAction = (request, response) => {
     let index = this.activeRequests.indexOf(request.url);
     if (index !== -1) {
       this.activeRequests.splice(index, 1);
@@ -217,12 +211,6 @@ class SaveControls extends Component {
     }, this.clickAllElements);
   }
 
-  /***
-   * Records the backend error and saves it to sessionStorage
-   * @params error error -- the error object
-   * @params endpoint api -- the endpoint for the backend call
-   * @params data data -- the data used in the call
-   */
   recordBackendError = (api, data, error) => {
     // TODO add current page where the error occured here and in results modal
     this.addToStorageByPage(
@@ -238,10 +226,6 @@ class SaveControls extends Component {
     );
   }
 
-  /***
-   * Records the frontend error and saves it to sessionStorage
-   * @params error e -- the error object
-   */
   recordFrontendError = (e) => {
     // TODO don't save grail internal errors
     if (this.state.grailRunning) {
@@ -260,7 +244,6 @@ class SaveControls extends Component {
 
   // STORAGE FUNCTIONS
 
-  // Adds all values to page
   addToStorageByPage = (key, page, values, storage=sessionStorage) => {
     let currentValue = storage.getItem(key);
 
@@ -296,6 +279,7 @@ class SaveControls extends Component {
       items.push(value);
       storage.setItem(key, JSON.stringify(items));
     }
+    return items;
   }
 
   // IGNORE ELEMENTS
@@ -331,7 +315,7 @@ class SaveControls extends Component {
     event.stopPropagation();
 
     this.revertHighlight(event.target, true);
-    this.addToStorage('grail_ignoreElements', event.target.outerHTML, localStorage);
+    this.ignoredElements = this.addToStorage('grail-ignored-elements', event.target.outerHTML, localStorage);
     this.removeListeners(this.addSelectedElement);
   }
 
@@ -342,11 +326,15 @@ class SaveControls extends Component {
   removeSelectedElement = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    let ignoredElements = this.retrieveFromStorage('grail_ignoreElements', localStorage);
-
     this.revertHighlight(event.target, true);
+
+    let ignoredElements = JSON.parse(localStorage.getItem('grail-ignored-elements'));
     let index = ignoredElements.indexOf(event.target.outerHTML);
-    this.popFromStorage('grail_ignoreElements', index, localStorage);
+    if (index !== -1) {
+      ignoredElements.splice(index, 1);
+    }
+    localStorage.setItem('grail-ignored-elements', JSON.stringify(ignoredElements));
+    this.ignoredElements = ignoredElements;
     this.removeListeners(this.removeSelectedElement);
   }
 
