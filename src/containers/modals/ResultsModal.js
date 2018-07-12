@@ -71,7 +71,7 @@ class ResultsModal extends React.Component {
       );
     });
 
-    let backendErrors = sessionStorage.getItem('grail_backend_errors');
+    let backendErrors = sessionStorage.getItem('grail-backend-errors');
     backendErrors = JSON.parse(backendErrors);
     if (!backendErrors) backendErrors = [];
     let backendDisplay = Object.keys(backendErrors).map((page, index) => {

@@ -63,14 +63,6 @@ class SaveControls extends Component {
     }, this.clickAllElements);
   }
 
-  handleLoad = () => {
-    let running = sessionStorage.getItem('grail-running');
-
-    if (running && !this.state.grailRunning) {
-      this.startClickAll();
-    }
-  }
-
   // STORAGE FUNCTIONS
 
   // Adds all values to page (doesn't guarentee uniqueness)
@@ -286,7 +278,7 @@ class SaveControls extends Component {
    * @params data data -- the data used in the call
    */
   recordBackendError = (api, data, error) => {
-    this.addToStorageByPage('grail_backend_errors', {
+    this.addToStorageByPage('grail-backend-errors', {
       api: api,
       data: data,
       error: error,
@@ -412,53 +404,25 @@ class SaveControls extends Component {
     }
   }
 
+  handleLoad = () => {
+    let running = sessionStorage.getItem('grail-running');
+
+    if (running && !this.state.grailRunning) {
+      this.startClickAll();
+    }
+  }
+
   componentDidMount() {
     window.addEventListener('error', this.recordFrontendError, false);
-    let { grail } = this.props;
 
-    let resume = sessionStorage.getItem('grail_resume');
-    if (grail.activeFetchCalls.length === 0 && resume === 'true') {
-      let elements = this.getAllClickableElements();
-      this.setState({
-        elements,
-      }, this.handleLoad)
+    if (this.props.grail.activeFetchCalls.length === 0) {
+      this.handleLoad();
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    let { grail, grailActions, modalActions } = this.props;
-    if (grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
-      if (grail.recording) {
-        grailActions.addEventToList();
-      } else {
-        if (grail.playback.length > 0) {
-          grailActions.checkHTML({
-            cur_html: page_state.html,
-            cur_css: page_state.css,
-            page_state_id: grail.playback[0].id
-          });
-        }
-
-        let resume = sessionStorage.getItem('grail_resume');
-        if (resume === 'true') {
-          let elements = this.getAllClickableElements();
-          this.setState({
-            elements,
-          }, this.handleLoad)
-        } else {
-          this.afterClick(true);
-        }
-      }
-    }
-
-    if (grail.playback.length < prevProps.grail.playback.length && grail.playback.length !== 0) {
-      let element = grail.playback[0];
-      this.playback(element);
-    }
-
-    if (grail.playback.length === 0 && prevProps.grail.playback.length > 0) {
-      grailActions.checkPlayback(grail.checkStates);
-      modalActions.openCheckModal(true);
+    if (this.props.grail.activeFetchCalls.length === 0 && prevProps.grail.activeFetchCalls.length > 0) {
+      this.handleLoad();
     }
   }
 
@@ -475,7 +439,6 @@ class SaveControls extends Component {
               }
             </div>
         }
-        {modal.openCheckModal && <CheckModal />}
         {modal.openResultsModal && <ResultsModal />}
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.addToIgnore}>Ignore Element</button>
         <button className={css(styles.grailTestButton, styles.grailTestCheck)} onClick={this.removeFromIgnore}>Remove Ignored Element</button>

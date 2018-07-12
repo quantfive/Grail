@@ -13,23 +13,10 @@ import Helpers from '../config/helpers';
  **********************************/
 
  const ModalConstants = {
-  CHECK_MODAL_TOGGLE: '@@modal/CHECK_MODAL_TOGGLE',
   RESULTS_MODAL_TOGGLE: '@@modal/RESULTS_MODAL_TOGGLE',
 }
 
 export const ModalActions = {
-  /***
-   * Opens/closes the modal for authentication
-   * @param: boolean -- true opens modal false closes modal
-   */
-  openCheckModal: (openModal) => {
-    return dispatch => {
-      dispatch({
-        type: ModalConstants.CHECK_MODAL_TOGGLE,
-        openCheckModal: openModal,
-      })
-    }
-  },
   /***
    * Opens/closes the modal for results
    * @param: boolean -- true opens modal false closes modal
@@ -49,17 +36,11 @@ export const ModalActions = {
  **********************************/
 
 const defaultState = {
-  openCheckModal: false,
   openResultsModal: false,
 }
 
 const ModalReducer = (state = defaultState, action) => {
   switch(action.type) {
-    case ModalConstants.CHECK_MODAL_TOGGLE:
-      return {
-        ...state,
-        ...action
-      }
     case ModalConstants.RESULTS_MODAL_TOGGLE:
       return {
         ...state,
