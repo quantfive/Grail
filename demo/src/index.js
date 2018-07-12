@@ -118,7 +118,7 @@ class Demo extends Component {
         </div>
         <div id='bottom' onClick={() => this.onClick('WOW')}>
             <p id='c' onClick={() => this.onClick('HEHE')}> Demo </p>
-            <p id='d' onMouseEnter={() => this.onClick('MOSUE OVER')}> Test </p>
+            <p id='d' onMouseEnter={() => this.onClick('MOUSE OVER')}> Test </p>
         </div>
         <button onClick={() => this.testFetch2()}> Error Fetch </button>
         <button onClick={() => this.testFetch('WEBPAGE FETCH CALL')}> Fetch </button>
