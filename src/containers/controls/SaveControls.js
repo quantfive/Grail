@@ -37,9 +37,43 @@ class SaveControls extends Component {
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements')) || [];
     this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages')) || [];
     this.activeRequests = [];
-    // TODO double check ignoring element logic
+  }
 
-    this.addToIgnore = this.addToIgnore.bind(this);
+  componentDidMount() {
+    window.addEventListener('error', this.recordFrontendError, false);
+
+    xhook.before(this.xmlBeforeHook);
+    xhook.after(this.xmlAfterHook);
+    xhook.enable();
+
+    if (this.activeRequests.length === 0) {
+      this.handleLoad();
+    }
+  }
+
+  resetGrail = () => {
+    xhook.disable();
+    sessionStorage.setItem('grail-running', false);
+    this.clickedElements = [];
+    this.visitedPages = [];
+    this.activeRequests = [];
+    this.setState({grailRunning: false});
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.activeRequests.length === 0) {
+      this.handleLoad();
+    }
+  }
+
+  handleLoad = () => {
+    let running = sessionStorage.getItem('grail-running');
+
+    if (running === 'true' && !this.state.grailRunning) {
+      this.setState({
+        grailRunning: true,
+      }, this.clickAllElements);
+    }
   }
 
   startClickAll = () => {
@@ -49,46 +83,6 @@ class SaveControls extends Component {
     this.setState({
       grailRunning: true,
     }, this.clickAllElements);
-  }
-
-  // STORAGE FUNCTIONS
-
-  // Adds all values to page
-  addToStorageByPage = (key, page, values, storage=sessionStorage) => {
-    let currentValue = storage.getItem(key);
-
-    let items = {};
-    if (currentValue) {
-      items = JSON.parse(currentValue);
-    }
-
-    if (page in items) {
-      items[page].push(...values);
-    } else {
-      items[page] = values;
-    }
-    storage.setItem(key, JSON.stringify(items));
-
-    return items[page];
-  }
-
-  popFromStorage = (key, storage=sessionStorage) => {
-    let items = JSON.parse(storage.getItem(key));
-
-    if (items) {
-      let value = items.pop();
-      storage.setItem(key, JSON.stringify(items));
-      return value;
-    }
-  }
-
-  // Only adds unique values
-  addToStorage = (key, value, storage=sessionStorage) => {
-    let items = JSON.parse(storage.getItem(key)) || [];
-    if (!items.includes(value)) {
-      items.push(value);
-      storage.setItem(key, JSON.stringify(items));
-    }
   }
 
   // CLICK LOGIC
@@ -168,15 +162,6 @@ class SaveControls extends Component {
 
   markPage = (page) => {
     this.addToStorage('grail-visited-pages', page);
-  }
-
-  resetGrail = () => {
-    xhook.disable();
-    sessionStorage.setItem('grail-running', false);
-    this.clickedElements = [];
-    this.visitedPages = [];
-    this.activeRequests = [];
-    this.setState({grailRunning: false});
   }
 
   /***
@@ -270,6 +255,46 @@ class SaveControls extends Component {
           lineno: e.lineno
         }],
       );
+    }
+  }
+
+  // STORAGE FUNCTIONS
+
+  // Adds all values to page
+  addToStorageByPage = (key, page, values, storage=sessionStorage) => {
+    let currentValue = storage.getItem(key);
+
+    let items = {};
+    if (currentValue) {
+      items = JSON.parse(currentValue);
+    }
+
+    if (page in items) {
+      items[page].push(...values);
+    } else {
+      items[page] = values;
+    }
+    storage.setItem(key, JSON.stringify(items));
+
+    return items[page];
+  }
+
+  popFromStorage = (key, storage=sessionStorage) => {
+    let items = JSON.parse(storage.getItem(key));
+
+    if (items) {
+      let value = items.pop();
+      storage.setItem(key, JSON.stringify(items));
+      return value;
+    }
+  }
+
+  // Only adds unique values
+  addToStorage = (key, value, storage=sessionStorage) => {
+    let items = JSON.parse(storage.getItem(key)) || [];
+    if (!items.includes(value)) {
+      items.push(value);
+      storage.setItem(key, JSON.stringify(items));
     }
   }
 
@@ -370,34 +395,6 @@ class SaveControls extends Component {
       element.removeAttribute('style');
     } else {
       element.setAttribute('style', styles);
-    }
-  }
-
-  handleLoad = () => {
-    let running = sessionStorage.getItem('grail-running');
-
-    if (running === 'true' && !this.state.grailRunning) {
-      this.setState({
-        grailRunning: true,
-      }, this.clickAllElements);
-    }
-  }
-
-  componentDidMount() {
-    window.addEventListener('error', this.recordFrontendError, false);
-
-    xhook.enable();
-    xhook.before(this.xmlBeforeHook);
-    xhook.after(this.xmlAfterHook);
-
-    if (this.activeRequests.length === 0) {
-      this.handleLoad();
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    if (this.activeRequests.length === 0) {
-      this.handleLoad();
     }
   }
 
