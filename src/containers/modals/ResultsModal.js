@@ -26,8 +26,7 @@ class ResultsModal extends React.Component {
     let { modals } = this.props;
 
     let frontendErrors = sessionStorage.getItem('grail-frontend-errors');
-    frontendErrors = JSON.parse(frontendErrors);
-    if (!frontendErrors) frontendErrors = [];
+    frontendErrors = JSON.parse(frontendErrors) || {};
     let frontendDisplay = Object.keys(frontendErrors).map((page, index) => {
       let errorMessages = frontendErrors[page].map((error, index) => {
       let element = {__html: error.element};
@@ -72,8 +71,7 @@ class ResultsModal extends React.Component {
     });
 
     let backendErrors = sessionStorage.getItem('grail-backend-errors');
-    backendErrors = JSON.parse(backendErrors);
-    if (!backendErrors) backendErrors = [];
+    backendErrors = JSON.parse(backendErrors) || {};
     let backendDisplay = Object.keys(backendErrors).map((page, index) => {
       let errorMessages = backendErrors[page].map((error, index) => {
         let api = error['api'];

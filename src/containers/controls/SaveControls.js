@@ -8,11 +8,9 @@ import React, { Component } from 'react';
 import { css, StyleSheet } from 'aphrodite';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import Popup from 'reactjs-popup';
 import xhook from 'xhook';
 
 // Components
-import CheckModal from '../modals/CheckModal';
 import ResultsModal from '../modals/ResultsModal';
 
 // Config
@@ -34,19 +32,20 @@ const SKIPTAGS = {
 class SaveControls extends Component {
   constructor(props) {
     super(props);
+    // TODO Check on correct Domain
     this.state = {
       grailCurrentHref: '',
       grailRunning: false,
       grailPaused: false,
     }
 
-    this.clickedElements = JSON.parse(sessionStorage.getItem('grail-clicked-elements'));
+    this.clickedElements = JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || [];
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements'));
-    this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages'));
+    this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages')) || [];
     this.activeRequests = [];
-    // TODO check we're at the correct domain
     // TODO double check ignoring element logic
     // TODO remove excess code in other file (esp redux)
+    // TODO switch clickedElements to "by page" version?
 
     this.addToIgnore = this.addToIgnore.bind(this);
   }
@@ -61,7 +60,7 @@ class SaveControls extends Component {
 
   // STORAGE FUNCTIONS
 
-  // Adds all values to page (doesn't guarentee uniqueness)
+  // Adds all values to page
   addToStorageByPage = (key, page, values, storage=sessionStorage) => {
     let currentValue = storage.getItem(key);
 
@@ -92,7 +91,7 @@ class SaveControls extends Component {
 
   // Only adds unique values
   addToStorage = (key, value, storage=sessionStorage) => {
-    let items = JSON.parse(storage.getItem(key));
+    let items = JSON.parse(storage.getItem(key)) || [];
     if (!items.includes(value)) {
       items.push(value);
       storage.setItem(key, JSON.stringify(items));
@@ -110,8 +109,11 @@ class SaveControls extends Component {
         return;
       }
 
-      let elements = this.addToStorageByPage('grail-element-queue', this.state.grailCurrentHref, this.getClickableElements());
+      let elements = this.getClickableElements();
+      let elementQueue = this.addToStorageByPage('grail-element-queue', this.state.grailCurrentHref, elements.map((e) => { return e.outerHTML; }));
 
+      // TODO search for more elements in queue that are not currently visible?
+      debugger;
       if (elements.length > 0) {
         if (this.state.grailPaused) {
           return;
@@ -136,7 +138,15 @@ class SaveControls extends Component {
   }
 
   getClickableElements = () => {
-    return document.querySelectorAll(':not([class^=grailTest])').filter(this.clickable);
+    // TODO simplify to return [...document.querySelectorAll(':not([class^=grailTest])')].filter(this.clickable);
+    let nodes = document.querySelectorAll(':not([class^=grailTest])');
+    let filteredNodes = [];
+    for (let i = 0; i < nodes.length; i++) {
+      if (this.clickable(nodes[i])) {
+        filteredNodes.push(nodes[i]);
+      }
+    }
+    return filteredNodes;
   }
 
   clickable = (element) => {
@@ -159,11 +169,11 @@ class SaveControls extends Component {
   }
 
   markClick = (element) => {
-    addToStorageByPage('grail-clicked-elements', this.state.grailCurrentHref, [element.outerHTML]);
+    this.clickedElements = this.addToStorageByPage('grail-clicked-elements', this.state.grailCurrentHref, [element.outerHTML]);
   }
 
   markPage = (page) => {
-    addToStorage('grail-visited-pages', page);
+    this.addToStorage('grail-visited-pages', page);
   }
 
   resetGrail = () => {
@@ -258,14 +268,16 @@ class SaveControls extends Component {
    * @params data data -- the data used in the call
    */
   recordBackendError = (api, data, error) => {
-    this.addToStorageByPage('grail-backend-errors', {
-      api: api,
-      data: data,
-      error: error,
-      element: this.state.currentElementHtml,
-      page: window.location.href,
-    },
-    api
+    this.addToStorageByPage(
+      'grail-backend-errors',
+      api,
+      [{
+        api: api,
+        data: data,
+        error: error,
+        element: this.state.currentElementHtml,
+        page: window.location.href,
+      }],
     );
   }
 
@@ -274,14 +286,19 @@ class SaveControls extends Component {
    * @params error e -- the error object
    */
   recordFrontendError = (e) => {
-    this.addToStorageByPage('grail-frontend-errors', {
-      stack: e.error.stack,
-      message: e.message,
-      filename: e.filename,
-      lineno: e.lineno
-    },
-    window.location.pathname
-    );
+    // TODO don't save grail internal errors
+    if (this.state.grailRunning) {
+      this.addToStorageByPage(
+        'grail-frontend-errors',
+        window.location.pathname,
+        [{
+          stack: e.error.stack,
+          message: e.message,
+          filename: e.filename,
+          lineno: e.lineno
+        }],
+      );
+    }
   }
 
   // IGNORE ELEMENTS
@@ -387,7 +404,7 @@ class SaveControls extends Component {
   handleLoad = () => {
     let running = sessionStorage.getItem('grail-running');
 
-    if (running && !this.state.grailRunning) {
+    if (running === 'true' && !this.state.grailRunning) {
       this.startClickAll();
     }
   }
