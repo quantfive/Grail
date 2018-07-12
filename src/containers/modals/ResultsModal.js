@@ -37,7 +37,7 @@ class ResultsModal extends React.Component {
               <div>
                 { error['message'] } (in { error['filename'] }: { error['lineno'] })
                 <div className={css(styles.element)}>
-                  Element:  <div style={{marginLeft: 5}} dangerouslySetInnerHTML={element}/>
+                  Clicked on:  <div style={{marginLeft: 5}} dangerouslySetInnerHTML={element}/>
                 </div>
               </div>
             </div>
@@ -211,7 +211,7 @@ var overlayStyles = {
     right             : 0,
     bottom            : 0,
     backgroundColor   : 'rgba(0, 0, 0, 0.75)',
-    zIndex: '2',
+    zIndex: '9999999999',
   },
 }
 
