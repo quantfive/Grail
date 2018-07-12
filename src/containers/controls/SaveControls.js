@@ -13,10 +13,6 @@ import xhook from 'xhook';
 // Components
 import ResultsModal from '../modals/ResultsModal';
 
-// Config
-import API from '../../config/api';
-import Helpers from '../../config/helpers';
-
 // Redux
 import { ModalActions } from '../../redux/modals';
 
