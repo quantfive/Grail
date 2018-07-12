@@ -31,11 +31,10 @@ const SKIPTAGS = {
 class SaveControls extends Component {
   constructor(props) {
     super(props);
-    // TODO Check on correct Domain
     this.state = {
       grailCurrentHref: window.location.href,
       grailRunning: false,
-      grailPaused: false,
+      grailPaused: sessionStorage.getItem('grail-paused') === 'true',
     }
 
     this.clickedElements = (JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || {})[this.state.grailCurrentHref] || [];
@@ -49,6 +48,7 @@ class SaveControls extends Component {
 
   startClickAll = () => {
     sessionStorage.setItem('grail-running', true);
+    sessionStorage.setItem('grail-origin', window.location.origin);
     xhook.enable();
     this.setState({
       grailRunning: true,
@@ -97,7 +97,8 @@ class SaveControls extends Component {
 
   // CLICK LOGIC
   clickAllElements = () => {
-    if (!this.visitedPages.includes(this.state.grailCurrentHref)) {
+    // TODO better orign checking
+    if (window.location.origin === sessionStorage.getItem('grail-origin') && !this.visitedPages.includes(this.state.grailCurrentHref)) {
 
       this.addToStorage('grail-page-queue', this.state.grailCurrentHref);
 
@@ -222,39 +223,13 @@ class SaveControls extends Component {
     }
   }
 
-  /***
-   * Checks if we're on a new page or not
-   */
-  checkNewPage = (newHref) => {
-    let currentElement = this.state.currentElement;
-    let currentHref = this.state.currentHref;
-
-    if (currentHref !== newHref) {
-      let visited = this.retrieveFromStorage('grail_visited');
-      if (visited) {
-        let index = visited.indexOf(currentElement.href);
-        if (index !== -1) {
-          this.popFromStorage('grail_visited', index);
-        }
-      }
-
-      let hasVisited = !this.hasVisited(currentElement);
-      if (hasVisited) {
-        let href = currentElement.href;
-        if (href === undefined || href === null) {
-          href = window.location.href;
-        }
-        this.addToStorage('grail_newPages', href);
-      }
-      window.history.back();
-    }
-  }
-
   pause = () => {
+    sessionStorage.setItem('grail-paused', true);
     this.setState({grailPaused: true});
   }
 
   resume = () => {
+    sessionStorage.setItem('grail-paused', false);
     this.setState({
       grailPaused: false
     }, this.clickAllElements);
@@ -405,7 +380,9 @@ class SaveControls extends Component {
     let running = sessionStorage.getItem('grail-running');
 
     if (running === 'true' && !this.state.grailRunning) {
-      this.startClickAll();
+      this.setState({
+        grailRunning: true,
+      }, this.clickAllElements);
     }
   }
 
