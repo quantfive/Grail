@@ -97,7 +97,7 @@ class SaveControls extends Component {
 
   // CLICK LOGIC
   clickAllElements = () => {
-    // TODO better orign checking
+    // TODO make chrome extension? and inject on every page (so when we hit external links we can "go back" )
     if (window.location.origin === sessionStorage.getItem('grail-origin') && !this.visitedPages.includes(this.state.grailCurrentHref)) {
 
       this.addToStorage('grail-page-queue', this.state.grailCurrentHref);
