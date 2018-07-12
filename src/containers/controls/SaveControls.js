@@ -52,6 +52,7 @@ class SaveControls extends Component {
 
   startClickAll = () => {
     sessionStorage.setItem('grail-running', true);
+    xhook.enable();
     this.setState({
       grailRunning: true,
     }, this.clickAllElements);
@@ -177,6 +178,9 @@ class SaveControls extends Component {
   resetGrail = () => {
     xhook.disable();
     sessionStorage.setItem('grail-running', false);
+    this.clickedElements = [];
+    this.visitedPages = [];
+    this.activeRequests = [];
     this.setState({grailRunning: false});
   }
 
