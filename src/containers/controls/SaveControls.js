@@ -102,6 +102,7 @@ class SaveControls extends Component {
 
       this.addToStorage('grail-page-queue', this.state.grailCurrentHref);
 
+      // TODO Time bound these so that we don't get caught be "interval requests"
       if (this.activeRequests.length > 0) {
         setTimeout(this.clickAllElements, 100);
         return;
