@@ -43,8 +43,6 @@ class SaveControls extends Component {
     this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages')) || [];
     this.activeRequests = [];
     // TODO double check ignoring element logic
-    // TODO remove excess code in other file (esp redux)
-    // TODO switch clickedElements to "by page" version?
 
     this.addToIgnore = this.addToIgnore.bind(this);
   }
