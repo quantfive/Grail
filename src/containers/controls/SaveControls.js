@@ -203,6 +203,7 @@ class SaveControls extends Component {
 
   recordBackendError = (api, data, error) => {
     // TODO add current page where the error occured here and in results modal
+    // TODO don't add duplicates
     this.addToStorageByPage(
       'grail-backend-errors',
       api,
@@ -218,6 +219,7 @@ class SaveControls extends Component {
 
   recordFrontendError = (e) => {
     // TODO don't save grail internal errors
+    // TODO don't allow duplicates
     if (this.state.grailRunning) {
       this.addToStorageByPage(
         'grail-frontend-errors',
