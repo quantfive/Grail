@@ -42,7 +42,7 @@ class SaveControls extends Component {
 
     this.clickedElements = JSON.parse(sessionStorage.getItem('grail-clicked-elements'));
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements'));
-    // TODO set visited pages
+    this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages'));
     // TODO check we're at the correct domain
     // TODO fix component Mount
     // TODO double check ignoring element logic
