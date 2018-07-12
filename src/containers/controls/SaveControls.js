@@ -1,6 +1,3 @@
-/***
- * The save + check page controls
- */
 
 import React, { Component } from 'react';
 
@@ -15,14 +12,6 @@ import ResultsModal from '../modals/ResultsModal';
 
 // Redux
 import { ModalActions } from '../../redux/modals';
-
-const SKIPTAGS = {
-  script: true,
-  head: true,
-  meta: true,
-  style: true,
-  title: true,
-}
 
 class SaveControls extends Component {
   constructor(props) {
