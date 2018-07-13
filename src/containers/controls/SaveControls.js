@@ -23,7 +23,7 @@ class SaveControls extends Component {
     };
 
     this.clickedElements = (JSON.parse(sessionStorage.getItem('grail-clicked-elements')) || {})[this.state.grailCurrentHref] || [];
-    // TODO change this to a per page basis?
+    // TODO change ignoredElements to a per page basis?
     this.ignoredElements = JSON.parse(sessionStorage.getItem('grail-ignored-elements')) || [];
     this.visitedPages = JSON.parse(sessionStorage.getItem('grail-visited-pages')) || [];
     this.activeRequests = [];
